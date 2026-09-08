@@ -71,6 +71,7 @@ export function Nav() {
         curve="bezier"
         exponential
         zIndex={40}
+        tone={overDark ? "dark" : "light"}
       />
       <header className="fixed top-0 left-0 right-0 z-50 h-24 md:h-32 pt-[env(safe-area-inset-top)] pointer-events-none">
       <div className="page-wrap h-full grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center gap-4 pointer-events-auto">
