@@ -352,6 +352,24 @@ a:focus-visible .cta-wipe-band {
   overflow-x: clip;
 }
 
+.navblur-mobile {
+  display: block;
+}
+
+.navblur-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .navblur-mobile {
+    display: none;
+  }
+
+  .navblur-desktop {
+    display: block;
+  }
+}
+
 @media (min-width: 768px) {
   .page-wrap {
     padding-left: 24px;

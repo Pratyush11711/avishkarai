@@ -89,7 +89,7 @@ export function GradualBlur({
   return (
     <>
       <div
-        className={`pointer-events-none fixed inset-x-0 h-24 md:hidden ${className}`}
+        className={`navblur-mobile pointer-events-none fixed inset-x-0 h-24 ${className}`}
         style={{
           [position]: 0,
           zIndex,
@@ -108,7 +108,7 @@ export function GradualBlur({
         aria-hidden="true"
       />
       <div
-        className={`pointer-events-none fixed inset-x-0 hidden md:block ${className}`}
+        className={`navblur-desktop pointer-events-none fixed inset-x-0 ${className}`}
         style={{
           [position]: 0,
           height,
@@ -116,7 +116,7 @@ export function GradualBlur({
         }}
         aria-hidden="true"
       >
-        <div className="relative w-full h-full">{layers}</div>
+        <div className="relative w-full h-full isolate">{layers}</div>
       </div>
     </>
   );
