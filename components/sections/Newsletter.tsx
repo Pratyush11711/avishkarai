@@ -14,7 +14,7 @@ export function Newsletter() {
 
   return (
     <section id="newsletter" className="section-pad" aria-label="Newsletter">
-      <div className="max-w-[480px] mx-auto px-6 text-center">
+      <div className="max-w-[480px] w-full min-w-0 mx-auto px-6 text-center box-border">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -35,14 +35,14 @@ export function Newsletter() {
               You're on the list.
             </p>
           ) : (
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 w-full min-w-0">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="flex-1 px-4 py-3 rounded-lg type-body bg-paper-white text-carbon-black placeholder:text-smoke focus:outline-none focus:ring-2 focus:ring-voltage-yellow"
+                className="w-full min-w-0 flex-1 px-4 py-3 rounded-lg type-body bg-paper-white text-carbon-black placeholder:text-smoke focus:outline-none focus:ring-2 focus:ring-voltage-yellow"
               />
               <button
                 type="submit"

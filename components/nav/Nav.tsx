@@ -65,15 +65,14 @@ export function Nav() {
     <>
       <GradualBlur
         position="top"
-        height="8.5rem"
+        height="9rem"
         strength={2.4}
         divCount={6}
         curve="bezier"
         exponential
         zIndex={40}
-        className="md:h-36"
       />
-      <header className="fixed top-0 left-0 right-0 z-50 h-24 md:h-32 pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-50 h-24 md:h-32 pt-[env(safe-area-inset-top)] pointer-events-none">
       <div className="page-wrap h-full grid grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center gap-4 pointer-events-auto">
         <a href="#" className="justify-self-start">
           <BrandLogo on={overDark ? "dark" : "light"} />

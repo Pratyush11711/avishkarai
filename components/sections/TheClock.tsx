@@ -55,63 +55,77 @@ export function TheClock() {
 
     const beats = [beat1Ref.current, beat2Ref.current, beat3Ref.current];
     const visuals = [visual1Ref.current, visual2Ref.current, visual3Ref.current];
-    gsap.set(beats, { autoAlpha: 0, y: 24 });
-    gsap.set(visuals, { autoAlpha: 0, scale: 0.92 });
-    gsap.set(moduleRef.current, { autoAlpha: 0 });
+    const mm = gsap.matchMedia();
 
-    if (ringRef.current) {
-      const length = ringRef.current.getTotalLength();
-      gsap.set(ringRef.current, {
-        strokeDasharray: length,
-        strokeDashoffset: length,
-      });
-    }
-
-    const tl = gsap.timeline({
-      defaults: { ease: "none" },
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "+=180%",
-        pin: true,
-        pinSpacing: true,
-        scrub: 0.15,
-        anticipatePin: 1,
-      },
+    mm.add("(max-width: 767px)", () => {
+      gsap.set([...beats, moduleRef.current], { autoAlpha: 1, y: 0 });
+      gsap.set(visuals, { autoAlpha: 1, scale: 1 });
     });
 
-    tl.to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-      .to(visual1Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-      .to(beat1Ref.current, { duration: 1.1 })
-      .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
-      .to(visual1Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
-      .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-      .to(visual2Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-      .to(
-        ringRef.current,
-        { strokeDashoffset: 0, duration: 0.9 },
-        "<0.1"
-      )
-      .to(beat2Ref.current, { duration: 1.5 })
-      .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
-      .to(visual2Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
-      .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-      .to(visual3Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-      .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "<0.15")
-      .to({}, { duration: 1.2 });
+    mm.add("(min-width: 768px)", () => {
+      gsap.set(beats, { autoAlpha: 0, y: 24 });
+      gsap.set(visuals, { autoAlpha: 0, scale: 0.92 });
+      gsap.set(moduleRef.current, { autoAlpha: 0 });
 
-    const refresh = () => {
-      requestAnimationFrame(() => ScrollTrigger.refresh());
-    };
-    const onLoad = () => ScrollTrigger.refresh();
-    window.addEventListener("load", onLoad);
-    const t = window.setTimeout(refresh, 200);
+      if (ringRef.current) {
+        const length = ringRef.current.getTotalLength();
+        gsap.set(ringRef.current, {
+          strokeDasharray: length,
+          strokeDashoffset: length,
+        });
+      }
+
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: "+=180%",
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.15,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      tl.to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
+        .to(visual1Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
+        .to(beat1Ref.current, { duration: 1.1 })
+        .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
+        .to(visual1Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
+        .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
+        .to(visual2Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
+        .to(
+          ringRef.current,
+          { strokeDashoffset: 0, duration: 0.9 },
+          "<0.1"
+        )
+        .to(beat2Ref.current, { duration: 1.5 })
+        .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
+        .to(visual2Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
+        .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
+        .to(visual3Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
+        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "<0.15")
+        .to({}, { duration: 1.2 });
+
+      const refresh = () => {
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      };
+      const onLoad = () => ScrollTrigger.refresh();
+      window.addEventListener("load", onLoad);
+      const t = window.setTimeout(refresh, 200);
+
+      return () => {
+        window.removeEventListener("load", onLoad);
+        window.clearTimeout(t);
+        tl.scrollTrigger?.kill();
+        tl.kill();
+      };
+    });
 
     return () => {
-      window.removeEventListener("load", onLoad);
-      window.clearTimeout(t);
-      tl.scrollTrigger?.kill();
-      tl.kill();
+      mm.revert();
     };
   }, []);
 
@@ -134,19 +148,19 @@ export function TheClock() {
     <section
       ref={sectionRef}
       id="clock"
-      className="relative z-[3] h-screen overflow-hidden bg-carbon-black rounded-t-[64px]"
+      className="relative z-[3] overflow-x-clip bg-carbon-black rounded-t-[28px] md:rounded-t-[64px] h-auto md:h-screen md:overflow-hidden"
       aria-label="The Clock"
     >
-      <div className="h-full flex flex-col justify-center page-wrap py-20">
-        <p className="type-caption text-smoke mb-10">04 · The Clock</p>
+      <div className="h-full flex flex-col justify-center page-wrap py-16 md:py-20">
+        <p className="type-caption text-smoke mb-8 md:mb-10">04 · The Clock</p>
 
-        <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
-          <div className="relative w-full min-h-[280px] md:min-h-[320px]">
+        <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
+          <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
             <div
               ref={beat1Ref}
-              className="absolute top-0 left-0 right-0 will-change-[opacity,transform]"
+              className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-6">
+              <h2 className="type-display text-paper-white mb-6 break-words">
                 You know the pattern.
               </h2>
               <p className="type-body text-smoke max-w-[54ch]">
@@ -158,9 +172,9 @@ export function TheClock() {
 
             <div
               ref={beat2Ref}
-              className="absolute top-0 left-0 right-0 will-change-[opacity,transform]"
+              className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-6">
+              <h2 className="type-display text-paper-white mb-6 break-words">
                 We run on a different clock.
               </h2>
               <p className="type-body text-smoke max-w-[54ch]">
@@ -177,9 +191,9 @@ export function TheClock() {
 
             <div
               ref={beat3Ref}
-              className="absolute top-0 left-0 right-0 will-change-[opacity,transform]"
+              className="relative md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-8 max-w-[20ch]">
+              <h2 className="type-display text-paper-white mb-8 max-w-[20ch] break-words">
                 You will never have to ask what we're working on. You'll be using
                 it.
               </h2>

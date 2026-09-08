@@ -11,7 +11,7 @@ export function BrandLogo({ on, className }: BrandLogoProps) {
   const src = on === "dark" ? "/logo-white-nav.webp" : "/logo-dark.webp";
 
   return (
-    <span className={clsx("relative block h-7 w-[9.5rem] shrink-0", className)}>
+    <span className={clsx("relative block h-6 w-[8.25rem] md:h-7 md:w-[9.5rem] shrink-0", className)}>
       <Image
         src={src}
         alt="Avishkar AI"

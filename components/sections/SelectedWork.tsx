@@ -32,7 +32,7 @@ export function SelectedWork() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="rounded-[32px] bg-paper-white p-8 md:p-12 mb-4"
+            className="rounded-[24px] md:rounded-[32px] bg-paper-white p-6 md:p-12 mb-4 min-w-0 overflow-hidden"
           >
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
               <div>
@@ -90,7 +90,7 @@ export function SelectedWork() {
           </motion.div>
         </TiltedCard>
 
-        <div className="bg-paper-white rounded-[32px] divide-y divide-mist-gray mt-4">
+        <div className="bg-paper-white rounded-[24px] md:rounded-[32px] divide-y divide-mist-gray mt-4 min-w-0 overflow-hidden">
           {PLACEHOLDER_CASES.map((c, i) => (
             <motion.div
               key={c.num}
@@ -98,7 +98,7 @@ export function SelectedWork() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.5, delay: i * 0.07, ease: "easeOut" }}
-              className="p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8"
+              className="p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 min-w-0"
             >
               <span className="type-caption text-smoke shrink-0 w-6">{c.num}</span>
               <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">

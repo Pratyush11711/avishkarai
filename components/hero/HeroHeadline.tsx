@@ -68,7 +68,7 @@ export function HeroHeadline() {
   }, []);
 
   return (
-    <div className="relative z-10 max-w-[640px] flex flex-col gap-6">
+    <div className="relative z-10 w-full min-w-0 max-w-[640px] flex flex-col gap-6">
       <div ref={eyebrowRef} className="flex items-center gap-2 opacity-0">
         <span
           className="w-2 h-2 rounded-full bg-voltage-yellow shrink-0"
@@ -79,8 +79,8 @@ export function HeroHeadline() {
         </span>
       </div>
 
-      <h1 className="flex flex-col">
-        <span className="overflow-hidden block">
+      <h1 className="flex flex-col min-w-0">
+        <span className="overflow-hidden block min-w-0 pt-[0.08em] pb-[0.14em]">
           <span
             ref={line1Ref}
             className="block type-display-xl text-carbon-black"
@@ -89,7 +89,7 @@ export function HeroHeadline() {
             Live in eight weeks.
           </span>
         </span>
-        <span className="overflow-hidden block">
+        <span className="overflow-hidden block min-w-0 pt-[0.08em] pb-[0.14em]">
           <span
             ref={line2Ref}
             className="block type-display-xl text-carbon-black"
@@ -98,7 +98,7 @@ export function HeroHeadline() {
             Enterprise-grade
           </span>
         </span>
-        <span className="overflow-hidden block">
+        <span className="overflow-hidden block min-w-0 pt-[0.08em] pb-[0.14em]">
           <span
             ref={line3Ref}
             className="block type-display-xl text-carbon-black"

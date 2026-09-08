@@ -17,7 +17,7 @@ export function HeroVideo({ playing }: { playing: boolean }) {
   }, [playing]);
 
   return (
-    <div className="relative w-full max-w-[420px] mx-auto md:max-w-none md:w-[128%] md:-mt-16 md:-translate-y-4 md:translate-x-6 md:justify-self-end">
+    <div className="relative w-full max-w-[min(420px,100%)] min-w-0 mx-auto overflow-hidden md:max-w-none md:w-[128%] md:-mt-16 md:-translate-y-4 md:translate-x-6 md:justify-self-end">
       <video
         ref={videoRef}
         className="w-full h-auto object-contain pointer-events-none select-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]"

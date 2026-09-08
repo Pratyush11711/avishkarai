@@ -42,15 +42,15 @@ export function StudioGlance() {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-40px" }}
                 variants={fadeUp}
-                className="flex items-baseline justify-between gap-8 py-4 first:pt-0 last:pb-0"
+                className="flex flex-col items-start gap-1 py-4 first:pt-0 last:pb-0 min-w-0 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
               >
                 <span className="text-smoke type-caption shrink-0">{stat.label}</span>
                 {stat.placeholder ? (
-                  <PlaceholderField inline className="text-right">
+                  <PlaceholderField inline className="min-w-0 break-words text-left sm:text-right">
                     {stat.placeholder}
                   </PlaceholderField>
                 ) : (
-                  <span className="text-carbon-black type-body text-right">
+                  <span className="text-carbon-black type-body min-w-0 break-words text-left sm:text-right">
                     {stat.value}
                   </span>
                 )}

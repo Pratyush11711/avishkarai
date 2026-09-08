@@ -23,7 +23,7 @@ export default function Home() {
   return (
     <SmoothScrollProvider>
       <Nav />
-      <main className="relative isolate">
+      <main className="relative isolate w-full max-w-full">
         <div className="curtain-sticky z-[1] bg-warm-canvas">
           <Hero />
         </div>

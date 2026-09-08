@@ -59,6 +59,7 @@ html {
   color: var(--color-carbon-black);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
 }
 
 body {
@@ -68,6 +69,7 @@ body {
   font-size: 16px;
   line-height: 1.25;
   font-weight: 500;
+  max-width: 100%;
 }
 
 *:focus-visible {
@@ -106,19 +108,23 @@ body {
 .type-display-xl {
   font-family: var(--font-suisseintlcond), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(36px, 6.2vw, 80px);
+  font-size: clamp(26px, 7.4vw, 80px);
   line-height: 0.9;
   letter-spacing: -0.03em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .type-display {
   font-family: var(--font-suisseintlcond), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
-  font-size: clamp(40px, 7vw, 80px);
+  font-size: clamp(26px, 7.2vw, 80px);
   line-height: 0.9;
   letter-spacing: -0.03em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 
 .type-heading-lg {
@@ -181,15 +187,17 @@ body {
 
 .page-wrap {
   max-width: var(--page-max-width);
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: max(32px, env(safe-area-inset-left));
+  padding-right: max(32px, env(safe-area-inset-right));
+  box-sizing: border-box;
 }
 
 .section-pad {
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: 56px;
+  padding-bottom: 56px;
 }
 
 .mint-tag {
@@ -331,13 +339,43 @@ a:focus-visible .cta-wipe-band {
 
 .curtain {
   position: relative;
-  border-radius: 64px 64px 0 0;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 28px 28px 0 0;
   overflow: hidden;
 }
 
 .curtain-sticky {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
+  overflow-x: clip;
+}
+
+@media (min-width: 768px) {
+  .page-wrap {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .section-pad {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .curtain {
+    border-radius: 64px 64px 0 0;
+  }
+}
+
+.pin-spacer {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#clock {
+  width: 100%;
+  max-width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {

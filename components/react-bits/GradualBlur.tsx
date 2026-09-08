@@ -23,7 +23,7 @@ const CURVES: Record<string, (p: number) => number> = {
 export function GradualBlur({
   position = "top",
   strength = 2,
-  height = "8rem",
+  height: _height = "8rem",
   divCount = 6,
   exponential = true,
   opacity = 1,
@@ -32,27 +32,39 @@ export function GradualBlur({
   zIndex = 40,
 }: GradualBlurProps) {
   const [reduced, setReduced] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    const reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileMq = window.matchMedia("(max-width: 767px)");
+    const apply = () => {
+      setReduced(reduceMq.matches);
+      setIsMobile(mobileMq.matches);
+    };
+    apply();
+    reduceMq.addEventListener("change", apply);
+    mobileMq.addEventListener("change", apply);
+    return () => {
+      reduceMq.removeEventListener("change", apply);
+      mobileMq.removeEventListener("change", apply);
+    };
   }, []);
 
+  const resolvedStrength = isMobile ? Math.min(strength, 1) : strength;
+  const resolvedCount = isMobile ? Math.min(divCount, 3) : divCount;
+
   const layers = useMemo(() => {
-    const increment = 100 / divCount;
+    const increment = 100 / resolvedCount;
     const curveFn = CURVES[curve] ?? CURVES.linear;
     const direction = position === "top" ? "to top" : "to bottom";
 
-    return Array.from({ length: divCount }, (_, i) => {
+    return Array.from({ length: resolvedCount }, (_, i) => {
       const index = i + 1;
-      let progress = curveFn(index / divCount);
+      let progress = curveFn(index / resolvedCount);
 
       const blurValue = exponential
-        ? Math.pow(2, progress * 4) * 0.0625 * strength
-        : 0.0625 * (progress * divCount + 1) * strength;
+        ? Math.pow(2, progress * 4) * 0.0625 * resolvedStrength
+        : 0.0625 * (progress * resolvedCount + 1) * resolvedStrength;
 
       const p1 = Math.round((increment * index - increment) * 10) / 10;
       const p2 = Math.round(increment * index * 10) / 10;
@@ -73,16 +85,15 @@ export function GradualBlur({
 
       return <div key={index} className="absolute inset-0" style={style} />;
     });
-  }, [curve, divCount, exponential, opacity, position, strength]);
+  }, [curve, exponential, opacity, position, resolvedCount, resolvedStrength]);
 
   if (reduced) return null;
 
   return (
     <div
-      className={`pointer-events-none fixed left-0 right-0 ${className}`}
+      className={`pointer-events-none fixed inset-x-0 h-14 md:h-36 ${className}`}
       style={{
         [position]: 0,
-        height,
         zIndex,
       }}
       aria-hidden="true"
