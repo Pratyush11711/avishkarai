@@ -33,11 +33,11 @@ export function Hero() {
     <section
       ref={heroRef}
       id="hero"
-      className="relative min-h-[100dvh] flex flex-col bg-warm-canvas overflow-hidden"
+      className="relative min-h-[100dvh] flex flex-col bg-warm-canvas"
       aria-label="Hero"
     >
-      <div className="relative z-10 flex-1 flex items-center pt-28 md:pt-32 pb-8 overflow-hidden">
-        <div className="page-wrap w-full min-w-0 grid grid-cols-1 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)] gap-8 md:gap-4 items-start">
+      <div className="relative z-10 flex-1 flex items-center pt-24 md:pt-28 pb-8">
+        <div className="page-wrap w-full min-w-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-6 items-start">
           <HeroHeadline />
           {!prefersReduced && (
             <HeroVideo playing={isHeroVisible} />

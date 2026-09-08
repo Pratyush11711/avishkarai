@@ -26,7 +26,7 @@ const PLANS = [
     price: "From $50,000",
     type: "Fixed scope, fixed price, fixed launch date",
     duration: null,
-    note: "Most 0→1 platforms land in the $50K to $150K range depending on integrations and compliance surface",
+    note: "Most 0→1 platforms land in the [$50K to $150K] range depending on integrations and compliance surface",
     features: [
       "Milestone-based payments",
       "Weekly Thursday deploys",
@@ -39,7 +39,7 @@ const PLANS = [
   },
   {
     name: "Ongoing product partnership",
-    price: "From $10,000/mo",
+    price: "From $10,000 per month",
     type: "Your embedded product and engineering team",
     duration: "Monthly",
     note: null,

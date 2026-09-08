@@ -12,6 +12,9 @@ const PLACEHOLDER_CASES = [
   { num: "05", name: "House of Life Sciences" },
 ];
 
+const CASE_BLURB =
+  "[One paragraph, under 60 words. Lead with the hard part: the integration, the compliance surface, the volume. Then the outcome.]";
+
 export function SelectedWork() {
   return (
     <section id="work" className="section-pad" aria-label="Selected work">
@@ -98,18 +101,22 @@ export function SelectedWork() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.5, delay: i * 0.07, ease: "easeOut" }}
-              className="p-5 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 min-w-0"
+              className="p-5 md:p-8 flex flex-col gap-4 min-w-0"
             >
-              <span className="type-caption text-smoke shrink-0 w-6">{c.num}</span>
-              <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
-                <h3 className="type-subheading-lg text-carbon-black shrink-0">{c.name}</h3>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <PlaceholderField inline>[Sector]</PlaceholderField>
-                  <PlaceholderField inline>[Country]</PlaceholderField>
-                  <PlaceholderField inline>[Status]</PlaceholderField>
+              <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                <span className="type-caption text-smoke shrink-0 w-6">{c.num}</span>
+                <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4">
+                  <h3 className="type-subheading-lg text-carbon-black shrink-0">{c.name}</h3>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <PlaceholderField inline>[Sector]</PlaceholderField>
+                    <PlaceholderField inline>[Country]</PlaceholderField>
+                    <PlaceholderField inline>[Status]</PlaceholderField>
+                  </div>
                 </div>
               </div>
-              <a href="#" className="type-body-sm text-slate hover:text-carbon-black shrink-0">
+              <PlaceholderField>{CASE_BLURB}</PlaceholderField>
+              <PlaceholderField inline>[Capability tags]</PlaceholderField>
+              <a href="#" className="type-body-sm text-slate hover:text-carbon-black self-start">
                 <TextRoll>Read the full case study →</TextRoll>
               </a>
             </motion.div>

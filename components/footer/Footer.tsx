@@ -38,6 +38,9 @@ export function Footer() {
             <a href="#" className="inline-block mb-4">
               <BrandLogo on="dark" className="h-8 w-[11rem]" />
             </a>
+            <p className="type-body text-smoke mb-2 max-w-[40ch]">
+              Product and engineering studio.
+            </p>
             <p className="type-body text-smoke mb-4 max-w-[40ch]">
               Software that ships fast and holds up.
             </p>

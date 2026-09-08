@@ -27,6 +27,15 @@ export function StudioGlance() {
   return (
     <section id="studio" className="section-pad" aria-label="Studio at a glance">
       <div className="page-wrap">
+        <motion.h2
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="type-heading text-carbon-black mb-10"
+        >
+          Avishkar AI
+        </motion.h2>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

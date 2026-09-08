@@ -152,7 +152,11 @@ export function TheClock() {
       aria-label="The Clock"
     >
       <div className="h-full flex flex-col justify-center page-wrap py-16 md:py-20">
-        <p className="type-caption text-smoke mb-8 md:mb-10">04 · The Clock</p>
+        <p className="type-caption text-smoke mb-4">04 · The Clock</p>
+        <p className="type-body text-paper-white max-w-[42ch] mb-8 md:mb-10">
+          Most studios promise deliverables next quarter. We ship yours by
+          Thursday.
+        </p>
 
         <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
           <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
