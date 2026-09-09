@@ -36,8 +36,8 @@ const STEPS = [
 
 export function Process() {
   return (
-    <section id="process" className="section-pad" aria-label="Process">
-      <div className="page-wrap">
+    <section id="process" className="section-pad relative" aria-label="Process">
+      <div className="page-wrap relative z-[1]">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}

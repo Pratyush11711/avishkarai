@@ -1,8 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Ref,
+  type RefObject,
+} from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { CardSwap, Card } from "@/components/react-bits/CardSwap";
+import { MagneticButton } from "@/components/ui/MagneticButton";
 
 const MUTED = "rgba(255, 255, 255, 0.36)";
 const BRIGHT = "#ffffff";
@@ -247,8 +256,21 @@ function ClockCardContent({
   );
 }
 
-export function TheClock() {
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (!ref) return;
+  if (typeof ref === "function") ref(value);
+  else ref.current = value;
+}
+
+export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRef) {
   const sectionRef = useRef<HTMLElement>(null);
+  const setSectionRef = useCallback(
+    (node: HTMLElement | null) => {
+      sectionRef.current = node;
+      assignRef(forwardedRef, node);
+    },
+    [forwardedRef]
+  );
   const introRef = useRef<HTMLParagraphElement>(null);
   const beat1Ref = useRef<HTMLDivElement>(null);
   const beat2Ref = useRef<HTMLDivElement>(null);
@@ -259,6 +281,7 @@ export function TheClock() {
   const p2Ref = useRef<HTMLParagraphElement>(null);
   const h3Ref = useRef<HTMLHeadingElement>(null);
   const moduleRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
   const [reducedMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -276,7 +299,7 @@ export function TheClock() {
     const prefersReduced = reducedMotion;
 
     if (prefersReduced) {
-      [beat1Ref, beat2Ref, beat3Ref, moduleRef].forEach((r) => {
+      [beat1Ref, beat2Ref, beat3Ref, moduleRef, ctaRef].forEach((r) => {
         if (r.current) gsap.set(r.current, { autoAlpha: 1, y: 0 });
       });
       return;
@@ -305,14 +328,17 @@ export function TheClock() {
     };
 
     mm.add("(max-width: 767px)", () => {
-      gsap.set([...beats, moduleRef.current], { autoAlpha: 1, y: 0 });
+      gsap.set([...beats, moduleRef.current, ctaRef.current], {
+        autoAlpha: 1,
+        y: 0,
+      });
       applyWordColors(allWords, "final");
       setCard(CLOCK_CARDS.length - 1);
     });
 
     mm.add("(min-width: 768px)", () => {
       gsap.set(beats, { autoAlpha: 0, y: 24 });
-      gsap.set(moduleRef.current, { autoAlpha: 0 });
+      gsap.set([moduleRef.current, ctaRef.current], { autoAlpha: 0, y: 16 });
       applyWordColors(allWords, "muted");
       setCard(0);
 
@@ -360,7 +386,12 @@ export function TheClock() {
         .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat3")
         .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat3")
-        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "beat3+=0.15");
+        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "beat3+=0.15")
+        .to(
+          ctaRef.current,
+          { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
+          "beat3+=0.35"
+        );
       revealWords(tl, beat3Words, "beat3+=0.08");
       tl.to(beat3Ref.current, { duration: 1.6 });
 
@@ -396,21 +427,13 @@ export function TheClock() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={setSectionRef}
       id="clock"
       className="relative z-[3] overflow-x-clip bg-carbon-black rounded-t-[28px] md:rounded-t-[64px] h-auto md:h-screen md:overflow-hidden"
       aria-label="The Clock"
     >
       <div className="h-full flex flex-col justify-center page-wrap py-16 md:py-20">
         <p className="type-caption text-smoke mb-4">04 · The Clock</p>
-        <p
-          ref={introRef}
-          className="clock-copy type-body max-w-[42ch] mb-8 md:mb-10"
-        >
-          Most studios promise deliverables next quarter. We ship yours by{" "}
-          <span data-clock-accent>Thursday</span>.
-        </p>
-
         <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
           <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
             <div
@@ -467,6 +490,11 @@ export function TheClock() {
                 it.
               </h2>
               <DeployStamp moduleRef={moduleRef} />
+              <div ref={ctaRef} className="mt-7">
+                <MagneticButton href="#contact" variant="inverted" strength={0}>
+                  Book a build review →
+                </MagneticButton>
+              </div>
             </div>
           </div>
 
@@ -502,4 +530,4 @@ export function TheClock() {
       </div>
     </section>
   );
-}
+});

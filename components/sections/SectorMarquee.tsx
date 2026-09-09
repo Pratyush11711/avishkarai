@@ -41,6 +41,19 @@ export function SectorMarquee() {
           Our clients are operators in industries where getting it wrong is
           expensive.
         </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, delay: 0.12, ease: "easeOut" }}
+          className="type-subheading mt-10 max-w-[36ch] border-l-2 border-voltage-yellow pl-5 text-carbon-black"
+        >
+          Most studios promise deliverables next quarter. We ship yours by{" "}
+          <mark className="bg-voltage-yellow px-1 text-carbon-black">
+            Thursday.
+          </mark>
+        </motion.p>
       </div>
     </section>
   );

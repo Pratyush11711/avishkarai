@@ -633,11 +633,6 @@ a:focus-visible .cta-wipe-band {
   }
 }
 
-.pin-spacer {
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
 /* ─── ProcessCTA ─────────────────────────────────────────────────────────── */
 
 .pcta-wrap {
@@ -814,21 +809,40 @@ a:focus-visible .cta-wipe-band {
 
 /* ─── Newsletter glow ────────────────────────────────────────────────────── */
 
-.newsletter-glow {
-  position: absolute;
-  inset: -20% -10%;
-  pointer-events: none;
+/* ─── FAQ / Newsletter atmospheric gradients ─────────────────────────────── */
+/* Color lives in the middle of each block. Canvas fades cover the start
+   edge of FAQ and the end edge of Newsletter so the wash never sits on
+   those horizontal seams. */
+
+.work-section {
+  position: relative;
   background:
-    radial-gradient(closest-side, rgba(209, 255, 202, 0.55), transparent 70%) 15% 20% / 55% 55% no-repeat,
-    radial-gradient(closest-side, rgba(255, 241, 0, 0.35), transparent 70%) 85% 75% / 50% 50% no-repeat;
-  filter: blur(40px);
-  opacity: 0.8;
+    linear-gradient(to bottom, var(--color-paper-white) 0%, transparent 26%),
+    linear-gradient(to top, var(--color-paper-white) 0%, transparent 26%),
+    radial-gradient(ellipse 90% 58% at 6% 22%, rgba(209, 255, 202, 0.58), transparent 60%),
+    radial-gradient(ellipse 80% 55% at 96% 38%, rgba(96, 165, 250, 0.34), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 88% 82%, rgba(192, 132, 252, 0.38), transparent 58%),
+    radial-gradient(ellipse 65% 48% at 12% 78%, rgba(255, 241, 0, 0.28), transparent 58%),
+    var(--color-paper-white);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .newsletter-glow {
-    opacity: 0.5;
-  }
+.faq-section {
+  position: relative;
+  background:
+    linear-gradient(to bottom, var(--color-warm-canvas) 0%, transparent 28%),
+    radial-gradient(ellipse 90% 70% at 8% 48%, rgba(192, 132, 252, 0.42), transparent 58%),
+    radial-gradient(ellipse 75% 65% at 100% 58%, rgba(96, 165, 250, 0.30), transparent 58%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(209, 255, 202, 0.40), transparent 62%),
+    var(--color-warm-canvas);
+}
+
+.newsletter-section {
+  position: relative;
+  background:
+    linear-gradient(to top, var(--color-warm-canvas) 0%, transparent 32%),
+    radial-gradient(ellipse 90% 75% at 12% 22%, rgba(209, 255, 202, 0.58), transparent 58%),
+    radial-gradient(ellipse 80% 70% at 92% 48%, rgba(255, 241, 0, 0.40), transparent 58%),
+    var(--color-warm-canvas);
 }
 
 /* ─── WhatWeDontDo ───────────────────────────────────────────────────────── */
@@ -906,6 +920,231 @@ a:focus-visible .cta-wipe-band {
 #clock {
   width: 100%;
   max-width: 100%;
+}
+
+/* ─── SelectedWork — featured work list ──────────────────────────────────── */
+
+.fw-list {
+  position: relative;
+  margin-top: 40px;
+  border-top: 1px solid var(--color-ash);
+}
+
+.fw-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--color-ash);
+  text-decoration: none;
+  color: var(--color-carbon-black);
+  transition: opacity 0.45s ease;
+}
+
+.fw-index {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--color-smoke);
+  transition: color 0.35s ease;
+}
+
+.fw-head {
+  display: block;
+  min-width: 0;
+}
+
+.fw-tags {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: var(--color-smoke);
+}
+
+.fw-title {
+  display: block;
+  font-family: var(--font-suisseintlcond), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: clamp(30px, 5.2vw, 68px);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fw-meta {
+  display: block;
+  min-width: 0;
+}
+
+.fw-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.fw-place {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--color-smoke);
+}
+
+.fw-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-slate);
+}
+
+.fw-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-mist-gray);
+}
+
+.fw-thumb-img {
+  object-fit: cover;
+}
+
+.fw-arrow {
+  display: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-smoke);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+}
+
+.fw-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border: 1.5px solid var(--color-carbon-black);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--color-carbon-black);
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.fw-all:hover {
+  background: var(--color-carbon-black);
+  color: var(--color-paper-white);
+}
+
+@media (min-width: 900px) {
+  .fw-row {
+    grid-template-columns: 52px minmax(0, 1.15fr) minmax(0, 0.85fr) 40px;
+    align-items: center;
+    gap: 24px;
+    padding: 30px 0;
+  }
+
+  .fw-arrow {
+    display: block;
+    text-align: right;
+  }
+
+  /* Hover mode: only tags + title rest on the page, everything else is
+     revealed for the row the cursor is on. */
+  .fw-list:not(.is-static) .fw-thumb {
+    display: none;
+  }
+
+  .fw-list:not(.is-static) .fw-meta-top,
+  .fw-list:not(.is-static) .fw-desc {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+
+  .fw-list:not(.is-static).is-hovering .fw-row {
+    opacity: 0.3;
+  }
+
+  .fw-list:not(.is-static) .fw-row:hover,
+  .fw-list:not(.is-static) .fw-row:focus-visible {
+    opacity: 1;
+  }
+
+  .fw-list:not(.is-static) .fw-row:hover .fw-title,
+  .fw-list:not(.is-static) .fw-row:focus-visible .fw-title {
+    transform: translateX(22px);
+  }
+
+  .fw-list:not(.is-static) .fw-row:hover .fw-index,
+  .fw-list:not(.is-static) .fw-row:focus-visible .fw-index {
+    color: var(--color-carbon-black);
+  }
+
+  .fw-list:not(.is-static) .fw-row:hover .fw-meta-top,
+  .fw-list:not(.is-static) .fw-row:hover .fw-desc,
+  .fw-list:not(.is-static) .fw-row:focus-visible .fw-meta-top,
+  .fw-list:not(.is-static) .fw-row:focus-visible .fw-desc {
+    opacity: 1;
+    transform: none;
+  }
+
+  .fw-list:not(.is-static) .fw-row:hover .fw-arrow {
+    transform: translate(6px, -6px);
+    color: var(--color-carbon-black);
+  }
+
+  /* Static mode (touch / reduced motion): no cursor follower, so the preview
+     image lives in the row and nothing is hidden behind a hover. */
+  .fw-list.is-static .fw-row {
+    grid-template-columns: 52px minmax(0, 1fr) minmax(0, 0.8fr) 220px 40px;
+  }
+}
+
+/* Cursor-following preview */
+
+.fw-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: clamp(240px, 24vw, 400px);
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  box-shadow: 0 34px 70px -24px rgba(0, 0, 0, 0.55);
+  will-change: transform, opacity;
+}
+
+.fw-preview.is-visible {
+  opacity: 1;
+}
+
+.fw-preview-img {
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.fw-preview-img.is-active {
+  opacity: 1;
 }
 
 /* ─── CaseStudyCard ──────────────────────────────────────────────────────── */

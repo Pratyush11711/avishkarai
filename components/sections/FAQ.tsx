@@ -60,7 +60,11 @@ const FAQ_ITEMS = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="section-pad" aria-label="Frequently asked questions">
+    <section
+      id="faq"
+      className="section-pad faq-section"
+      aria-label="Frequently asked questions"
+    >
       <div className="page-wrap">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
           <motion.h2

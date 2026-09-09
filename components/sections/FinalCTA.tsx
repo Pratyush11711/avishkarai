@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, type Ref } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
@@ -62,8 +62,21 @@ function splitWords(
 
 /* ─── Component ────────────────────────────────────────────────────────────── */
 
-export function FinalCTA() {
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (!ref) return;
+  if (typeof ref === "function") ref(value);
+  else ref.current = value;
+}
+
+export const FinalCTA = forwardRef<HTMLElement>(function FinalCTA(_, forwardedRef) {
   const sectionRef = useRef<HTMLElement>(null);
+  const setSectionRef = useCallback(
+    (node: HTMLElement | null) => {
+      sectionRef.current = node;
+      assignRef(forwardedRef, node);
+    },
+    [forwardedRef]
+  );
   const headingRef = useRef<HTMLHeadingElement>(null);
   const bodyRef    = useRef<HTMLDivElement>(null);
 
@@ -133,7 +146,7 @@ export function FinalCTA() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={setSectionRef}
       id="contact"
       className="py-28 md:py-40 bg-carbon-black"
       aria-label="Contact us"
@@ -163,7 +176,7 @@ export function FinalCTA() {
             </p>
           </div>
 
-          <div>
+          <div id="cta-action">
             <MagneticButton
               href="mailto:arpit@avishkarai.com,shivang@avishkarai.com?subject=Build%20review"
               variant="inverted"
@@ -176,4 +189,4 @@ export function FinalCTA() {
       </div>
     </section>
   );
-}
+});

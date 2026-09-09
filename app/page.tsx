@@ -14,6 +14,7 @@ import { Newsletter } from "@/components/sections/Newsletter";
 import { SplitCTA } from "@/components/sections/SplitCTA";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/footer/Footer";
+import { ProcessRibbon } from "@/components/fx/ProcessRibbon";
 
 export default function Home() {
   return (
@@ -24,7 +25,7 @@ export default function Home() {
           <Hero />
         </div>
 
-        <div className="curtain z-[2] bg-paper-white">
+        <div className="curtain z-[2] work-section">
           <SelectedWork />
         </div>
 
@@ -40,8 +41,15 @@ export default function Home() {
           <WhatWeStandOn />
           <Capabilities />
           <WhatWeDontDo />
-          <Process />
-          <ProcessCTA />
+          {/* Shared box so the ribbon can weave past the cards and taper out
+              below the CTA. */}
+          <div className="relative pb-[clamp(90px,9vw,160px)]">
+            <ProcessRibbon />
+            <div className="relative z-[1]">
+              <Process />
+              <ProcessCTA />
+            </div>
+          </div>
           <FAQ />
         </div>
 

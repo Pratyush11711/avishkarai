@@ -80,9 +80,9 @@ export function Nav() {
                   key={link.href}
                   href={link.href}
                   className={clsx(
-                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none px-2.5 xl:px-3.5 py-2 rounded-full border border-transparent transition-colors duration-150",
+                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none px-2.5 xl:px-3.5 py-2 rounded-full border border-transparent transition-all duration-200",
                     isActive
-                      ? "text-[var(--nav-link-active)] bg-[var(--nav-link-chip)] border-[var(--nav-link-chip-border)]"
+                      ? "px-4 xl:px-5 text-[var(--nav-link-active)] bg-[var(--nav-link-chip)] border-[var(--nav-link-chip-border)]"
                       : "text-[var(--nav-link)] hover:text-[var(--nav-link-active)] hover:bg-[var(--nav-link-chip)] hover:border-[var(--nav-link-chip-border)]"
                   )}
                 >
