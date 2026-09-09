@@ -17,6 +17,16 @@ const MUTED = "rgba(255, 255, 255, 0.36)";
 const BRIGHT = "#ffffff";
 const PHOSPHOR = "#fff100";
 
+const PALETTE = [
+  "#d1ffca",
+  "#fff100",
+  "#4EE2EF",
+  "#60a5fa",
+  "#c084fc",
+  "#f472b6",
+  "#f97316",
+];
+
 type ClockWord = { el: HTMLElement; accent: boolean; color: string };
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -33,6 +43,21 @@ function hexToRgb(hex: string): [number, number, number] {
     parseInt(full.slice(2, 4), 16) || 0,
     parseInt(full.slice(4, 6), 16) || 0,
   ];
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const ch = (x: number) =>
+    Math.round(x).toString(16).padStart(2, "0");
+  return `#${ch(ar + (br - ar) * t)}${ch(ag + (bg - ag) * t)}${ch(ab + (bb - ab) * t)}`;
+}
+
+function paletteColor(t: number): string {
+  const n = PALETTE.length - 1;
+  const x = Math.min(Math.max(t, 0), 1) * n;
+  const i = Math.floor(x);
+  return mixHex(PALETTE[i], PALETTE[Math.min(i + 1, n)], x - i);
 }
 
 type WashTint = { r: number; g: number; b: number; a: number };
@@ -57,7 +82,10 @@ function atPos(base: number | string, extra: number): number | string {
   return `${label}+=${off}`;
 }
 
-function splitWords(el: HTMLElement | null): {
+function splitWords(
+  el: HTMLElement | null,
+  cycle = false
+): {
   words: ClockWord[];
   revert: () => void;
 } {
@@ -105,6 +133,13 @@ function splitWords(el: HTMLElement | null): {
     }
   });
 
+  if (cycle && words.length) {
+    words.forEach((word, i) => {
+      if (word.accent) return;
+      word.color = paletteColor(i / Math.max(words.length - 1, 1));
+    });
+  }
+
   return {
     words,
     revert: () => {
@@ -115,7 +150,7 @@ function splitWords(el: HTMLElement | null): {
 
 function applyWordColors(words: ClockWord[], color: "muted" | "final") {
   words.forEach((word) => {
-    word.el.style.color = color === "muted" ? MUTED : BRIGHT;
+    word.el.style.color = color === "muted" ? MUTED : word.color;
   });
 }
 
@@ -130,7 +165,7 @@ function revealWords(
   tl.to(
     words.map((word) => word.el),
     {
-      color: BRIGHT,
+      color: (i: number) => words[i].color,
       duration: 0.5,
       stagger,
       ease: "none",
@@ -139,9 +174,11 @@ function revealWords(
   );
 
   if (!wash) return;
+  const step = Math.max(1, Math.floor(words.length / 7));
   let last = "";
   words.forEach((word, i) => {
-    if (!word.accent || word.color === last) return;
+    const sample = word.accent || i % step === 0;
+    if (!sample || word.color === last) return;
     last = word.color;
     const [r, g, b] = hexToRgb(word.color);
     tl.to(
@@ -377,11 +414,11 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
     const splits = [
       splitWords(introRef.current),
-      splitWords(h1Ref.current),
-      splitWords(p1Ref.current),
-      splitWords(h2Ref.current),
-      splitWords(p2Ref.current),
-      splitWords(h3Ref.current),
+      splitWords(h1Ref.current, true),
+      splitWords(p1Ref.current, true),
+      splitWords(h2Ref.current, true),
+      splitWords(p2Ref.current, true),
+      splitWords(h3Ref.current, true),
     ];
     const allWords = splits.flatMap((s) => s.words);
     applyWordColors(allWords, "muted");

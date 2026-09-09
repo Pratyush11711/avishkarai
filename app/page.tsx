@@ -11,6 +11,7 @@ import { Process } from "@/components/sections/Process";
 import { ProcessCTA } from "@/components/sections/ProcessCTA";
 import { FAQ } from "@/components/sections/FAQ";
 import { Newsletter } from "@/components/sections/Newsletter";
+import { LetsWorkTogether } from "@/components/sections/LetsWorkTogether";
 import { SplitCTA } from "@/components/sections/SplitCTA";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/footer/Footer";
@@ -59,6 +60,13 @@ export default function Home() {
 
         <div className="curtain z-[6] bg-carbon-black">
           <FinalCTA />
+        </div>
+
+        <div className="relative z-[7]">
+          <LetsWorkTogether />
+        </div>
+
+        <div className="relative z-[8] w-full max-w-full bg-carbon-black">
           <SplitCTA />
           <Footer />
         </div>
