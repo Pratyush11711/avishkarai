@@ -13,21 +13,31 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { CardSwap, Card } from "@/components/react-bits/CardSwap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
-const MUTED = "rgba(255, 255, 255, 0.36)";
-const BRIGHT = "#ffffff";
-const PHOSPHOR = "#fff100";
+const DIM = "rgba(255, 255, 255, 0.14)";
 
-const PALETTE = [
+/** Bright ink the active band paints with as you scroll. */
+const INK = [
+  "#f7c6d8",
+  "#fff1b8",
   "#d1ffca",
-  "#fff100",
   "#4EE2EF",
-  "#60a5fa",
   "#c084fc",
-  "#f472b6",
   "#f97316",
+  "#fff100",
 ];
 
-type ClockWord = { el: HTMLElement; accent: boolean; color: string };
+/** Solid section grounds — dark cousins of the ink, like the reference. */
+const GROUND = [
+  "#1a0f14",
+  "#2a1b15",
+  "#1c1a10",
+  "#0c181c",
+  "#140818",
+  "#1a0c08",
+  "#16140a",
+];
+
+type ClockWord = { el: HTMLElement; accent: boolean };
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "").trim();
@@ -48,44 +58,58 @@ function hexToRgb(hex: string): [number, number, number] {
 function mixHex(a: string, b: string, t: number): string {
   const [ar, ag, ab] = hexToRgb(a);
   const [br, bg, bb] = hexToRgb(b);
-  const ch = (x: number) =>
-    Math.round(x).toString(16).padStart(2, "0");
+  const ch = (x: number) => Math.round(x).toString(16).padStart(2, "0");
   return `#${ch(ar + (br - ar) * t)}${ch(ag + (bg - ag) * t)}${ch(ab + (bb - ab) * t)}`;
 }
 
-function paletteColor(t: number): string {
-  const n = PALETTE.length - 1;
+function along(palette: string[], t: number): string {
+  const n = palette.length - 1;
   const x = Math.min(Math.max(t, 0), 1) * n;
   const i = Math.floor(x);
-  return mixHex(PALETTE[i], PALETTE[Math.min(i + 1, n)], x - i);
+  return mixHex(palette[i], palette[Math.min(i + 1, n)], x - i);
 }
 
-type WashTint = { r: number; g: number; b: number; a: number };
-
-function paintWash(el: HTMLElement, tint: WashTint) {
-  el.style.setProperty("--clock-r", tint.r.toFixed(1));
-  el.style.setProperty("--clock-g", tint.g.toFixed(1));
-  el.style.setProperty("--clock-b", tint.b.toFixed(1));
-  el.style.setProperty("--clock-a", tint.a.toFixed(3));
+function paintWash(el: HTMLElement, hex: string, a: number) {
+  const [r, g, b] = hexToRgb(hex);
+  el.style.setProperty("--clock-r", String(r));
+  el.style.setProperty("--clock-g", String(g));
+  el.style.setProperty("--clock-b", String(b));
+  el.style.setProperty("--clock-a", a.toFixed(3));
 }
 
-function atPos(base: number | string, extra: number): number | string {
-  if (typeof base === "number") return base + extra;
-  const raw = String(base);
-  const match = raw.match(/^(.*?)(?:\+=([\d.]+))?$/);
-  if (!match) return base;
-  const label = match[1];
-  const off = (match[2] ? parseFloat(match[2]) : 0) + extra;
-  if (label === ">" || label === "<" || label === "") {
-    return extra === 0 ? base : `+=${extra}`;
-  }
-  return `${label}+=${off}`;
+function muteWords(words: ClockWord[]) {
+  words.forEach((word) => {
+    word.el.style.color = DIM;
+  });
 }
 
-function splitWords(
-  el: HTMLElement | null,
-  cycle = false
-): {
+/**
+ * Moving spotlight: a band of words around `t` (0–1) lights up in `ink`.
+ * Accent words in the band go white. Everything else stays dim.
+ */
+function applySpotlight(words: ClockWord[], t: number, ink: string) {
+  if (!words.length) return;
+  const n = words.length;
+  const center = Math.min(Math.max(t, 0), 1) * (n - 1);
+  const radius = Math.max(3.4, Math.min(9, n * 0.18));
+  const [ir, ig, ib] = hexToRgb(ink);
+
+  words.forEach((word, i) => {
+    const falloff = Math.max(0, 1 - Math.abs(i - center) / radius);
+    const k = falloff * falloff;
+    if (k < 0.03) {
+      word.el.style.color = DIM;
+      return;
+    }
+    if (word.accent) {
+      word.el.style.color = `rgba(255, 255, 255, ${0.14 + 0.86 * k})`;
+      return;
+    }
+    word.el.style.color = `rgba(${ir}, ${ig}, ${ib}, ${0.14 + 0.86 * k})`;
+  });
+}
+
+function splitWords(el: HTMLElement | null): {
   words: ClockWord[];
   revert: () => void;
 } {
@@ -94,7 +118,7 @@ function splitWords(
   const original = el.innerHTML;
   const words: ClockWord[] = [];
 
-  const wrapText = (text: string, accent: boolean, color: string) => {
+  const wrapText = (text: string, accent: boolean) => {
     const frag = document.createDocumentFragment();
     text.split(/(\s+)/).forEach((part) => {
       if (!part) return;
@@ -106,7 +130,7 @@ function splitWords(
       span.className = "clock-word";
       span.textContent = part;
       frag.appendChild(span);
-      words.push({ el: span, accent, color });
+      words.push({ el: span, accent });
     });
     return frag;
   };
@@ -117,28 +141,15 @@ function splitWords(
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent ?? "";
       if (!text.trim()) return;
-      const frag = wrapText(text, false, BRIGHT);
-      el.replaceChild(frag, node);
+      el.replaceChild(wrapText(text, false), node);
       return;
     }
     if (node.nodeType === Node.ELEMENT_NODE) {
       const child = node as HTMLElement;
-      const accentAttr = child.getAttribute("data-clock-accent");
-      const accent = accentAttr !== null;
-      const color =
-        accent && accentAttr && accentAttr !== "true" ? accentAttr : PHOSPHOR;
-      const text = child.textContent ?? "";
-      const frag = wrapText(text, accent, color);
-      el.replaceChild(frag, child);
+      const accent = child.hasAttribute("data-clock-accent");
+      el.replaceChild(wrapText(child.textContent ?? "", accent), child);
     }
   });
-
-  if (cycle && words.length) {
-    words.forEach((word, i) => {
-      if (word.accent) return;
-      word.color = paletteColor(i / Math.max(words.length - 1, 1));
-    });
-  }
 
   return {
     words,
@@ -146,55 +157,6 @@ function splitWords(
       el.innerHTML = original;
     },
   };
-}
-
-function applyWordColors(words: ClockWord[], color: "muted" | "final") {
-  words.forEach((word) => {
-    word.el.style.color = color === "muted" ? MUTED : word.color;
-  });
-}
-
-function revealWords(
-  tl: gsap.core.Timeline,
-  words: ClockWord[],
-  position: number | string,
-  wash?: { el: HTMLElement; tint: WashTint }
-) {
-  if (!words.length) return;
-  const stagger = words.length > 40 ? 0.038 : 0.055;
-  tl.to(
-    words.map((word) => word.el),
-    {
-      color: (i: number) => words[i].color,
-      duration: 0.5,
-      stagger,
-      ease: "none",
-    },
-    position
-  );
-
-  if (!wash) return;
-  const step = Math.max(1, Math.floor(words.length / 7));
-  let last = "";
-  words.forEach((word, i) => {
-    const sample = word.accent || i % step === 0;
-    if (!sample || word.color === last) return;
-    last = word.color;
-    const [r, g, b] = hexToRgb(word.color);
-    tl.to(
-      wash.tint,
-      {
-        r,
-        g,
-        b,
-        a: 0.42,
-        duration: 0.9,
-        ease: "sine.inOut",
-        onUpdate: () => paintWash(wash.el, wash.tint),
-      },
-      atPos(position, i * stagger)
-    );
-  });
 }
 
 function useLastThursdayLabel() {
@@ -397,15 +359,21 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
     if (!section) return;
 
     const prefersReduced = reducedMotion;
-    const tint: WashTint = { r: 0, g: 0, b: 0, a: 0 };
-    const paintStaticWash = () => washEl?.classList.add("is-static");
-    const clearStaticWash = () => washEl?.classList.remove("is-static");
+
+    const paintScene = (progress: number, active: ClockWord[], local: number) => {
+      const ink = along(INK, progress);
+      const ground = along(GROUND, progress);
+      section.style.backgroundColor = ground;
+      if (washEl) paintWash(washEl, ink, 0.28);
+      applySpotlight(active, local, ink);
+    };
 
     if (prefersReduced) {
       [beat1Ref, beat2Ref, beat3Ref, moduleRef, ctaRef].forEach((r) => {
         if (r.current) gsap.set(r.current, { autoAlpha: 1, y: 0 });
       });
-      paintStaticWash();
+      section.style.backgroundColor = GROUND[2];
+      if (washEl) paintWash(washEl, INK[2], 0.22);
       return;
     }
 
@@ -414,16 +382,19 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
     const splits = [
       splitWords(introRef.current),
-      splitWords(h1Ref.current, true),
-      splitWords(p1Ref.current, true),
-      splitWords(h2Ref.current, true),
-      splitWords(p2Ref.current, true),
-      splitWords(h3Ref.current, true),
+      splitWords(h1Ref.current),
+      splitWords(p1Ref.current),
+      splitWords(h2Ref.current),
+      splitWords(p2Ref.current),
+      splitWords(h3Ref.current),
     ];
     const allWords = splits.flatMap((s) => s.words);
-    applyWordColors(allWords, "muted");
+    muteWords(allWords);
 
     const revertSplits = () => splits.forEach((s) => s.revert());
+    const beat1Words = [...splits[1].words, ...splits[2].words];
+    const beat2Words = [...splits[3].words, ...splits[4].words];
+    const beat3Words = splits[5].words;
 
     const setCard = (idx: number) => {
       if (cardIndexRef.current === idx) return;
@@ -436,25 +407,31 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         autoAlpha: 1,
         y: 0,
       });
-      applyWordColors(allWords, "final");
-      paintStaticWash();
       setCard(CLOCK_CARDS.length - 1);
+
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: "top 75%",
+        end: "bottom 25%",
+        scrub: 0.4,
+        onUpdate: (self) => {
+          paintScene(self.progress, allWords, self.progress);
+        },
+      });
+      paintScene(0, allWords, 0);
+
+      return () => st.kill();
     });
 
     mm.add("(min-width: 768px)", () => {
       gsap.set(beats, { autoAlpha: 0, y: 24 });
       gsap.set([moduleRef.current, ctaRef.current], { autoAlpha: 0, y: 16 });
-      applyWordColors(allWords, "muted");
-      clearStaticWash();
-      tint.r = 0;
-      tint.g = 0;
-      tint.b = 0;
-      tint.a = 0;
-      if (washEl) paintWash(washEl, tint);
+      muteWords(allWords);
+      if (washEl) paintWash(washEl, INK[0], 0);
+      section.style.backgroundColor = GROUND[0];
       setCard(0);
 
       const breakpoints = { beat2: 0.33, beat3: 0.66 };
-      const wash = washEl ? { el: washEl, tint } : undefined;
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -475,26 +452,47 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
                 ? 1
                 : 0;
             setCard(idx);
+
+            const time = tl.time();
+            const t1 = tl.labels.beat1 ?? 0;
+            const t2 = tl.labels.beat2 ?? 0;
+            const t3 = tl.labels.beat3 ?? 0;
+            const end = tl.duration() || 1;
+
+            let active = beat1Words;
+            let local = 0;
+            if (time < t2) {
+              active = beat1Words;
+              local = t2 > t1 ? (time - t1) / (t2 - t1) : 0;
+              muteWords(beat2Words);
+              muteWords(beat3Words);
+            } else if (time < t3) {
+              active = beat2Words;
+              local = t3 > t2 ? (time - t2) / (t3 - t2) : 0;
+              muteWords(beat1Words);
+              muteWords(beat3Words);
+            } else {
+              active = beat3Words;
+              local = (time - t3) / Math.max(end - t3, 0.001);
+              muteWords(beat1Words);
+              muteWords(beat2Words);
+            }
+
+            paintScene(self.progress, active, local);
           },
         },
       });
 
-      const introWords = splits[0].words;
-      const beat1Words = [...splits[1].words, ...splits[2].words];
-      const beat2Words = [...splits[3].words, ...splits[4].words];
-      const beat3Words = splits[5].words;
+      const hold = (words: ClockWord[]) =>
+        Math.max(1.6, words.length * 0.048);
 
-      revealWords(tl, introWords, 0, wash);
-
-      tl.addLabel("beat1", ">")
-        .to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat1");
-      revealWords(tl, beat1Words, "beat1+=0.08", wash);
-      tl.to(beat1Ref.current, { duration: 1.1 })
+      tl.addLabel("beat1", 0)
+        .to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat1")
+        .to({}, { duration: hold(beat1Words) })
         .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat2")
-        .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat2");
-      revealWords(tl, beat2Words, "beat2+=0.08", wash);
-      tl.to(beat2Ref.current, { duration: 1.4 })
+        .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat2")
+        .to({}, { duration: hold(beat2Words) })
         .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat3")
         .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat3")
@@ -503,9 +501,8 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
           ctaRef.current,
           { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
           "beat3+=0.35"
-        );
-      revealWords(tl, beat3Words, "beat3+=0.08", wash);
-      tl.to(beat3Ref.current, { duration: 1.6 });
+        )
+        .to({}, { duration: hold(beat3Words) });
 
       // Recompute the card-swap breakpoints from the timeline's own
       // label positions so the right-side stack changes state at exactly
@@ -541,7 +538,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
     <section
       ref={setSectionRef}
       id="clock"
-      className="relative z-[3] overflow-hidden bg-carbon-black rounded-t-[28px] md:rounded-t-[64px] h-auto md:h-screen"
+      className="clock-section relative z-[3] overflow-hidden h-auto md:h-screen"
       aria-label="The Clock"
     >
       <div ref={washRef} className="clock-wash" aria-hidden />

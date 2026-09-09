@@ -495,13 +495,17 @@ a:focus-visible .cta-wipe-band {
   transform: rotate(-28deg);
 }
 
+.clock-section {
+  background-color: #1a0f14;
+}
+
 .clock-copy {
-  color: rgba(255, 255, 255, 0.36);
+  color: rgba(255, 255, 255, 0.14);
 }
 
 .clock-word {
   display: inline;
-  color: rgba(255, 255, 255, 0.36);
+  color: rgba(255, 255, 255, 0.14);
 }
 
 .clock-wash {
@@ -516,14 +520,14 @@ a:focus-visible .cta-wipe-band {
   --clock-a: 0;
   background:
     radial-gradient(
-      ellipse 90% 80% at 22% 40%,
+      ellipse 110% 90% at 30% 40%,
       rgba(var(--clock-r), var(--clock-g), var(--clock-b), var(--clock-a)) 0%,
-      transparent 68%
+      transparent 72%
     ),
     radial-gradient(
-      ellipse 70% 60% at 88% 72%,
-      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.5)) 0%,
-      transparent 72%
+      ellipse 80% 70% at 90% 80%,
+      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.55)) 0%,
+      transparent 70%
     );
 }
 
