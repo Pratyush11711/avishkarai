@@ -10,7 +10,7 @@ const PILLARS = [
     body: "Multi-tenant architecture. Role-based access control. Audit logging. Encryption in transit and at rest. Automated CI/CD, real test coverage, documented APIs, infrastructure as code.",
     closing: "We build the thing you scale, not the thing you replace.",
     surface: "bg-voltage-yellow",
-    accent: "bg-acid-lime",
+    accent: "bg-mint-chip",
   },
   {
     number: "02",
@@ -18,7 +18,7 @@ const PILLARS = [
     heading: "Designed like a product, not a project.",
     body: "Your first users, your first investors, and your first enterprise buyer all form their opinion in about four seconds. We don't hand that moment to a template.",
     closing: "Nobody should be able to tell it's version one.",
-    surface: "bg-acid-lime",
+    surface: "bg-mint-chip",
     accent: "bg-voltage-yellow",
   },
   {
