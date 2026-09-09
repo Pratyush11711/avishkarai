@@ -500,14 +500,41 @@ a:focus-visible .cta-wipe-band {
   color: rgba(255, 255, 255, 0.36);
 }
 
+.clock-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  --clock-r: 0;
+  --clock-g: 0;
+  --clock-b: 0;
+  --clock-a: 0;
+  background:
+    radial-gradient(
+      ellipse 90% 80% at 22% 40%,
+      rgba(var(--clock-r), var(--clock-g), var(--clock-b), var(--clock-a)) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 70% 60% at 88% 72%,
+      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.5)) 0%,
+      transparent 72%
+    );
+}
+
+.clock-wash.is-static {
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 28%, rgba(209, 255, 202, 0.32), transparent 58%),
+    radial-gradient(ellipse 70% 55% at 92% 30%, rgba(78, 226, 239, 0.24), transparent 56%),
+    radial-gradient(ellipse 65% 50% at 78% 82%, rgba(192, 132, 252, 0.28), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 16% 84%, rgba(249, 115, 22, 0.2), transparent 55%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .clock-copy,
   .clock-word {
     color: #ffffff;
-  }
-
-  .clock-copy [data-clock-accent] {
-    color: #fff100;
   }
 }
 
