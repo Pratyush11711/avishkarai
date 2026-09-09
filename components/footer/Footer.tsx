@@ -9,13 +9,13 @@ const FOOTER_LINKS = {
     { label: "Work", href: "#work" },
     { label: "Capabilities", href: "#capabilities" },
     { label: "Process", href: "#process" },
-    { label: "Pricing", href: "#pricing" },
     { label: "About", href: "#studio" },
     { label: "Careers", href: "#" },
   ],
   Contact: [
-    { label: "hello@avishkar.ai", href: "mailto:hello@avishkar.ai" },
-    { label: "Book a build review", href: "#pricing" },
+    { label: "arpit@avishkarai.com", href: "mailto:arpit@avishkarai.com" },
+    { label: "shivang@avishkarai.com", href: "mailto:shivang@avishkarai.com" },
+    { label: "Book a build review", href: "#contact" },
   ],
   Legal: [
     { label: "Privacy", href: "#" },
@@ -32,6 +32,7 @@ const FOOTER_LINKS = {
 export function Footer() {
   return (
     <footer className="bg-carbon-black" aria-label="Footer">
+      <div aria-hidden className="brand-rainbow-strip" />
       <div className="page-wrap py-16">
         <div className="grid md:grid-cols-[1fr_auto] gap-12 md:gap-20 mb-12">
           <div>

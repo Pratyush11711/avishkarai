@@ -16,7 +16,7 @@ function ArrowIcon() {
 
 const PANELS = [
   {
-    href: "#pricing",
+    href: "#contact",
     lines: ["Book a", "build review"],
     body: "In 30 minutes we'll tell you what we'd build, how long it would take, and what we'd cut.",
     wipe: "var(--color-voltage-yellow)",

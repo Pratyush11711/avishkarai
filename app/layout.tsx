@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Inter } from "next/font/google";
+import { Barlow_Condensed, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
@@ -13,6 +13,12 @@ const suisseIntlCond = Barlow_Condensed({
   subsets: ["latin"],
   variable: "--font-suisseintlcond",
   weight: ["700"],
+});
+
+const jakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-jakarta",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${suisseIntl.variable} ${suisseIntlCond.variable} ${GeistMono.variable} h-full`}
+      className={`${suisseIntl.variable} ${suisseIntlCond.variable} ${jakartaSans.variable} ${GeistMono.variable} h-full`}
       suppressHydrationWarning
     >
       <body

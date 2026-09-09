@@ -4,6 +4,28 @@ import { motion } from "framer-motion";
 import { Accordion } from "@/components/ui/Accordion";
 
 const FAQ_ITEMS = [
+  // Trust & security
+  {
+    question: "Who owns the code?",
+    answer:
+      "You do. From the first commit, in your repository, under your account. Full IP assignment in the contract.",
+  },
+  {
+    question: "How do you handle our data?",
+    answer:
+      "Least-privilege access, signed NDAs across the team, encrypted secrets management, no production data in development environments, and a documented subprocessor list.",
+  },
+  {
+    question: "Are you compliance-ready?",
+    answer:
+      "We've shipped HIPAA-grade systems in production and will sign a BAA where we handle PHI. Our SOC 2 readiness program is in progress.",
+  },
+  {
+    question: "What if it doesn't work out?",
+    answer:
+      "The Build Review is deliberately small and self-contained. Build contracts are milestone-based with defined exit points. You are never locked into a decision you made in month one.",
+  },
+  // General FAQ
   {
     question: "Is eight weeks real, or is that a marketing number?",
     answer:
@@ -12,7 +34,7 @@ const FAQ_ITEMS = [
   {
     question: "Where is your team?",
     answer:
-      "Our engineering team is in Bengaluru. Our engagements run on US hours with committed daily overlap for Eastern and Central time zones, and your founder contact is available in your working day. This is the reason you get a fifteen-person outcome on a five-person budget, and we'd rather be direct about it than have you find out from a contract.",
+      "Our engineering team is in Bengaluru. Our engagements run on US hours with committed daily overlap for Eastern and Central time zones, and your founder contact is available in your working day. This is the reason you get a fifteen-person outcome from a five-person team, and we'd rather be direct about it than have you find out from a contract.",
   },
   {
     question: "Do you work with non-technical founders?",
@@ -40,15 +62,27 @@ export function FAQ() {
   return (
     <section id="faq" className="section-pad" aria-label="Frequently asked questions">
       <div className="page-wrap">
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="type-heading text-carbon-black mb-12"
-        >
-          Frequently asked questions
-        </motion.h2>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="type-heading text-carbon-black max-w-[22ch]"
+          >
+            The questions serious buyers ask before signing.
+          </motion.h2>
+
+          <motion.span
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="type-caption text-smoke shrink-0"
+          >
+            {FAQ_ITEMS.length} questions
+          </motion.span>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}

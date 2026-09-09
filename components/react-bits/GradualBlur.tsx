@@ -13,6 +13,7 @@ interface GradualBlurProps {
   className?: string;
   zIndex?: number;
   tone?: "light" | "dark";
+  contain?: boolean;
 }
 
 const CURVES: Record<string, (p: number) => number> = {
@@ -32,6 +33,7 @@ export function GradualBlur({
   className = "",
   zIndex = 40,
   tone = "light",
+  contain = false,
 }: GradualBlurProps) {
   const [reduced, setReduced] = useState(false);
 
@@ -86,10 +88,14 @@ export function GradualBlur({
       ? `linear-gradient(to bottom, ${wash} 0%, transparent 100%)`
       : `linear-gradient(to top, ${wash} 0%, transparent 100%)`;
 
+  const placement = contain
+    ? "absolute inset-x-0 overflow-hidden rounded-full"
+    : "fixed inset-x-0";
+
   return (
     <>
       <div
-        className={`navblur-mobile pointer-events-none fixed inset-x-0 h-24 ${className}`}
+        className={`navblur-mobile pointer-events-none ${placement} ${contain ? "h-full" : "h-24"} ${className}`}
         style={{
           [position]: 0,
           zIndex,
@@ -108,7 +114,7 @@ export function GradualBlur({
         aria-hidden="true"
       />
       <div
-        className={`navblur-desktop pointer-events-none fixed inset-x-0 ${className}`}
+        className={`navblur-desktop pointer-events-none ${placement} ${className}`}
         style={{
           [position]: 0,
           height,

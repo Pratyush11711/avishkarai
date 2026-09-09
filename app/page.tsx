@@ -1,19 +1,15 @@
 import { SmoothScrollProvider } from "@/lib/smooth-scroll";
 import { Nav } from "@/components/nav/Nav";
 import { Hero } from "@/components/hero/Hero";
-import { StudioGlance } from "@/components/sections/StudioGlance";
 import { SelectedWork } from "@/components/sections/SelectedWork";
 import { SectorMarquee } from "@/components/sections/SectorMarquee";
-import { OperatorsGrid } from "@/components/sections/OperatorsGrid";
 import { TheClock } from "@/components/sections/TheClock";
 import { WhatWeStandOn } from "@/components/sections/WhatWeStandOn";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { WhatWeDontDo } from "@/components/sections/WhatWeDontDo";
 import { Process } from "@/components/sections/Process";
-import { Pricing } from "@/components/sections/Pricing";
-import { TrustAndSecurity } from "@/components/sections/TrustAndSecurity";
+import { ProcessCTA } from "@/components/sections/ProcessCTA";
 import { FAQ } from "@/components/sections/FAQ";
-import { FromTheStudio } from "@/components/sections/FromTheStudio";
 import { Newsletter } from "@/components/sections/Newsletter";
 import { SplitCTA } from "@/components/sections/SplitCTA";
 import { FinalCTA } from "@/components/sections/FinalCTA";
@@ -29,10 +25,6 @@ export default function Home() {
         </div>
 
         <div className="curtain z-[2] bg-paper-white">
-          <StudioGlance />
-        </div>
-
-        <div className="relative z-[2] bg-warm-canvas">
           <SelectedWork />
         </div>
 
@@ -40,28 +32,24 @@ export default function Home() {
           <SectorMarquee />
         </div>
 
-        <div className="relative z-[2] bg-warm-canvas">
-          <OperatorsGrid />
+        <div className="relative z-[3] bg-warm-canvas">
+          <TheClock />
         </div>
-
-        <TheClock />
 
         <div className="curtain z-[4] bg-warm-canvas">
           <WhatWeStandOn />
           <Capabilities />
           <WhatWeDontDo />
           <Process />
-          <Pricing />
-          <TrustAndSecurity />
+          <ProcessCTA />
           <FAQ />
-          <FromTheStudio />
         </div>
 
-        <div className="curtain-sticky z-[4] bg-warm-canvas">
+        <div className="curtain-sticky z-[5] bg-warm-canvas">
           <Newsletter />
         </div>
 
-        <div className="curtain z-[5] bg-carbon-black">
+        <div className="curtain z-[6] bg-carbon-black">
           <FinalCTA />
           <SplitCTA />
           <Footer />

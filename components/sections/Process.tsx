@@ -8,15 +8,13 @@ const STEPS = [
     name: "Scope",
     subtitle: "The Build Review",
     week: "Week 0",
-    price: "$2,500 to $7,500, credited against your build.",
-    body: "Before anyone signs a build contract, we do the work. Two weeks of real technical and product diligence: architecture recommendation, scope and sequencing, integration and compliance risks, a fixed-price build plan, and a launch date. You keep everything, whether or not you hire us to build it. If you take it to another studio, it makes them better too. We're comfortable with that. Most clients don't take it anywhere.",
+    body: "Before anyone signs a build contract, we do the work. Two weeks of real technical and product diligence: architecture recommendation, scope and sequencing, integration and compliance risks, a scoped build plan, and a launch date. You keep everything, whether or not you hire us to build it. If you take it to another studio, it makes them better too. We're comfortable with that. Most clients don't take it anywhere.",
     inverted: true,
   },
   {
     name: "Shape",
     subtitle: "Scope lock and design direction",
     week: "Week 1",
-    price: null,
     body: "We agree on exactly what version one is, and what it isn't. You approve a design direction before we write feature code. Nothing after this is a surprise.",
     inverted: false,
   },
@@ -24,7 +22,6 @@ const STEPS = [
     name: "Ship",
     subtitle: "Thursday deploys",
     week: "Week 2 through launch",
-    price: null,
     body: "A deployed build every Thursday. A short Loom walking through what changed. Direct access to the team in your Slack.",
     inverted: false,
   },
@@ -32,8 +29,7 @@ const STEPS = [
     name: "Scale",
     subtitle: "Launch and beyond",
     week: null,
-    price: null,
-    body: "We handle deployment, app store submission, monitoring, and handover. Then either you take the keys, with full code ownership and documentation and no lock-in, or we stay on as your product team on a monthly retainer.",
+    body: "We handle deployment, app store submission, monitoring, and handover. Then either you take the keys, with full code ownership and documentation and no lock-in, or we stay on as your product team.",
     inverted: true,
   },
 ];
@@ -91,17 +87,6 @@ export function Process() {
                   <p className="type-caption text-smoke mb-4">
                     {step.subtitle}
                   </p>
-
-                  {step.price && (
-                    <p
-                      className={clsx(
-                        "type-body-sm mb-6 max-w-[48ch]",
-                        step.inverted ? "text-paper-white" : "text-carbon-black"
-                      )}
-                    >
-                      {step.price}
-                    </p>
-                  )}
 
                   <p
                     className={clsx(

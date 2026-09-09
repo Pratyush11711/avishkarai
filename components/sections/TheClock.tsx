@@ -1,30 +1,97 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { CardSwap, Card } from "@/components/react-bits/CardSwap";
 
-const DAYS = [
-  { label: "MON", active: false },
-  { label: "TUE", active: false },
-  { label: "WED", active: false },
-  { label: "THU", active: true },
-  { label: "FRI", active: false },
-  { label: "SAT", active: false },
-  { label: "SUN", active: false },
-];
+const MUTED = "rgba(255, 255, 255, 0.36)";
+const BRIGHT = "#ffffff";
+const PHOSPHOR = "#fff100";
 
-export function TheClock() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const beat1Ref = useRef<HTMLDivElement>(null);
-  const beat2Ref = useRef<HTMLDivElement>(null);
-  const beat3Ref = useRef<HTMLDivElement>(null);
-  const visual1Ref = useRef<HTMLDivElement>(null);
-  const visual2Ref = useRef<HTMLDivElement>(null);
-  const visual3Ref = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<SVGCircleElement>(null);
-  const moduleRef = useRef<HTMLDivElement>(null);
-  const dotRef = useRef<HTMLSpanElement>(null);
-  const [deployLabel, setDeployLabel] = useState("Last deploy: Thursday");
+type ClockWord = { el: HTMLElement; accent: boolean };
+
+function splitWords(el: HTMLElement | null): {
+  words: ClockWord[];
+  revert: () => void;
+} {
+  if (!el) return { words: [], revert: () => {} };
+
+  const original = el.innerHTML;
+  const words: ClockWord[] = [];
+
+  const wrapText = (text: string, accent: boolean) => {
+    const frag = document.createDocumentFragment();
+    text.split(/(\s+)/).forEach((part) => {
+      if (!part) return;
+      if (/^\s+$/.test(part)) {
+        frag.appendChild(document.createTextNode(part));
+        return;
+      }
+      const span = document.createElement("span");
+      span.className = "clock-word";
+      span.textContent = part;
+      if (accent) span.dataset.accent = "true";
+      frag.appendChild(span);
+      words.push({ el: span, accent });
+    });
+    return frag;
+  };
+
+  const next: Node[] = [];
+  el.childNodes.forEach((node) => next.push(node));
+  next.forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      if (!text.trim()) return;
+      const frag = wrapText(text, false);
+      el.replaceChild(frag, node);
+      return;
+    }
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const child = node as HTMLElement;
+      const accent = child.hasAttribute("data-clock-accent");
+      const text = child.textContent ?? "";
+      const frag = wrapText(text, accent);
+      el.replaceChild(frag, child);
+    }
+  });
+
+  return {
+    words,
+    revert: () => {
+      el.innerHTML = original;
+    },
+  };
+}
+
+function applyWordColors(words: ClockWord[], color: "muted" | "final") {
+  words.forEach((word) => {
+    word.el.style.color =
+      color === "muted" ? MUTED : word.accent ? PHOSPHOR : BRIGHT;
+  });
+}
+
+function revealWords(
+  tl: gsap.core.Timeline,
+  words: ClockWord[],
+  position: number | string
+) {
+  if (!words.length) return;
+  const stagger = words.length > 40 ? 0.038 : 0.055;
+  tl.to(
+    words.map((word) => word.el),
+    {
+      color: (i: number) => (words[i].accent ? PHOSPHOR : BRIGHT),
+      duration: 0.5,
+      stagger,
+      ease: "none",
+    },
+    position
+  );
+}
+
+function useLastThursdayLabel() {
+  const [label, setLabel] = useState("Thursday");
 
   useEffect(() => {
     const today = new Date();
@@ -35,79 +102,276 @@ export function TheClock() {
       month: "long",
       day: "numeric",
     });
-    setDeployLabel(`Last deploy: Thursday ${dateStr}`);
+    setLabel(`Thursday ${dateStr}`);
   }, []);
+
+  return label;
+}
+
+function PulseDot({ className }: { className?: string }) {
+  const dotRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const dot = dotRef.current;
+    if (!dot) return;
+    const pulse = gsap.to(dot, {
+      opacity: 0.55,
+      scale: 0.85,
+      duration: 1.4,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+    return () => {
+      pulse.kill();
+    };
+  }, []);
+
+  return (
+    <span
+      ref={dotRef}
+      className={
+        className ??
+        "w-2 h-2 rounded-full bg-voltage-yellow shrink-0 shadow-[0_0_6px_2px_rgba(255,241,0,0.65)]"
+      }
+    />
+  );
+}
+
+function LiveDot() {
+  return (
+    <span className="relative inline-flex w-2.5 h-2.5 shrink-0">
+      <span className="clock-live-ping" />
+      <span className="clock-live-core" />
+    </span>
+  );
+}
+
+function DeployStamp({ moduleRef }: { moduleRef: RefObject<HTMLDivElement | null> }) {
+  const deployLabel = useLastThursdayLabel();
+
+  return (
+    <div ref={moduleRef} className="flex items-center gap-3">
+      <PulseDot />
+      <span className="type-caption text-smoke">Last deploy: {deployLabel}</span>
+    </div>
+  );
+}
+
+/**
+ * One entry per pinned scroll state on the left. Add a 4th/5th state by
+ * appending another object here plus another breakpoint label on the
+ * timeline below — the CardSwap stack and its scroll wiring don't need
+ * to change.
+ */
+const CLOCK_CARDS: {
+  id: string;
+  value: string;
+  subtext: string;
+  showDeploy?: boolean;
+}[] = [
+  { id: "mo-demo", value: "04", subtext: "MO. DEMO" },
+  { id: "thu", value: "THU", subtext: "EVERY WEEK" },
+  { id: "live", value: "LIVE", subtext: "ON A URL", showDeploy: true },
+];
+
+function ClockCardContent({
+  index,
+  value,
+  subtext,
+  showDeploy,
+  isActive,
+}: {
+  index: number;
+  value: string;
+  subtext: string;
+  showDeploy?: boolean;
+  isActive: boolean;
+}) {
+  const deployLabel = useLastThursdayLabel();
+  const valueRef = useRef<HTMLSpanElement>(null);
+  const wasActive = useRef(false);
+
+  useEffect(() => {
+    const el = valueRef.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      wasActive.current = isActive;
+      return;
+    }
+    if (isActive && !wasActive.current) {
+      gsap.fromTo(
+        el,
+        { scale: 1.22, filter: "brightness(1.8) saturate(1.4)" },
+        {
+          scale: 1,
+          filter: "brightness(1) saturate(1)",
+          duration: 0.7,
+          ease: "elastic.out(1, 0.55)",
+        }
+      );
+    }
+    wasActive.current = isActive;
+  }, [isActive]);
+
+  const indexStr = String(index + 1).padStart(2, "0");
+
+  return (
+    <div className="relative flex h-full w-full flex-col items-center justify-center text-center px-6 overflow-hidden">
+      <span aria-hidden className="clock-card-accent" />
+      <span aria-hidden className="clock-card-ghost">
+        {indexStr}
+      </span>
+      <span
+        aria-hidden
+        className="clock-card-glow"
+        style={{ opacity: isActive ? 1 : 0.3 }}
+      />
+      <span
+        ref={valueRef}
+        className={`font-display text-[clamp(48px,7vw,72px)] leading-none clock-card-value inline-block transition-colors duration-300 ${
+          isActive ? "text-voltage-yellow" : "text-voltage-yellow/55"
+        }`}
+      >
+        {value}
+      </span>
+      <span className="type-caption text-smoke mt-3 relative">{subtext}</span>
+      {showDeploy && (
+        <div className="flex items-center gap-2 mt-6 relative">
+          <LiveDot />
+          <span className="type-caption text-smoke">
+            Last deploy: {deployLabel}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function TheClock() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const beat1Ref = useRef<HTMLDivElement>(null);
+  const beat2Ref = useRef<HTMLDivElement>(null);
+  const beat3Ref = useRef<HTMLDivElement>(null);
+  const h1Ref = useRef<HTMLHeadingElement>(null);
+  const p1Ref = useRef<HTMLParagraphElement>(null);
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const p2Ref = useRef<HTMLParagraphElement>(null);
+  const h3Ref = useRef<HTMLHeadingElement>(null);
+  const moduleRef = useRef<HTMLDivElement>(null);
+  const [reducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const [cardIndex, setCardIndex] = useState(() =>
+    reducedMotion ? CLOCK_CARDS.length - 1 : 0
+  );
+  const cardIndexRef = useRef(cardIndex);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    const prefersReduced = reducedMotion;
 
     if (prefersReduced) {
-      [beat1Ref, beat2Ref, beat3Ref, moduleRef, visual3Ref].forEach((r) => {
+      [beat1Ref, beat2Ref, beat3Ref, moduleRef].forEach((r) => {
         if (r.current) gsap.set(r.current, { autoAlpha: 1, y: 0 });
       });
       return;
     }
 
     const beats = [beat1Ref.current, beat2Ref.current, beat3Ref.current];
-    const visuals = [visual1Ref.current, visual2Ref.current, visual3Ref.current];
     const mm = gsap.matchMedia();
+
+    const splits = [
+      splitWords(introRef.current),
+      splitWords(h1Ref.current),
+      splitWords(p1Ref.current),
+      splitWords(h2Ref.current),
+      splitWords(p2Ref.current),
+      splitWords(h3Ref.current),
+    ];
+    const allWords = splits.flatMap((s) => s.words);
+    applyWordColors(allWords, "muted");
+
+    const revertSplits = () => splits.forEach((s) => s.revert());
+
+    const setCard = (idx: number) => {
+      if (cardIndexRef.current === idx) return;
+      cardIndexRef.current = idx;
+      setCardIndex(idx);
+    };
 
     mm.add("(max-width: 767px)", () => {
       gsap.set([...beats, moduleRef.current], { autoAlpha: 1, y: 0 });
-      gsap.set(visuals, { autoAlpha: 1, scale: 1 });
+      applyWordColors(allWords, "final");
+      setCard(CLOCK_CARDS.length - 1);
     });
 
     mm.add("(min-width: 768px)", () => {
       gsap.set(beats, { autoAlpha: 0, y: 24 });
-      gsap.set(visuals, { autoAlpha: 0, scale: 0.92 });
       gsap.set(moduleRef.current, { autoAlpha: 0 });
+      applyWordColors(allWords, "muted");
+      setCard(0);
 
-      if (ringRef.current) {
-        const length = ringRef.current.getTotalLength();
-        gsap.set(ringRef.current, {
-          strokeDasharray: length,
-          strokeDashoffset: length,
-        });
-      }
+      const breakpoints = { beat2: 0.33, beat3: 0.66 };
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: "+=180%",
+          end: "+=420%",
           pin: true,
           pinSpacing: true,
-          scrub: 0.15,
+          scrub: 0.45,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const idx =
+              self.progress >= breakpoints.beat3
+                ? 2
+                : self.progress >= breakpoints.beat2
+                ? 1
+                : 0;
+            setCard(idx);
+          },
         },
       });
 
-      tl.to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-        .to(visual1Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-        .to(beat1Ref.current, { duration: 1.1 })
-        .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
-        .to(visual1Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
-        .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-        .to(visual2Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-        .to(
-          ringRef.current,
-          { strokeDashoffset: 0, duration: 0.9 },
-          "<0.1"
-        )
-        .to(beat2Ref.current, { duration: 1.5 })
-        .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.45 })
-        .to(visual2Ref.current, { autoAlpha: 0, scale: 0.96, duration: 0.45 }, "<")
-        .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 })
-        .to(visual3Ref.current, { autoAlpha: 1, scale: 1, duration: 0.55 }, "<")
-        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "<0.15")
-        .to({}, { duration: 1.2 });
+      const introWords = splits[0].words;
+      const beat1Words = [...splits[1].words, ...splits[2].words];
+      const beat2Words = [...splits[3].words, ...splits[4].words];
+      const beat3Words = splits[5].words;
+
+      revealWords(tl, introWords, 0);
+
+      tl.addLabel("beat1", ">")
+        .to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat1");
+      revealWords(tl, beat1Words, "beat1+=0.08");
+      tl.to(beat1Ref.current, { duration: 1.1 })
+        .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
+        .addLabel("beat2")
+        .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat2");
+      revealWords(tl, beat2Words, "beat2+=0.08");
+      tl.to(beat2Ref.current, { duration: 1.4 })
+        .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
+        .addLabel("beat3")
+        .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat3")
+        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "beat3+=0.15");
+      revealWords(tl, beat3Words, "beat3+=0.08");
+      tl.to(beat3Ref.current, { duration: 1.6 });
+
+      // Recompute the card-swap breakpoints from the timeline's own
+      // label positions so the right-side stack changes state at exactly
+      // the same scroll fractions as the left-side headline swap.
+      const totalDuration = tl.duration();
+      if (totalDuration > 0) {
+        breakpoints.beat2 = (tl.labels.beat2 ?? 0) / totalDuration;
+        breakpoints.beat3 = (tl.labels.beat3 ?? 0) / totalDuration;
+      }
 
       const refresh = () => {
         requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -126,23 +390,9 @@ export function TheClock() {
 
     return () => {
       mm.revert();
+      revertSplits();
     };
-  }, []);
-
-  useEffect(() => {
-    const dot = dotRef.current;
-    if (!dot) return;
-    const pulse = gsap.to(dot, {
-      opacity: 0.25,
-      duration: 1.4,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    });
-    return () => {
-      pulse.kill();
-    };
-  }, []);
+  }, [reducedMotion]);
 
   return (
     <section
@@ -153,9 +403,12 @@ export function TheClock() {
     >
       <div className="h-full flex flex-col justify-center page-wrap py-16 md:py-20">
         <p className="type-caption text-smoke mb-4">04 · The Clock</p>
-        <p className="type-body text-paper-white max-w-[42ch] mb-8 md:mb-10">
-          Most studios promise deliverables next quarter. We ship yours by
-          Thursday.
+        <p
+          ref={introRef}
+          className="clock-copy type-body max-w-[42ch] mb-8 md:mb-10"
+        >
+          Most studios promise deliverables next quarter. We ship yours by{" "}
+          <span data-clock-accent>Thursday</span>.
         </p>
 
         <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
@@ -164,10 +417,13 @@ export function TheClock() {
               ref={beat1Ref}
               className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-6 break-words">
+              <h2
+                ref={h1Ref}
+                className="clock-copy type-display mb-6 break-words"
+              >
                 You know the pattern.
               </h2>
-              <p className="type-body text-smoke max-w-[54ch]">
+              <p ref={p1Ref} className="clock-copy type-body max-w-[54ch]">
                 A six-week discovery phase. A kickoff deck. Status calls where the
                 honest answer is “we’re still setting up the environment.” A demo
                 in month four that looks nothing like what you described.
@@ -178,18 +434,24 @@ export function TheClock() {
               ref={beat2Ref}
               className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-6 break-words">
+              <h2
+                ref={h2Ref}
+                className="clock-copy type-display mb-6 break-words"
+              >
                 We run on a different clock.
               </h2>
-              <p className="type-body text-smoke max-w-[54ch]">
+              <p ref={p2Ref} className="clock-copy type-body max-w-[54ch]">
                 Scope is locked in week one. From week two, there is a working
-                build in your hands every Thursday: deployed, clickable, on a real
-                URL, not a Figma frame. A focused MVP is live in eight weeks. A
-                multi-tenant platform with third-party integrations and a
-                compliance layer runs 10 to 14. We tell you which one you are
-                during the Build Review, in writing, before there is a contract to
-                sign. The eight weeks on our homepage is a commitment, not a range
-                we hope you forget.
+                build in your hands every{" "}
+                <span data-clock-accent>Thursday</span>: deployed, clickable, on
+                a real URL, not a Figma frame. A focused MVP is live in{" "}
+                <span data-clock-accent>eight weeks</span>. A multi-tenant
+                platform with third-party integrations and a compliance layer
+                runs 10 to 14. We tell you which one you are during the Build
+                Review, <span data-clock-accent>in writing</span>, before there
+                is a contract to sign. The{" "}
+                <span data-clock-accent>eight weeks</span> on our homepage is a
+                commitment, not a range we hope you forget.
               </p>
             </div>
 
@@ -197,113 +459,44 @@ export function TheClock() {
               ref={beat3Ref}
               className="relative md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
             >
-              <h2 className="type-display text-paper-white mb-8 max-w-[20ch] break-words">
+              <h2
+                ref={h3Ref}
+                className="clock-copy type-display mb-8 max-w-[20ch] break-words"
+              >
                 You will never have to ask what we're working on. You'll be using
                 it.
               </h2>
-              <div ref={moduleRef} className="flex items-center gap-3">
-                <span
-                  ref={dotRef}
-                  className="w-2 h-2 rounded-full bg-voltage-yellow shrink-0"
-                />
-                <span className="type-caption text-smoke">{deployLabel}</span>
-              </div>
+              <DeployStamp moduleRef={moduleRef} />
             </div>
           </div>
 
           <div
-            className="relative hidden md:flex items-center justify-center justify-self-end w-full max-w-[380px] aspect-square"
+            className={`relative flex items-center justify-center justify-self-center md:justify-self-end w-full max-w-[260px] md:max-w-[380px] aspect-square mt-6 md:mt-0 ${
+              reducedMotion ? "" : "clock-card-float"
+            }`}
             aria-hidden="true"
           >
-            <svg
-              viewBox="0 0 320 320"
-              className="absolute inset-0 w-full h-full"
+            <CardSwap
+              width={200}
+              height={200}
+              cardDistance={28}
+              verticalDistance={34}
+              skewAmount={6}
+              activeIndex={cardIndex}
+              reducedMotion={reducedMotion}
             >
-              <circle
-                cx="160"
-                cy="160"
-                r="138"
-                fill="none"
-                stroke="#2f2f2f"
-                strokeWidth="1.5"
-              />
-              <circle
-                ref={ringRef}
-                cx="160"
-                cy="160"
-                r="138"
-                fill="none"
-                stroke="#fff100"
-                strokeWidth="2"
-                strokeLinecap="round"
-                transform="rotate(-90 160 160)"
-              />
-              {DAYS.map((day, i) => {
-                const angle = (i / DAYS.length) * Math.PI * 2 - Math.PI / 2;
-                const x = 160 + Math.cos(angle) * 118;
-                const y = 160 + Math.sin(angle) * 118;
-                return (
-                  <g key={`${day.label}-${i}`}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={day.active ? 4.5 : 2.5}
-                      fill={day.active ? "#fff100" : "#444444"}
-                    />
-                  </g>
-                );
-              })}
-            </svg>
-
-            {DAYS.map((day, i) => {
-              const angle = (i / DAYS.length) * Math.PI * 2 - Math.PI / 2;
-              const x = 50 + Math.cos(angle) * 42;
-              const y = 50 + Math.sin(angle) * 42;
-              return (
-                <span
-                  key={`label-${day.label}-${i}`}
-                  className="absolute type-caption pointer-events-none"
-                  style={{
-                    left: `${x}%`,
-                    top: `${y}%`,
-                    transform: "translate(-50%, -50%)",
-                    color: day.active ? "#fff100" : "#979797",
-                  }}
-                >
-                  {day.label}
-                </span>
-              );
-            })}
-
-            <div className="relative z-10 w-[58%] aspect-square rounded-full bg-carbon-black flex items-center justify-center">
-              <div
-                ref={visual1Ref}
-                className="absolute inset-0 flex flex-col items-center justify-center text-center"
-              >
-                <span className="font-display text-[clamp(40px,6vw,64px)] text-paper-white/90 leading-none">
-                  04
-                </span>
-                <span className="type-caption text-smoke mt-2">MO. DEMO</span>
-              </div>
-              <div
-                ref={visual2Ref}
-                className="absolute inset-0 flex flex-col items-center justify-center text-center"
-              >
-                <span className="font-display text-[clamp(40px,6vw,64px)] text-voltage-yellow leading-none">
-                  THU
-                </span>
-                <span className="type-caption text-smoke mt-2">EVERY WEEK</span>
-              </div>
-              <div
-                ref={visual3Ref}
-                className="absolute inset-0 flex flex-col items-center justify-center text-center"
-              >
-                <span className="font-display text-[clamp(40px,6vw,64px)] text-paper-white leading-none">
-                  LIVE
-                </span>
-                <span className="type-caption text-smoke mt-2">ON A URL</span>
-              </div>
-            </div>
+              {CLOCK_CARDS.map((card, i) => (
+                <Card key={card.id}>
+                  <ClockCardContent
+                    index={i}
+                    value={card.value}
+                    subtext={card.subtext}
+                    showDeploy={card.showDeploy}
+                    isActive={cardIndex === i}
+                  />
+                </Card>
+              ))}
+            </CardSwap>
           </div>
         </div>
       </div>

@@ -24,18 +24,26 @@ export function SmoothScrollProvider({
 
     lenisRef.current = lenis;
 
-    const onScroll = () => {
-      ScrollTrigger.update();
-    };
+    // Keep ScrollTrigger in sync with every Lenis scroll tick
+    const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
 
-    const ticker = (time: number) => {
-      lenis.raf(time * 1000);
-    };
+    // Drive Lenis through GSAP's ticker for perfect frame timing
+    const ticker = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(ticker);
     gsap.ticker.lagSmoothing(0);
 
+    // CRITICAL: whenever GSAP refreshes (e.g. TheClock adds its 420vh pin-spacer),
+    // tell Lenis to recalculate the document's scrollable height so it doesn't
+    // cap scroll at the pre-pin document height.
+    const onSTRefresh = () => lenis.resize();
+    ScrollTrigger.addEventListener("refresh", onSTRefresh);
+
+    // Initial sync in case triggers fire before this effect runs
+    ScrollTrigger.refresh();
+
     return () => {
+      ScrollTrigger.removeEventListener("refresh", onSTRefresh);
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(ticker);
       lenis.destroy();

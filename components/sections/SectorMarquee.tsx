@@ -18,7 +18,7 @@ const SECTORS = [
 
 export function SectorMarquee() {
   return (
-    <section id="sectors" className="py-20" aria-label="Sectors">
+    <section id="sectors" className="pb-16" aria-label="Sectors">
       <div className="mb-8 bg-paper-white py-6">
         <MarqueeRow
           items={SECTORS}

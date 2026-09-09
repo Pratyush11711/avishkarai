@@ -5,10 +5,10 @@ import { gsap } from "@/lib/gsap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
 export function HeroHeadline() {
+  const eyebrowRef = useRef<HTMLDivElement>(null);
   const line1Ref = useRef<HTMLSpanElement>(null);
   const line2Ref = useRef<HTMLSpanElement>(null);
   const line3Ref = useRef<HTMLSpanElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
   const subcopyRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const microRef = useRef<HTMLParagraphElement>(null);
@@ -17,7 +17,7 @@ export function HeroHeadline() {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReduced) {
-      [line1Ref, line2Ref, line3Ref, eyebrowRef, subcopyRef, ctaRef, microRef].forEach((r) => {
+      [eyebrowRef, line1Ref, line2Ref, line3Ref, subcopyRef, ctaRef, microRef].forEach((r) => {
         if (r.current) r.current.style.opacity = "1";
       });
       [line1Ref, line2Ref, line3Ref].forEach((r) => {
@@ -34,11 +34,11 @@ export function HeroHeadline() {
       { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
     )
       .fromTo(
-        line1Ref.current,
-        { y: "110%" },
-        { y: "0%", duration: 0.75, ease: "power3.out" },
-        "-=0.2"
-      )
+      line1Ref.current,
+      { y: "110%" },
+      { y: "0%", duration: 0.75, ease: "power3.out" },
+      "-=0.2"
+    )
       .fromTo(
         line2Ref.current,
         { y: "110%" },
@@ -117,29 +117,31 @@ export function HeroHeadline() {
         </span>
       </h1>
 
-      <p ref={subcopyRef} className="type-body text-slate max-w-[52ch] opacity-0">
-        Your MVP shouldn't look like an MVP. We build production-grade software
-        with the design finesse of a funded product: multi-tenant architecture,
-        real test coverage, a design system, and a launch date you can put on a
-        calendar.
-      </p>
+      <div className="hero-prose flex flex-col gap-4 md:gap-5">
+        <p ref={subcopyRef} className="type-body text-slate max-w-[52ch] opacity-0 font-[450] leading-[1.6] tracking-[-0.01em]">
+          Your MVP shouldn&apos;t look like an MVP. We build production-grade software
+          with the design finesse of a funded product: multi-tenant architecture,
+          real test coverage, a design system, and a launch date you can put on a
+          calendar.
+        </p>
 
-      <div
-        ref={ctaRef}
-        className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 opacity-0 shrink-0"
-      >
-        <MagneticButton href="#pricing" variant="primary" strength={0}>
-          Book a 30-minute build review
-        </MagneticButton>
-        <MagneticButton href="#clock" variant="ghost" strength={0}>
-          See how we ship
-        </MagneticButton>
+        <div
+          ref={ctaRef}
+          className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 opacity-0 shrink-0"
+        >
+          <MagneticButton href="#contact" variant="primary" strength={0}>
+            Book a 30-minute build review
+          </MagneticButton>
+          <MagneticButton href="#clock" variant="ghost" strength={0}>
+            See how we ship
+          </MagneticButton>
+        </div>
+
+        <p ref={microRef} className="type-caption text-smoke opacity-0">
+          Typical MVP: 8 weeks. Regulated or integration-heavy platforms: 10 to
+          14. You get the real number in writing before you sign anything.
+        </p>
       </div>
-
-      <p ref={microRef} className="type-caption text-smoke opacity-0">
-        Typical MVP: 8 weeks. Regulated or integration-heavy platforms: 10 to
-        14. You get the real number in writing before you sign anything.
-      </p>
     </div>
   );
 }

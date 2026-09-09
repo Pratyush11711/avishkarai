@@ -37,7 +37,7 @@ export function Hero() {
       aria-label="Hero"
     >
       <div className="relative z-10 flex-1 flex items-center pt-24 md:pt-28 pb-8">
-        <div className="page-wrap w-full min-w-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-6 items-start">
+        <div className="page-wrap w-full min-w-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-6 items-center">
           <HeroHeadline />
           {!prefersReduced && (
             <HeroVideo playing={isHeroVisible} />
