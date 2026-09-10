@@ -33,23 +33,23 @@ export function Hero() {
     <section
       ref={heroRef}
       id="hero"
-      className="relative min-h-[100dvh] flex flex-col bg-warm-canvas"
+      className="relative min-h-[100dvh] flex flex-col overflow-hidden bg-carbon-black"
       aria-label="Hero"
     >
+      <HeroVideo playing={isHeroVisible && !prefersReduced} />
+      <div className="hero-video-scrim" aria-hidden="true" />
+
       <div className="relative z-10 flex-1 flex items-center pt-24 md:pt-28 pb-8">
-        <div className="page-wrap w-full min-w-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-8 md:gap-6 items-center">
+        <div className="page-wrap w-full min-w-0">
           <HeroHeadline />
-          {!prefersReduced && (
-            <HeroVideo playing={isHeroVisible} />
-          )}
         </div>
       </div>
 
-      <div className="relative z-10 py-6 bg-mist-gray">
+      <div className="relative z-10 py-6 bg-black/35 backdrop-blur-[8px]">
         <MarqueeRow
           items={TRUST_ITEMS}
           speed={30}
-          itemClassName="text-slate type-caption"
+          itemClassName="text-white/75 type-caption"
         />
       </div>
     </section>

@@ -17,17 +17,16 @@ export function HeroVideo({ playing }: { playing: boolean }) {
   }, [playing]);
 
   return (
-    <div className="relative w-full max-w-[min(420px,100%)] min-w-0 mx-auto overflow-hidden md:max-w-none md:w-[118%] md:-mt-8 md:translate-x-4 md:justify-self-end">
+    <div className="hero-video-bg" aria-hidden="true">
       <video
         ref={videoRef}
-        className="w-full h-auto object-contain pointer-events-none select-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]"
-        src="/hero-latest.webm"
+        className="hero-video-el"
+        src="/hero.mp4"
         autoPlay
         muted
         loop
         playsInline
-        preload="metadata"
-        aria-hidden="true"
+        preload="auto"
       />
     </div>
   );

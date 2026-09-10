@@ -82,7 +82,7 @@ export function HeroHeadline() {
           className="w-2 h-2 rounded-full bg-voltage-yellow shrink-0"
           aria-hidden="true"
         />
-        <span className="type-caption text-slate">
+        <span className="type-caption text-white/70">
           Product &amp; engineering studio
         </span>
       </div>
@@ -91,7 +91,7 @@ export function HeroHeadline() {
         <span className="overflow-hidden block min-w-0 pt-[0.06em] pb-[0.1em]">
           <span
             ref={line1Ref}
-            className="block hero-display text-carbon-black md:whitespace-nowrap"
+            className="block hero-display text-paper-white md:whitespace-nowrap"
             style={{ willChange: "transform" }}
           >
             Live in eight weeks.
@@ -100,7 +100,7 @@ export function HeroHeadline() {
         <span className="overflow-hidden block min-w-0 pt-[0.06em] pb-[0.1em]">
           <span
             ref={line2Ref}
-            className="block hero-display text-carbon-black md:whitespace-nowrap"
+            className="block hero-display text-paper-white md:whitespace-nowrap"
             style={{ willChange: "transform" }}
           >
             Enterprise-grade
@@ -109,7 +109,7 @@ export function HeroHeadline() {
         <span className="overflow-hidden block min-w-0 pt-[0.06em] pb-[0.1em]">
           <span
             ref={line3Ref}
-            className="block hero-display text-carbon-black md:whitespace-nowrap"
+            className="block hero-display text-paper-white md:whitespace-nowrap"
             style={{ willChange: "transform" }}
           >
             from day one.
@@ -118,7 +118,7 @@ export function HeroHeadline() {
       </h1>
 
       <div className="hero-prose flex flex-col gap-4 md:gap-5">
-        <p ref={subcopyRef} className="type-body text-slate max-w-[52ch] opacity-0 font-[450] leading-[1.6] tracking-[-0.01em]">
+        <p ref={subcopyRef} className="type-body text-white/80 max-w-[52ch] opacity-0 font-[450] leading-[1.6] tracking-[-0.01em]">
           Your MVP shouldn&apos;t look like an MVP. We build production-grade software
           with the design finesse of a funded product: multi-tenant architecture,
           real test coverage, a design system, and a launch date you can put on a
@@ -129,15 +129,15 @@ export function HeroHeadline() {
           ref={ctaRef}
           className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 opacity-0 shrink-0"
         >
-          <MagneticButton href="#contact" variant="primary" strength={0}>
+          <MagneticButton href="#contact" variant="inverted" strength={0}>
             Book a 30-minute build review
           </MagneticButton>
-          <MagneticButton href="#clock" variant="ghost" strength={0}>
+          <MagneticButton href="#clock" variant="ghost" strength={0} className="text-paper-white">
             See how we ship
           </MagneticButton>
         </div>
 
-        <p ref={microRef} className="type-caption text-smoke opacity-0">
+        <p ref={microRef} className="type-caption text-white/55 opacity-0">
           Typical MVP: 8 weeks. Regulated or integration-heavy platforms: 10 to
           14. You get the real number in writing before you sign anything.
         </p>
