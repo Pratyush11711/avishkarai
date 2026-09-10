@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+    /* hero-journey and prototype-stage are both 100 % of the viewport so
+       getBoundingClientRect().top stays 0 → progress clamps to 0 and the
+       camera holds the exterior BUILD view that shows all the cubes. */
+    .hero-journey {
+      position: fixed;
+      inset: 0;
+    }
+    .prototype-stage {
+      position: relative;
+      width: 100%; height: 100%;
+    }
+    #scene {
+      display: block;
+      width: 100%; height: 100%;
+    }
+    .scene-fallback,
+    .stage-top,
+    .stage-title,
+    .stage-bottom,
+    .journey-caption,
+    #scene-phase,
+    #journey-word,
+    #journey-description { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="hero-journey">
+    <section class="prototype-stage">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <span id="scene-phase"></span>
+      <span id="journey-word"></span>
+      <p id="journey-description"></p>
+    </section>
+  </div>
+
+  <script>
+    if (location.search.includes("clock")) {
+      document.body.dataset.embed = "clock";
+    }
+  </script>
+  <script type="module" src="./experience.js?v=hover2"></script>
+</body>
+</html>

@@ -34,7 +34,7 @@ export default function Home() {
           <SectorMarquee />
         </div>
 
-        <div className="relative z-[3] bg-warm-canvas">
+        <div className="relative z-[3]">
           <TheClock />
         </div>
 

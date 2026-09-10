@@ -1,0 +1,13 @@
+{
+  "name": "avishkar-ai-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Avishkar AI immersive product and engineering website",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "check": "node --check dist/experience.js && node --check dist/spacecraft.js && node --check dist/flight-path.js && node --check dist/ribbon.js && node --check dist/interactions.js && node --check dist/particle-physics.js"
+  },
+  "engines": { "node": ">=18" }
+}

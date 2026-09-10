@@ -10,8 +10,8 @@ import {
   type RefObject,
 } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { CardSwap, Card } from "@/components/react-bits/CardSwap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ClockCanvas } from "./ClockCanvas";
 
 const DIM = "rgba(255, 255, 255, 0.14)";
 
@@ -207,15 +207,6 @@ function PulseDot({ className }: { className?: string }) {
   );
 }
 
-function LiveDot() {
-  return (
-    <span className="relative inline-flex w-2.5 h-2.5 shrink-0">
-      <span className="clock-live-ping" />
-      <span className="clock-live-core" />
-    </span>
-  );
-}
-
 function DeployStamp({ moduleRef }: { moduleRef: RefObject<HTMLDivElement | null> }) {
   const deployLabel = useLastThursdayLabel();
 
@@ -223,95 +214,6 @@ function DeployStamp({ moduleRef }: { moduleRef: RefObject<HTMLDivElement | null
     <div ref={moduleRef} className="flex items-center gap-3">
       <PulseDot />
       <span className="type-caption text-smoke">Last deploy: {deployLabel}</span>
-    </div>
-  );
-}
-
-/**
- * One entry per pinned scroll state on the left. Add a 4th/5th state by
- * appending another object here plus another breakpoint label on the
- * timeline below — the CardSwap stack and its scroll wiring don't need
- * to change.
- */
-const CLOCK_CARDS: {
-  id: string;
-  value: string;
-  subtext: string;
-  showDeploy?: boolean;
-}[] = [
-  { id: "mo-demo", value: "04", subtext: "MO. DEMO" },
-  { id: "thu", value: "THU", subtext: "EVERY WEEK" },
-  { id: "live", value: "LIVE", subtext: "ON A URL", showDeploy: true },
-];
-
-function ClockCardContent({
-  index,
-  value,
-  subtext,
-  showDeploy,
-  isActive,
-}: {
-  index: number;
-  value: string;
-  subtext: string;
-  showDeploy?: boolean;
-  isActive: boolean;
-}) {
-  const deployLabel = useLastThursdayLabel();
-  const valueRef = useRef<HTMLSpanElement>(null);
-  const wasActive = useRef(false);
-
-  useEffect(() => {
-    const el = valueRef.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      wasActive.current = isActive;
-      return;
-    }
-    if (isActive && !wasActive.current) {
-      gsap.fromTo(
-        el,
-        { scale: 1.22, filter: "brightness(1.8) saturate(1.4)" },
-        {
-          scale: 1,
-          filter: "brightness(1) saturate(1)",
-          duration: 0.7,
-          ease: "elastic.out(1, 0.55)",
-        }
-      );
-    }
-    wasActive.current = isActive;
-  }, [isActive]);
-
-  const indexStr = String(index + 1).padStart(2, "0");
-
-  return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center text-center px-6 overflow-hidden">
-      <span aria-hidden className="clock-card-accent" />
-      <span aria-hidden className="clock-card-ghost">
-        {indexStr}
-      </span>
-      <span
-        aria-hidden
-        className="clock-card-glow"
-        style={{ opacity: isActive ? 1 : 0.3 }}
-      />
-      <span
-        ref={valueRef}
-        className={`font-display text-[clamp(48px,7vw,72px)] leading-none clock-card-value inline-block transition-colors duration-300 ${
-          isActive ? "text-voltage-yellow" : "text-voltage-yellow/55"
-        }`}
-      >
-        {value}
-      </span>
-      <span className="type-caption text-smoke mt-3 relative">{subtext}</span>
-      {showDeploy && (
-        <div className="flex items-center gap-2 mt-6 relative">
-          <LiveDot />
-          <span className="type-caption text-smoke">
-            Last deploy: {deployLabel}
-          </span>
-        </div>
-      )}
     </div>
   );
 }
@@ -343,15 +245,23 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
   const washRef = useRef<HTMLDivElement>(null);
   const moduleRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const [isClockVisible, setIsClockVisible] = useState(true);
   const [reducedMotion] = useState(
     () =>
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
-  const [cardIndex, setCardIndex] = useState(() =>
-    reducedMotion ? CLOCK_CARDS.length - 1 : 0
-  );
-  const cardIndexRef = useRef(cardIndex);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsClockVisible(entry.isIntersecting),
+      { rootMargin: "160px 0px" }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -362,9 +272,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
     const paintScene = (progress: number, active: ClockWord[], local: number) => {
       const ink = along(INK, progress);
-      const ground = along(GROUND, progress);
-      section.style.backgroundColor = ground;
-      if (washEl) paintWash(washEl, ink, 0.28);
+      if (washEl) paintWash(washEl, ink, 0.12);
       applySpotlight(active, local, ink);
     };
 
@@ -396,18 +304,11 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
     const beat2Words = [...splits[3].words, ...splits[4].words];
     const beat3Words = splits[5].words;
 
-    const setCard = (idx: number) => {
-      if (cardIndexRef.current === idx) return;
-      cardIndexRef.current = idx;
-      setCardIndex(idx);
-    };
-
     mm.add("(max-width: 767px)", () => {
       gsap.set([...beats, moduleRef.current, ctaRef.current], {
         autoAlpha: 1,
         y: 0,
       });
-      setCard(CLOCK_CARDS.length - 1);
 
       const st = ScrollTrigger.create({
         trigger: section,
@@ -428,10 +329,6 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       gsap.set([moduleRef.current, ctaRef.current], { autoAlpha: 0, y: 16 });
       muteWords(allWords);
       if (washEl) paintWash(washEl, INK[0], 0);
-      section.style.backgroundColor = GROUND[0];
-      setCard(0);
-
-      const breakpoints = { beat2: 0.33, beat3: 0.66 };
 
       const tl = gsap.timeline({
         defaults: { ease: "none" },
@@ -445,14 +342,6 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            const idx =
-              self.progress >= breakpoints.beat3
-                ? 2
-                : self.progress >= breakpoints.beat2
-                ? 1
-                : 0;
-            setCard(idx);
-
             const time = tl.time();
             const t1 = tl.labels.beat1 ?? 0;
             const t2 = tl.labels.beat2 ?? 0;
@@ -504,15 +393,6 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         )
         .to({}, { duration: hold(beat3Words) });
 
-      // Recompute the card-swap breakpoints from the timeline's own
-      // label positions so the right-side stack changes state at exactly
-      // the same scroll fractions as the left-side headline swap.
-      const totalDuration = tl.duration();
-      if (totalDuration > 0) {
-        breakpoints.beat2 = (tl.labels.beat2 ?? 0) / totalDuration;
-        breakpoints.beat3 = (tl.labels.beat3 ?? 0) / totalDuration;
-      }
-
       const refresh = () => {
         requestAnimationFrame(() => ScrollTrigger.refresh());
       };
@@ -541,10 +421,12 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       className="clock-section relative z-[3] overflow-hidden h-auto md:h-screen"
       aria-label="The Clock"
     >
+      {!reducedMotion && <ClockCanvas playing={isClockVisible} />}
+      <div className="clock-scene-scrim" aria-hidden />
       <div ref={washRef} className="clock-wash" aria-hidden />
-      <div className="relative z-[1] h-full flex flex-col justify-center page-wrap py-16 md:py-20">
+      <div className="relative z-[2] h-full flex flex-col justify-center page-wrap py-16 md:py-20">
         <p className="type-caption text-smoke mb-4">04 · The Clock</p>
-        <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(260px,380px)] gap-10 lg:gap-16 items-center">
+        <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,46%)] gap-10 lg:gap-16 items-center">
           <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
             <div
               ref={beat1Ref}
@@ -625,35 +507,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
               </div>
             </div>
           </div>
-
-          <div
-            className={`relative flex items-center justify-center justify-self-center md:justify-self-end w-full max-w-[260px] md:max-w-[380px] aspect-square mt-6 md:mt-0 ${
-              reducedMotion ? "" : "clock-card-float"
-            }`}
-            aria-hidden="true"
-          >
-            <CardSwap
-              width={200}
-              height={200}
-              cardDistance={28}
-              verticalDistance={34}
-              skewAmount={6}
-              activeIndex={cardIndex}
-              reducedMotion={reducedMotion}
-            >
-              {CLOCK_CARDS.map((card, i) => (
-                <Card key={card.id}>
-                  <ClockCardContent
-                    index={i}
-                    value={card.value}
-                    subtext={card.subtext}
-                    showDeploy={card.showDeploy}
-                    isActive={cardIndex === i}
-                  />
-                </Card>
-              ))}
-            </CardSwap>
-          </div>
+          <div className="hidden md:block min-h-[280px]" aria-hidden />
         </div>
       </div>
     </section>

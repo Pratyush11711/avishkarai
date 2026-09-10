@@ -496,7 +496,8 @@ a:focus-visible .cta-wipe-band {
 }
 
 .clock-section {
-  background-color: #1a0f14;
+  background-color: #02040c;
+  border-radius: 28px 28px 0 0;
 }
 
 .clock-copy {
@@ -511,7 +512,7 @@ a:focus-visible .cta-wipe-band {
 .clock-wash {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
   border-radius: inherit;
   --clock-r: 0;
@@ -664,6 +665,10 @@ a:focus-visible .cta-wipe-band {
   }
 
   .curtain {
+    border-radius: 64px 64px 0 0;
+  }
+
+  .clock-section {
     border-radius: 64px 64px 0 0;
   }
 
@@ -959,6 +964,51 @@ a:focus-visible .cta-wipe-band {
 #clock {
   width: 100%;
   max-width: 100%;
+}
+
+/* ─── Clock 3-D scene (full-bleed background, ship on the right) ─────────── */
+
+.clock-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.clock-canvas-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  background: #02040c;
+}
+
+.clock-scene-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 6, 12, 0.82) 0%,
+    rgba(8, 6, 12, 0.48) 34%,
+    rgba(8, 6, 12, 0.1) 58%,
+    transparent 76%
+  );
+}
+
+@media (max-width: 767px) {
+  .clock-scene-scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(8, 6, 12, 0.84) 0%,
+      rgba(8, 6, 12, 0.58) 52%,
+      rgba(8, 6, 12, 0.32) 100%
+    );
+  }
 }
 
 /* ─── SelectedWork — featured work list ──────────────────────────────────── */
