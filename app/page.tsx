@@ -5,7 +5,7 @@ import { SelectedWork } from "@/components/sections/SelectedWork";
 import { SectorMarquee } from "@/components/sections/SectorMarquee";
 import { TheClock } from "@/components/sections/TheClock";
 import { WhatWeStandOn } from "@/components/sections/WhatWeStandOn";
-import { Capabilities } from "@/components/sections/Capabilities";
+import { ExpertiseSection } from "@/components/ExpertiseSection";
 import { WhatWeDontDo } from "@/components/sections/WhatWeDontDo";
 import { Process } from "@/components/sections/Process";
 import { ProcessCTA } from "@/components/sections/ProcessCTA";
@@ -40,7 +40,11 @@ export default function Home() {
 
         <div className="curtain z-[4] bg-warm-canvas">
           <WhatWeStandOn />
-          <Capabilities />
+        </div>
+
+        <ExpertiseSection />
+
+        <div className="curtain z-[4] bg-warm-canvas">
           <WhatWeDontDo />
           {/* Shared box so the ribbon can weave past the cards and taper out
               below the CTA. */}
