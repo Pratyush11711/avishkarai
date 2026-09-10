@@ -112,8 +112,9 @@ export function ExpertiseSection() {
   const visibleRef = useRef(false);
 
   useEffect(() => {
-    const scroll = scrollRef.current;
-    if (!scroll) return;
+    const node = scrollRef.current;
+    if (!node) return;
+    const scrollEl: HTMLDivElement = node;
 
     const cards = cardRefs.current;
     const rotors = rotorRefs.current;
@@ -141,8 +142,8 @@ export function ExpertiseSection() {
     }
 
     function arrange(dt = 1 / 60) {
-      const rect = scroll.getBoundingClientRect();
-      const scrollable = Math.max(1, scroll.offsetHeight - window.innerHeight);
+      const rect = scrollEl.getBoundingClientRect();
+      const scrollable = Math.max(1, scrollEl.offsetHeight - window.innerHeight);
       let target =
         paused || mobile.matches || dealtRef.current
           ? 1
@@ -230,7 +231,7 @@ export function ExpertiseSection() {
       },
       { rootMargin: "200px" }
     );
-    observer.observe(scroll);
+    observer.observe(scrollEl);
 
     const onResize = () => arrange();
     const onMobileChange = () => { manualRef.current.clear(); arrange(); };
