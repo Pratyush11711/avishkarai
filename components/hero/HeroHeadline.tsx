@@ -79,7 +79,7 @@ export function HeroHeadline() {
     <div className="relative z-10 w-full min-w-0 max-w-[720px] flex flex-col gap-4 md:gap-5">
       <div ref={eyebrowRef} className="flex items-center gap-2 opacity-0">
         <span
-          className="w-2 h-2 rounded-full bg-voltage-yellow shrink-0"
+          className="w-2 h-2 rounded-full bg-accent shrink-0"
           aria-hidden="true"
         />
         <span className="type-caption text-white/70">

@@ -47,10 +47,10 @@ export function SectorMarquee() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6, delay: 0.12, ease: "easeOut" }}
-          className="type-subheading mt-10 max-w-[36ch] border-l-2 border-voltage-yellow pl-5 text-carbon-black"
+          className="type-subheading mt-10 max-w-[36ch] border-l-2 border-primary pl-5 text-carbon-black"
         >
           Most studios promise deliverables next quarter. We ship yours by{" "}
-          <mark className="bg-voltage-yellow px-1 text-carbon-black">
+          <mark className="bg-primary px-1 text-text-inverse">
             Thursday.
           </mark>
         </motion.p>

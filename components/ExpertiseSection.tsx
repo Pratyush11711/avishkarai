@@ -97,8 +97,12 @@ function damp(current: number, target: number, lambda: number, dt: number) {
   return target + (current - target) * Math.exp(-lambda * dt);
 }
 
+const CARD_RATIO = 1.62;
+const CARD_MAX_W = 248;
+
 export function ExpertiseSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rotorRefs = useRef<(HTMLDivElement | null)[]>([]);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -113,8 +117,10 @@ export function ExpertiseSection() {
 
   useEffect(() => {
     const node = scrollRef.current;
-    if (!node) return;
+    const stage = stageRef.current;
+    if (!node || !stage) return;
     const scrollEl: HTMLDivElement = node;
+    const stageEl: HTMLDivElement = stage;
 
     const cards = cardRefs.current;
     const rotors = rotorRefs.current;
@@ -151,7 +157,7 @@ export function ExpertiseSection() {
               0,
               Math.min(
                 1,
-                (window.innerHeight * 0.38 - rect.top) / (scrollable * 0.72)
+                (window.innerHeight * 0.18 - rect.top) / (scrollable * 0.78)
               )
             );
 
@@ -183,31 +189,35 @@ export function ExpertiseSection() {
 
         if (!mobile.matches) {
           const offset = i - center;
-          const pad = 48;
-          const gutter = 20;
-          const baseW = 252;
-          const baseH = 470;
-          const available = Math.max(640, window.innerWidth - pad * 2);
-          const needed = n * baseW + (n - 1) * gutter;
-          const scale = Math.min(1, available / needed);
-          const step = (baseW + gutter) * scale;
-          const restTilt = 0;
-          const stackX = 0;
-          const stackY = i * 2;
-          const stackAngle = 0;
+          const stageBox = stageEl.getBoundingClientRect();
+          const padX = Math.max(24, window.innerWidth * 0.024);
+          const gutter = Math.max(16, Math.min(28, window.innerWidth * 0.014));
+          const availW = Math.max(280, stageBox.width - padX * 2);
+          const availH = Math.max(200, stageBox.height - 32);
+          const widthFromRow = (availW - gutter * (n - 1)) / n;
+          const widthFromHeight = availH / CARD_RATIO;
+          const cardW = Math.max(
+            140,
+            Math.min(CARD_MAX_W, widthFromRow, widthFromHeight)
+          );
+          const cardH = cardW * CARD_RATIO;
+          const step = cardW + gutter;
+          const fanX = offset * Math.min(64, cardW * 0.28);
+          const fanY = Math.abs(offset) * 10;
+          const fanAngle = offset * 7;
           const rowX = offset * step;
           const floatY = paused
             ? 0
-            : Math.sin(t * 0.00155 + i * 1.12) * (6 + 6 * spread);
-          const x = stackX + (rowX - stackX) * spread;
-          const y = stackY + (0 - stackY) * spread + floatY;
-          const angle = stackAngle + (restTilt - stackAngle) * spread;
+            : Math.sin(t * 0.00155 + i * 1.12) * (4 + 3 * (1 - spread));
+          const x = fanX + (rowX - fanX) * spread;
+          const y = fanY + (0 - fanY) * spread + floatY;
+          const angle = fanAngle * (1 - spread);
 
-          card.style.width = `${baseW}px`;
-          card.style.height = `${baseH}px`;
+          card.style.width = `${cardW}px`;
+          card.style.height = `${cardH}px`;
           card.style.transform =
-            `translate3d(calc(-50% + ${x}px), ${y}px, 0) rotate(${angle}deg) scale(${scale})`;
-          card.style.zIndex = String(showBack ? i + 1 : 80 + i);
+            `translate3d(calc(-50% + ${x}px), calc(-50% + ${y}px), 0) rotate(${angle}deg)`;
+          card.style.zIndex = String(showBack ? 10 + i : 80 + i);
         } else {
           card.style.removeProperty("width");
           card.style.removeProperty("height");
@@ -244,11 +254,16 @@ export function ExpertiseSection() {
     window.addEventListener("resize", onResize);
     mobile.addEventListener("change", onMobileChange);
     reduced.addEventListener("change", onReduced);
+    const stageObserver = new ResizeObserver(() => arrange());
+    stageObserver.observe(stageEl);
+    visibleRef.current = true;
+    arrange(1 / 60);
     rafRef.current = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
+      stageObserver.disconnect();
       window.removeEventListener("resize", onResize);
       mobile.removeEventListener("change", onMobileChange);
       reduced.removeEventListener("change", onReduced);
@@ -269,51 +284,41 @@ export function ExpertiseSection() {
     });
   };
 
-  const handleDeal = () => {
-    dealtRef.current = true;
-    manualRef.current.clear();
-    cardRefs.current[0]
-      ?.querySelector<HTMLButtonElement>(".deck-card__turn")
-      ?.focus({ preventScroll: true });
-  };
-
   return (
     <section id="capabilities" aria-label="Area of expertise" className="deck-section relative z-[4]">
-      <div className="deck-intro">
-        <span className="deck-label">How we build</span>
-        <div className="deck-intro-body">
-          <h2 className="deck-heading">
-            <span className="deck-heading-a">Area of</span>
-            <span className="deck-heading-b">expertise</span>
-          </h2>
-          <div className="deck-intro-meta">
-            <p>
-              Multidisciplinary expertise across
-              <br />
-              product, engineering, applied AI,
-              <br />
-              platform, and partnership.
-            </p>
-            <div className="deck-intro-actions">
-              {capabilities.map((cap, i) => (
-                <button
-                  key={cap.id}
-                  type="button"
-                  className="deck-intro-btn"
-                  aria-label={`Open ${cap.title.toLowerCase()}`}
-                  onClick={() => handleCardClick(i)}
-                >
-                  <span aria-hidden="true">{String(i + 1)}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div ref={scrollRef} className="deck-scroll">
         <div className="deck-sticky">
-          <div className="deck-stage" role="list" aria-label="Capabilities">
+          <div className="deck-intro">
+            <span className="deck-label">How we build</span>
+            <div className="deck-intro-body">
+              <h2 className="deck-heading">
+                <span className="deck-heading-a">Area of</span>
+                <span className="deck-heading-b">expertise</span>
+              </h2>
+              <div className="deck-intro-meta">
+                <p>
+                  Multidisciplinary expertise across
+                  product, engineering, applied AI,
+                  platform, and partnership.
+                </p>
+                <div className="deck-intro-actions">
+                  {capabilities.map((cap, i) => (
+                    <button
+                      key={cap.id}
+                      type="button"
+                      className="deck-intro-btn"
+                      aria-label={`Open ${cap.title.toLowerCase()}`}
+                      onClick={() => handleCardClick(i)}
+                    >
+                      <span aria-hidden="true">{String(i + 1)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div ref={stageRef} className="deck-stage" role="list" aria-label="Capabilities">
             {capabilities.map((cap, i) => (
               <div
                 key={cap.id}
@@ -473,15 +478,6 @@ export function ExpertiseSection() {
                 </button>
               </div>
             ))}
-          </div>
-
-          <div className="deck-bottom">
-            <span className="deck-bottom-hint">
-              Scroll to deal the cards.<br />Click any card to flip it.
-            </span>
-            <button className="deck-deal-btn" onClick={handleDeal}>
-              Deal cards
-            </button>
           </div>
         </div>
       </div>

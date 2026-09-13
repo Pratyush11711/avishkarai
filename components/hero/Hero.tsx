@@ -1,57 +1,154 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HeroHeadline } from "./HeroHeadline";
-import { HeroVideo, usePrefersReducedMotion } from "./HeroVideo";
-import { MarqueeRow } from "@/components/ui/MarqueeRow";
+import dynamic from "next/dynamic";
+import { HeadingReveal, LineReveal } from "@/components/ui/TypeReveal";
+import { HeroPlus } from "./HeroPlus";
+import { HeroErrorBoundary } from "./HeroErrorBoundary";
+import { usePrefersReducedMotion } from "./HeroVideo";
 
-const TRUST_ITEMS = [
-  "Building for teams in regulated health, telehealth, enterprise services, and industrial operations",
-  "HIPAA-grade platforms shipped and live in the US",
-  "SOC 2 readiness program in place",
-];
+const HeroCrossField = dynamic(
+  () =>
+    import("./HeroCrossField")
+      .then((m) => ({
+        default: m.HeroCrossField ?? m.default ?? (() => null),
+      }))
+      .catch(() => ({ default: () => null })),
+  { ssr: false }
+);
+
+const HeroReel = dynamic(
+  () =>
+    import("./HeroReel")
+      .then((m) => ({
+        default: m.HeroReel ?? m.default ?? (() => null),
+      }))
+      .catch(() => ({ default: () => null })),
+  { ssr: false }
+);
+
+const HeroRibbon = dynamic(
+  () =>
+    import("./HeroRibbon")
+      .then((m) => ({
+        default: m.HeroRibbon ?? m.default ?? (() => null),
+      }))
+      .catch(() => ({ default: () => null })),
+  { ssr: false }
+);
 
 export function Hero() {
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
-  const heroRef = useRef<HTMLElement>(null);
+  const introRef = useRef<HTMLElement>(null);
+  const statementRef = useRef<HTMLElement>(null);
+  const [crossPlaying, setCrossPlaying] = useState(true);
   const prefersReduced = usePrefersReducedMotion();
 
   useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsHeroVisible(entry.isIntersecting),
+    const node = introRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setCrossPlaying(entry.isIntersecting && !prefersReduced),
       { rootMargin: "160px 0px" }
     );
-
-    observer.observe(hero);
-    return () => observer.disconnect();
-  }, []);
+    io.observe(node);
+    return () => io.disconnect();
+  }, [prefersReduced]);
 
   return (
-    <section
-      ref={heroRef}
-      id="hero"
-      className="relative min-h-[100dvh] flex flex-col overflow-hidden bg-carbon-black"
-      aria-label="Hero"
-    >
-      <HeroVideo playing={isHeroVisible && !prefersReduced} />
-      <div className="hero-video-scrim" aria-hidden="true" />
+    <>
+      <div className="lh">
+        <section
+          ref={introRef}
+          id="hero"
+          className="lh-intro"
+          aria-label="Hero"
+        >
+          <div className="lh-intro-copy">
+            <p className="lh-kicker">
+              <span className="lh-kicker-dot" aria-hidden="true" />
+              Product &amp; engineering studio
+            </p>
+            <h1 className="lh-intro-title">
+              <HeadingReveal
+                eager
+                text="We build production-grade software and interactive product experiences that help teams ship in eight weeks"
+              />
+            </h1>
+          </div>
 
-      <div className="relative z-10 flex-1 flex items-center pt-24 md:pt-28 pb-8">
-        <div className="page-wrap w-full min-w-0">
-          <HeroHeadline />
-        </div>
-      </div>
+          <div className="lh-visual" aria-hidden={!crossPlaying}>
+            {prefersReduced ? (
+              <div className="lh-visual-fallback" />
+            ) : (
+              <HeroErrorBoundary fallback={<div className="lh-visual-fallback" />}>
+                <HeroCrossField playing={crossPlaying} />
+              </HeroErrorBoundary>
+            )}
+          </div>
 
-      <div className="relative z-10 py-6 bg-black/35 backdrop-blur-[8px]">
-        <MarqueeRow
-          items={TRUST_ITEMS}
-          speed={30}
-          itemClassName="text-white/75 type-caption"
-        />
+          <div className="lh-explore" aria-hidden="true">
+            <HeroPlus />
+            <HeroPlus />
+            <span className="lh-explore-text">Scroll to explore</span>
+            <HeroPlus />
+            <HeroPlus />
+          </div>
+        </section>
+
+        <section
+          ref={statementRef}
+          className="lh-statement"
+          aria-label="What we ship"
+        >
+          <HeroErrorBoundary fallback={null}>
+            <HeroRibbon triggerRef={statementRef} />
+          </HeroErrorBoundary>
+
+          <div className="lh-statement-grid">
+            <h2 className="lh-statement-title">
+              <span className="lh-statement-line">
+                <HeadingReveal text="Live in eight weeks," />
+              </span>
+              <span className="lh-statement-line">
+                <HeadingReveal text="Enterprise-grade" />
+              </span>
+              <span className="lh-statement-line">
+                <HeadingReveal text="from day one." />
+              </span>
+            </h2>
+
+            <div className="lh-statement-aside">
+              <p className="lh-statement-body">
+                <LineReveal text="Your MVP shouldn't look like an MVP. We build production-grade software with the design finesse of a funded product: multi-tenant architecture, real test coverage, a design system, and a launch date you can put on a calendar." />
+              </p>
+              <a className="lh-approach" href="#contact">
+                <span className="lh-approach-dot" aria-hidden="true" />
+                <span>Book a 30-minute build review</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.6"
+                    d="M2.3 8h11.4m0 0L8.7 3M13.7 8l-5 5"
+                  />
+                </svg>
+              </a>
+              <p className="lh-statement-micro">
+                Typical MVP: 8 weeks. Regulated or integration-heavy platforms:
+                10 to 14. You get the real number in writing before you sign
+                anything.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <HeroErrorBoundary fallback={null}>
+          <HeroReel />
+        </HeroErrorBoundary>
       </div>
-    </section>
+    </>
   );
 }
+
+export default Hero;

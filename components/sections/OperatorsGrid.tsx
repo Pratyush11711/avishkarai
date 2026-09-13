@@ -10,20 +10,20 @@ interface Operator {
 }
 
 const OPERATORS: Operator[] = [
-  { name: "Amazon", hover: "#e6dcc8" },
-  { name: "Delhivery", hover: "#d7c4a3" },
-  { name: "XpressBees", hover: "#c9d4c4" },
-  { name: "OM Logistics", hover: "#ddd2c6" },
-  { name: "Vedang", hover: "#d4c8b8" },
-  { name: "Quess", hover: "#c5d0c8" },
-  { name: "Terrier", sub: "Security Services", hover: "#e4d6b8" },
-  { name: "Bluspring", sub: "Infrastructure", hover: "#cfd6ce" },
-  { name: "Frontier Biomed", hover: "#e8dfd0" },
-  { name: "HOLS", sub: "House of Life Sciences", hover: "#d2c6b4" },
-  { name: "Medivance", hover: "#c8d2c6" },
-  { name: "Frontier Wellness", hover: "#e2d5c2" },
-  { name: "Guiding Hands", hover: "#d8cfc4" },
-  { name: "Pratap", sub: "Carving Lives", hover: "#cfc8bc" },
+  { name: "Amazon", hover: "var(--color-tint)" },
+  { name: "Delhivery", hover: "var(--color-tint)" },
+  { name: "XpressBees", hover: "var(--color-tint)" },
+  { name: "OM Logistics", hover: "var(--color-tint)" },
+  { name: "Vedang", hover: "var(--color-tint)" },
+  { name: "Quess", hover: "var(--color-tint)" },
+  { name: "Terrier", sub: "Security Services", hover: "var(--color-tint)" },
+  { name: "Bluspring", sub: "Infrastructure", hover: "var(--color-tint)" },
+  { name: "Frontier Biomed", hover: "var(--color-tint)" },
+  { name: "HOLS", sub: "House of Life Sciences", hover: "var(--color-tint)" },
+  { name: "Medivance", hover: "var(--color-tint)" },
+  { name: "Frontier Wellness", hover: "var(--color-tint)" },
+  { name: "Guiding Hands", hover: "var(--color-tint)" },
+  { name: "Pratap", sub: "Carving Lives", hover: "var(--color-tint)" },
 ];
 
 export function OperatorsGrid() {
@@ -72,14 +72,14 @@ export function OperatorsGrid() {
             >
               <TiltedCard maxTilt={16}>
                 <div
-                  className="group rounded-[24px] bg-carbon-black hover:[background-color:var(--hover-fill)] flex flex-col items-center justify-center gap-1 px-4 py-12 text-center min-h-[140px] transition-colors duration-300 ease-out"
+                  className="group rounded-[24px] bg-deep-navy hover:[background-color:var(--hover-fill)] flex flex-col items-center justify-center gap-1 px-4 py-12 text-center min-h-[140px] transition-colors duration-300 ease-out"
                   style={{ ["--hover-fill" as string]: op.hover }}
                 >
                   <span className="type-subheading font-semibold text-paper-white group-hover:text-carbon-black transition-colors duration-300">
                     {op.name}
                   </span>
                   {op.sub && (
-                    <span className="type-caption text-smoke group-hover:text-carbon-black/70 transition-colors duration-300">
+                    <span className="type-caption text-text-inverse/60 group-hover:text-carbon-black/70 transition-colors duration-300">
                       {op.sub}
                     </span>
                   )}

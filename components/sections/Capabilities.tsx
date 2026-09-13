@@ -8,8 +8,8 @@ const CAPABILITIES = [
   {
     category: "Product",
     label: "From idea to interface",
-    accent: "#d1ffca",
-    accentText: "#1a6b12",
+    accent: "#ebecfe",
+    accentText: "#12131a",
     items: [
       "Product strategy",
       "Scope definition",
@@ -22,8 +22,8 @@ const CAPABILITIES = [
   {
     category: "Engineering",
     label: "Code that ships on Thursday",
-    accent: "#fff100",
-    accentText: "#5a4f00",
+    accent: "#3040ff",
+    accentText: "#ffffff",
     items: [
       "0→1 products and MVPs",
       "Multi-tenant SaaS platforms",
@@ -36,8 +36,8 @@ const CAPABILITIES = [
   {
     category: "Applied AI",
     label: "Models wired into real products",
-    accent: "#dce8ff",
-    accentText: "#1a3a7a",
+    accent: "#5c8dff",
+    accentText: "#050a34",
     items: [
       "Voice agents",
       "Document intelligence",
@@ -49,8 +49,8 @@ const CAPABILITIES = [
   {
     category: "Platform",
     label: "Built to survive Series B",
-    accent: "#ffe4b8",
-    accentText: "#7a3a00",
+    accent: "#0a1550",
+    accentText: "#ffffff",
     items: [
       "Compliance architecture, HIPAA-grade",
       "Security and access control",
@@ -62,8 +62,8 @@ const CAPABILITIES = [
   {
     category: "Partnership",
     label: "Your team, extended",
-    accent: "#f0d6ff",
-    accentText: "#5a1a7a",
+    accent: "#050a34",
+    accentText: "#ffffff",
     items: [
       "Embedded product teams",
       "Ongoing engineering retainers",
@@ -231,7 +231,7 @@ export function Capabilities() {
                         <span
                           aria-hidden
                           className="w-1 h-1 rounded-full shrink-0"
-                          style={{ background: cap.accent === "#fff100" ? "#b8a000" : cap.accent }}
+                          style={{ background: cap.accent }}
                         />
                         <span className="type-body-sm text-carbon-black">{item}</span>
                       </motion.li>

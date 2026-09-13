@@ -38,12 +38,17 @@ export function SmoothScrollProvider({
     // cap scroll at the pre-pin document height.
     const onSTRefresh = () => lenis.resize();
     ScrollTrigger.addEventListener("refresh", onSTRefresh);
+    window.addEventListener("load", onSTRefresh);
+    window.addEventListener("resize", onSTRefresh);
 
     // Initial sync in case triggers fire before this effect runs
     ScrollTrigger.refresh();
+    requestAnimationFrame(() => lenis.resize());
 
     return () => {
       ScrollTrigger.removeEventListener("refresh", onSTRefresh);
+      window.removeEventListener("load", onSTRefresh);
+      window.removeEventListener("resize", onSTRefresh);
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(ticker);
       lenis.destroy();

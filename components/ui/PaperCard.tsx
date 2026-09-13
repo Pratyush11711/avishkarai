@@ -16,8 +16,8 @@ export function PaperCard({
       className={clsx(
         "rounded-[32px] p-6",
         inverted
-          ? "bg-carbon-black text-paper-white"
-          : "bg-paper-white text-carbon-black",
+          ? "bg-deep-navy text-text-inverse"
+          : "bg-paper-white text-text",
         className
       )}
     >

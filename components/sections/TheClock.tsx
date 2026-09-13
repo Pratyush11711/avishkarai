@@ -11,30 +11,33 @@ import {
 } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
-import { ClockCanvas } from "./ClockCanvas";
+import {
+  ScrollScrubSequence,
+  type ScrollScrubSequenceHandle,
+} from "@/components/hero/ScrollScrubSequence";
 
 const DIM = "rgba(255, 255, 255, 0.14)";
 
 /** Bright ink the active band paints with as you scroll. */
 const INK = [
-  "#f7c6d8",
-  "#fff1b8",
-  "#d1ffca",
-  "#4EE2EF",
-  "#c084fc",
-  "#f97316",
-  "#fff100",
+  "#4fd8ff",
+  "#5c8dff",
+  "#ebecfe",
+  "#3040ff",
+  "#1b2bff",
+  "#ffffff",
+  "#4fd8ff",
 ];
 
 /** Solid section grounds — dark cousins of the ink, like the reference. */
 const GROUND = [
-  "#1a0f14",
-  "#2a1b15",
-  "#1c1a10",
-  "#0c181c",
-  "#140818",
-  "#1a0c08",
-  "#16140a",
+  "#050a34",
+  "#0a1550",
+  "#050a34",
+  "#0a1550",
+  "#050a34",
+  "#0a1550",
+  "#050a34",
 ];
 
 type ClockWord = { el: HTMLElement; accent: boolean };
@@ -201,7 +204,7 @@ function PulseDot({ className }: { className?: string }) {
       ref={dotRef}
       className={
         className ??
-        "w-2 h-2 rounded-full bg-voltage-yellow shrink-0 shadow-[0_0_6px_2px_rgba(255,241,0,0.65)]"
+        "w-2 h-2 rounded-full bg-accent shrink-0 shadow-[0_0_6px_2px_rgba(79,216,255,0.65)]"
       }
     />
   );
@@ -213,7 +216,7 @@ function DeployStamp({ moduleRef }: { moduleRef: RefObject<HTMLDivElement | null
   return (
     <div ref={moduleRef} className="flex items-center gap-3">
       <PulseDot />
-      <span className="type-caption text-smoke">Last deploy: {deployLabel}</span>
+      <span className="type-caption text-text-inverse/70">Last deploy: {deployLabel}</span>
     </div>
   );
 }
@@ -225,6 +228,7 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
 }
 
 export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRef) {
+  const trackRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const setSectionRef = useCallback(
     (node: HTMLElement | null) => {
@@ -245,7 +249,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
   const washRef = useRef<HTMLDivElement>(null);
   const moduleRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const [isClockVisible, setIsClockVisible] = useState(true);
+  const sequenceRef = useRef<ScrollScrubSequenceHandle>(null);
   const [reducedMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -253,27 +257,23 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
   );
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsClockVisible(entry.isIntersecting),
-      { rootMargin: "160px 0px" }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
+    const track = trackRef.current;
     const section = sectionRef.current;
     const washEl = washRef.current;
-    if (!section) return;
+    if (!track || !section) return;
 
     const prefersReduced = reducedMotion;
 
-    const paintScene = (progress: number, active: ClockWord[], local: number) => {
+    const paintScene = (
+      progress: number,
+      active: ClockWord[],
+      local: number,
+      frameProgress = progress
+    ) => {
       const ink = along(INK, progress);
       if (washEl) paintWash(washEl, ink, 0.12);
       applySpotlight(active, local, ink);
+      sequenceRef.current?.setProgress(frameProgress);
     };
 
     if (prefersReduced) {
@@ -330,52 +330,13 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       muteWords(allWords);
       if (washEl) paintWash(washEl, INK[0], 0);
 
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "+=420%",
-          pin: true,
-          pinSpacing: true,
-          scrub: 0.45,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const time = tl.time();
-            const t1 = tl.labels.beat1 ?? 0;
-            const t2 = tl.labels.beat2 ?? 0;
-            const t3 = tl.labels.beat3 ?? 0;
-            const end = tl.duration() || 1;
-
-            let active = beat1Words;
-            let local = 0;
-            if (time < t2) {
-              active = beat1Words;
-              local = t2 > t1 ? (time - t1) / (t2 - t1) : 0;
-              muteWords(beat2Words);
-              muteWords(beat3Words);
-            } else if (time < t3) {
-              active = beat2Words;
-              local = t3 > t2 ? (time - t2) / (t3 - t2) : 0;
-              muteWords(beat1Words);
-              muteWords(beat3Words);
-            } else {
-              active = beat3Words;
-              local = (time - t3) / Math.max(end - t3, 0.001);
-              muteWords(beat1Words);
-              muteWords(beat2Words);
-            }
-
-            paintScene(self.progress, active, local);
-          },
-        },
-      });
+      const textTl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
       const hold = (words: ClockWord[]) =>
         Math.max(1.6, words.length * 0.048);
 
-      tl.addLabel("beat1", 0)
+      textTl
+        .addLabel("beat1", 0)
         .to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat1")
         .to({}, { duration: hold(beat1Words) })
         .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
@@ -390,21 +351,56 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
           ctaRef.current,
           { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
           "beat3+=0.35"
-        )
-        .to({}, { duration: hold(beat3Words) });
+        );
 
-      const refresh = () => {
-        requestAnimationFrame(() => ScrollTrigger.refresh());
+      const applyProgress = (progress: number) => {
+        textTl.progress(progress);
+
+        const time = textTl.time();
+        const t1 = textTl.labels.beat1 ?? 0;
+        const t2 = textTl.labels.beat2 ?? 0;
+        const t3 = textTl.labels.beat3 ?? 0;
+        const end = textTl.duration() || 1;
+        const frameProgress = Math.min(1, time / end);
+
+        let active = beat1Words;
+        let local = 0;
+        if (time < t2) {
+          active = beat1Words;
+          local = t2 > t1 ? (time - t1) / (t2 - t1) : 0;
+          muteWords(beat2Words);
+          muteWords(beat3Words);
+        } else if (time < t3) {
+          active = beat2Words;
+          local = t3 > t2 ? (time - t2) / (t3 - t2) : 0;
+          muteWords(beat1Words);
+          muteWords(beat3Words);
+        } else {
+          active = beat3Words;
+          local = (time - t3) / Math.max(end - t3, 0.001);
+          muteWords(beat1Words);
+          muteWords(beat2Words);
+        }
+
+        paintScene(progress, active, local, frameProgress);
       };
-      const onLoad = () => ScrollTrigger.refresh();
-      window.addEventListener("load", onLoad);
-      const t = window.setTimeout(refresh, 200);
+
+      const st = ScrollTrigger.create({
+        trigger: track,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => applyProgress(self.progress),
+        onLeave: () => applyProgress(1),
+        onLeaveBack: () => applyProgress(0),
+      });
+
+      applyProgress(st.progress);
 
       return () => {
-        window.removeEventListener("load", onLoad);
-        window.clearTimeout(t);
-        tl.scrollTrigger?.kill();
-        tl.kill();
+        st.kill();
+        textTl.kill();
       };
     });
 
@@ -415,17 +411,26 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
   }, [reducedMotion]);
 
   return (
-    <section
-      ref={setSectionRef}
-      id="clock"
-      className="clock-section relative z-[3] overflow-hidden h-auto md:h-screen"
-      aria-label="The Clock"
-    >
-      {!reducedMotion && <ClockCanvas playing={isClockVisible} />}
+    <div ref={trackRef} className="clock-track">
+      <section
+        ref={setSectionRef}
+        id="clock"
+        data-lusion-cursor="hero"
+        className="clock-section"
+        aria-label="The Clock"
+      >
+      <ScrollScrubSequence
+        ref={sequenceRef}
+        framePath="/combined"
+        frameCount={154}
+        frameNamePattern="ezgif-frame-XXX.jpg"
+        posterSrc="/combined/ezgif-frame-001.jpg"
+        className="clock-videos-wrap clock-sequence"
+      />
       <div className="clock-scene-scrim" aria-hidden />
       <div ref={washRef} className="clock-wash" aria-hidden />
-      <div className="relative z-[2] h-full flex flex-col justify-center page-wrap py-16 md:py-20">
-        <p className="type-caption text-smoke mb-4">04 · The Clock</p>
+      <div className="relative z-[2] h-full flex flex-col justify-center page-wrap py-16 pb-64 md:py-20">
+        <p className="type-caption text-text-inverse/60 mb-4">04 · The Clock</p>
         <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,46%)] gap-10 lg:gap-16 items-center">
           <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
             <div
@@ -434,21 +439,21 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
             >
               <h2
                 ref={h1Ref}
-                className="clock-copy type-display mb-6 break-words"
+                className="clock-copy type-display mb-6"
               >
                 You know the pattern.
               </h2>
               <p ref={p1Ref} className="clock-copy type-body max-w-[54ch]">
                 A{" "}
-                <span data-clock-accent="#f97316">six-week discovery</span>{" "}
+                <span data-clock-accent="#5c8dff">six-week discovery</span>{" "}
                 phase. A{" "}
-                <span data-clock-accent="#c084fc">kickoff deck</span>. Status
+                <span data-clock-accent="#4fd8ff">kickoff deck</span>. Status
                 calls where the honest answer is “
-                <span data-clock-accent="#60a5fa">
+                <span data-clock-accent="#3040ff">
                   we’re still setting up the environment
                 </span>
                 .” A demo in{" "}
-                <span data-clock-accent="#f472b6">month four</span> that looks
+                <span data-clock-accent="#1b2bff">month four</span> that looks
                 nothing like what you described.
               </p>
             </div>
@@ -459,30 +464,30 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
             >
               <h2
                 ref={h2Ref}
-                className="clock-copy type-display mb-6 break-words"
+                className="clock-copy type-display mb-6"
               >
                 We run on a different clock.
               </h2>
               <p ref={p2Ref} className="clock-copy type-body max-w-[54ch]">
-                <span data-clock-accent="#d1ffca">
+                <span data-clock-accent="#4fd8ff">
                   Scope is locked in week one.
                 </span>{" "}
                 From week two, there is a working build in your hands every{" "}
-                <span data-clock-accent="#fff100">Thursday</span>:{" "}
-                <span data-clock-accent="#4EE2EF">
+                <span data-clock-accent="#3040ff">Thursday</span>:{" "}
+                <span data-clock-accent="#5c8dff">
                   deployed, clickable, on a real URL, not a Figma frame.
                 </span>{" "}
                 A focused MVP is live in{" "}
-                <span data-clock-accent="#f97316">eight weeks</span>. A
+                <span data-clock-accent="#1b2bff">eight weeks</span>. A
                 multi-tenant platform with third-party integrations and a
                 compliance layer runs 10 to 14. We tell you which one you are
                 during the{" "}
-                <span data-clock-accent="#c084fc">
+                <span data-clock-accent="#ebecfe">
                   Build Review, in writing
                 </span>
                 , before there is a contract to sign. The eight weeks on our
                 homepage is{" "}
-                <span data-clock-accent="#f472b6">
+                <span data-clock-accent="#4fd8ff">
                   a commitment, not a range we hope you forget.
                 </span>
               </p>
@@ -494,10 +499,10 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
             >
               <h2
                 ref={h3Ref}
-                className="clock-copy type-display mb-8 max-w-[20ch] break-words"
+                className="clock-copy type-display mb-8"
               >
                 You will never have to ask what we&apos;re working on.{" "}
-                <span data-clock-accent="#fff100">You&apos;ll be using it.</span>
+                <span data-clock-accent="#4fd8ff">You&apos;ll be using it.</span>
               </h2>
               <DeployStamp moduleRef={moduleRef} />
               <div ref={ctaRef} className="mt-7">
@@ -510,6 +515,9 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
           <div className="hidden md:block min-h-[280px]" aria-hidden />
         </div>
       </div>
-    </section>
+      </section>
+    </div>
   );
 });
+
+export default TheClock;

@@ -175,8 +175,8 @@ function GraphScene({ graph, scrollProgress }: SceneProps) {
       }
 
       // Light up nodes along the path based on progress
-      const phosphor = new THREE.Color("#d1ffca");
-      const dimPhosphor = new THREE.Color("#fff100").multiplyScalar(0.5);
+      const phosphor = new THREE.Color("#4fd8ff");
+      const dimPhosphor = new THREE.Color("#3040ff").multiplyScalar(0.5);
       path.forEach((nodeIdx, i) => {
         const nodeProgress = progress - i * 0.4;
         if (nodeProgress > 0 && nodeProgress <= 1.5) {

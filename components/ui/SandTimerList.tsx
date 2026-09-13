@@ -8,8 +8,8 @@ export type SandTimerItem = {
   text: string;
 };
 
-const DIM = { r: 154, g: 154, b: 154 };   // smoke gray when unlit
-const LIT = { r: 0,   g: 0,   b: 0 };    // carbon-black when lit
+const DIM = { r: 107, g: 110, b: 134 };
+const LIT = { r: 18,  g: 19,  b: 26 };
 const GRAIN_COUNT = 6;
 
 function clamp(n: number, lo: number, hi: number) {

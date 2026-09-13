@@ -16,6 +16,7 @@ export function BrandLogo({ on, className }: BrandLogoProps) {
         "relative block h-6 w-[8.5rem] lg:h-8 lg:w-[11rem] shrink-0",
         className
       )}
+      style={{ position: "relative" }}
     >
       <Image
         src={src}

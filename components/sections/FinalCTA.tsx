@@ -8,7 +8,7 @@ import { MagneticButton } from "@/components/ui/MagneticButton";
 
 const MUTED = "rgba(255, 255, 255, 0.22)";
 const BRIGHT = "#ffffff";
-const PHOSPHOR = "#fff100";
+const PHOSPHOR = "#4fd8ff";
 
 type Word = { el: HTMLElement; accent: boolean };
 
@@ -30,6 +30,7 @@ function splitWords(
         return;
       }
       const span = document.createElement("span");
+      span.className = "cta-word";
       span.style.display = "inline";
       span.textContent = part;
       if (accent) span.dataset.accent = "true";
@@ -88,58 +89,52 @@ export const FinalCTA = forwardRef<HTMLElement>(function FinalCTA(_, forwardedRe
     const prefersReduced =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (prefersReduced) {
-      // Instant reveal — skip animation
-      heading.querySelectorAll("span").forEach((s) => {
-        (s as HTMLElement).style.color = BRIGHT;
+    const paint = (words: Word[], t: number) => {
+      const last = Math.max(words.length - 1, 1);
+      words.forEach((word, i) => {
+        const local = Math.min(1, Math.max(0, t * (last + 1.15) - i));
+        const k = local * local * (3 - 2 * local);
+        if (k <= 0) {
+          word.el.style.color = MUTED;
+          return;
+        }
+        word.el.style.color = word.accent
+          ? `rgba(79, 216, 255, ${0.22 + 0.78 * k})`
+          : `rgba(255, 255, 255, ${0.22 + 0.78 * k})`;
       });
-      body.style.opacity = "1";
-      body.style.transform = "none";
-      return;
-    }
+      const bodyT = Math.min(1, Math.max(0, (t - 0.62) / 0.38));
+      body.style.opacity = String(bodyT);
+      body.style.transform = `translateY(${(1 - bodyT) * 16}px)`;
+    };
 
-    /* Split heading into word spans */
     const { words, revert } = splitWords(heading);
 
-    /* Start all words muted */
-    words.forEach((w) => { w.el.style.color = MUTED; });
+    if (prefersReduced) {
+      paint(words, 1);
+      return () => revert();
+    }
+    paint(words, 0);
+    gsap.set(body, { opacity: 0, y: 16 });
 
-    /* Body hidden until heading is revealed */
-    gsap.set(body, { opacity: 0, y: 20 });
-
-    /* Timeline scrubbed by scroll */
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top 80%",
-        end: "center 45%",
-        scrub: 0.7,
-        invalidateOnRefresh: true,
-      },
+    const section = sectionRef.current;
+    const st = ScrollTrigger.create({
+      trigger: section,
+      start: "top 88%",
+      end: "top 28%",
+      scrub: 0.55,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => paint(words, self.progress),
     });
 
-    /* Word-by-word colour reveal */
-    tl.to(
-      words.map((w) => w.el),
-      {
-        color: (_i: number) => (words[_i].accent ? PHOSPHOR : BRIGHT),
-        duration: 1,
-        stagger: 0.055,
-        ease: "none",
-      },
-      0
-    );
-
-    /* Body fades in just after last word lights up */
-    tl.to(
-      body,
-      { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-      ">-0.15"
-    );
+    paint(words, st.progress);
+    const refresh = () => ScrollTrigger.refresh();
+    const t = window.setTimeout(refresh, 120);
+    window.addEventListener("load", refresh);
 
     return () => {
-      tl.scrollTrigger?.kill();
-      tl.kill();
+      window.removeEventListener("load", refresh);
+      window.clearTimeout(t);
+      st.kill();
       revert();
     };
   }, []);
@@ -148,14 +143,14 @@ export const FinalCTA = forwardRef<HTMLElement>(function FinalCTA(_, forwardedRe
     <section
       ref={setSectionRef}
       id="contact"
-      className="py-28 md:py-40 bg-carbon-black"
+      className="py-28 md:py-40 bg-deep-navy"
       aria-label="Contact us"
     >
       <div className="page-wrap">
         {/* Heading — accent words get voltage-yellow on scroll */}
         <h2
           ref={headingRef}
-          className="type-display mb-12 max-w-[20ch] leading-tight"
+          className="cta-heading type-display mb-12 max-w-[20ch] leading-tight"
         >
           Bring us the{" "}
           <span data-cta-accent>version</span>
@@ -166,12 +161,12 @@ export const FinalCTA = forwardRef<HTMLElement>(function FinalCTA(_, forwardedRe
         {/* Body + CTA — fade in after heading fully reveals */}
         <div ref={bodyRef} className="flex flex-col gap-8">
           <div className="flex flex-col gap-4 max-w-[60ch]">
-            <p className="type-body text-smoke">
+            <p className="type-body text-text-inverse/75">
               Send us the scope another studio gave you, or the roadmap you've
               been sitting on for six months. In 30 minutes we'll tell you what
               we'd build, how long it would take, and what we'd cut.
             </p>
-            <p className="type-body text-smoke">
+            <p className="type-body text-text-inverse/75">
               If we're not the right fit, we'll say so on the call.
             </p>
           </div>
@@ -190,3 +185,5 @@ export const FinalCTA = forwardRef<HTMLElement>(function FinalCTA(_, forwardedRe
     </section>
   );
 });
+
+export default FinalCTA;

@@ -60,12 +60,12 @@ export function MagneticButton({
   const baseClass = clsx(
     "inline-flex items-center justify-center gap-2 cursor-pointer select-none type-body",
     variant === "primary" &&
-      "px-6 py-4 rounded-lg bg-carbon-black text-paper-white hover:bg-graphite",
+      "px-6 py-4 rounded-lg bg-primary text-text-inverse hover:bg-primary-hover",
     variant === "inverted" &&
-      "px-6 py-4 rounded-lg bg-paper-white text-carbon-black hover:bg-mint-chip",
+      "px-6 py-4 rounded-lg bg-text-inverse text-text hover:bg-tint",
     variant === "outline" &&
-      "px-6 py-4 rounded-md border-[1.5px] border-slate text-slate hover:border-carbon-black hover:text-carbon-black",
-      variant === "ghost" && "text-carbon-black",
+      "px-6 py-4 rounded-md border-[1.5px] border-border text-text hover:border-primary hover:text-primary",
+      variant === "ghost" && "text-text",
     className
   );
 

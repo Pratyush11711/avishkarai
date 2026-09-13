@@ -227,9 +227,9 @@ export function WorkRibbon({ triggerEl }: WorkRibbonProps) {
           x1="0"     y1="0"
           x2={box.w} y2={box.h}
         >
-          <stop offset="0%"   stopColor="#b2fbff" stopOpacity="0.85" />
-          <stop offset="48%"  stopColor="#4EE2EF" stopOpacity="1"    />
-          <stop offset="100%" stopColor="#22b8c9" stopOpacity="0.82" />
+          <stop offset="0%"   stopColor="var(--color-secondary)" stopOpacity="0.55" />
+          <stop offset="48%"  stopColor="var(--color-accent)" stopOpacity="0.9"    />
+          <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0.55" />
         </linearGradient>
 
         <filter id={waveId} x="-6%" y="-6%" width="112%" height="112%">
@@ -262,7 +262,7 @@ export function WorkRibbon({ triggerEl }: WorkRibbonProps) {
       <path
         ref={glowRef}
         d={box.d}
-        stroke="#4EE2EF"
+        stroke="var(--color-accent)"
         strokeWidth={sw + 22}
         strokeLinecap="round"
         opacity="0.11"

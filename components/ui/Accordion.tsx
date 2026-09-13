@@ -68,7 +68,7 @@ export function Accordion({
                 <p
                   className={clsx(
                     "pb-5 type-body max-w-[65ch]",
-                    inverted ? "text-smoke" : "text-slate"
+                    inverted ? "text-text-inverse/75" : "text-slate"
                   )}
                 >
                   {item.answer}

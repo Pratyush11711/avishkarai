@@ -53,7 +53,7 @@ export function Nav() {
   }, []);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 pt-[max(12px,env(safe-area-inset-top))] pointer-events-none">
+    <header className="fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none">
       <div className="relative mx-auto w-[min(1080px,calc(100%-16px))] sm:w-[min(1080px,calc(100%-24px))] lg:w-[min(1080px,calc(100%-40px))] pointer-events-auto">
         <div className="relative">
         <GradualBlur
@@ -72,7 +72,7 @@ export function Nav() {
             <BrandLogo on="light" />
           </a>
 
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-4 xl:gap-8 min-w-0">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-8 xl:gap-12 min-w-0">
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.href.replace("#", "");
               return (
@@ -80,9 +80,9 @@ export function Nav() {
                   key={link.href}
                   href={link.href}
                   className={clsx(
-                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none px-2.5 xl:px-3.5 py-2 rounded-full border border-transparent transition-all duration-200",
+                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none px-3.5 xl:px-4 py-2 rounded-full border border-transparent transition-all duration-200",
                     isActive
-                      ? "px-4 xl:px-5 text-[var(--nav-link-active)] bg-[var(--nav-link-chip)] border-[var(--nav-link-chip-border)]"
+                      ? "px-6 xl:px-8 py-2.5 text-[var(--nav-link-active)] bg-[var(--nav-link-chip-active)] border-[var(--nav-link-chip-border)]"
                       : "text-[var(--nav-link)] hover:text-[var(--nav-link-active)] hover:bg-[var(--nav-link-chip)] hover:border-[var(--nav-link-chip-border)]"
                   )}
                 >
@@ -95,7 +95,7 @@ export function Nav() {
           <div className="flex items-center gap-2 shrink-0">
             <a
               href="#contact"
-              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-carbon-black text-paper-white text-[16px] font-semibold leading-none"
+              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-semibold leading-none"
             >
               Book a build
               <span className="w-10 h-10 rounded-full bg-paper-white text-carbon-black inline-flex items-center justify-center shrink-0">
@@ -139,7 +139,7 @@ export function Nav() {
               transition={{ duration: 0.22 }}
               className="lg:hidden overflow-hidden mt-2"
             >
-              <div className="site-nav-pill rounded-[28px] px-5 py-5 flex flex-col gap-1">
+              <div className="site-nav-pill rounded-[28px] px-5 py-5 flex flex-col gap-2">
                 {NAV_LINKS.map((link) => {
                   const isActive = activeSection === link.href.replace("#", "");
                   return (
@@ -147,9 +147,9 @@ export function Nav() {
                       key={link.href}
                       href={link.href}
                       className={clsx(
-                        "text-[15px] font-medium px-3.5 py-2.5 rounded-full",
+                        "text-[15px] font-medium px-4 py-3 rounded-full",
                         isActive
-                          ? "text-[var(--nav-link-active)] bg-[var(--nav-link-chip)]"
+                          ? "text-[var(--nav-link-active)] bg-[var(--nav-link-chip-active)]"
                           : "text-[var(--nav-link)]"
                       )}
                       onClick={() => setMobileOpen(false)}
@@ -160,7 +160,7 @@ export function Nav() {
                 })}
                 <a
                   href="#contact"
-                  className="nav-cta mt-3 inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-carbon-black text-paper-white text-[16px] font-semibold"
+                  className="nav-cta mt-3 inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-semibold"
                   onClick={() => setMobileOpen(false)}
                 >
                   Book a build

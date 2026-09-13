@@ -31,7 +31,7 @@ export function Newsletter() {
 
           {submitted ? (
             <p className="type-body text-carbon-black flex items-center justify-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-voltage-yellow" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent" />
               You're on the list.
             </p>
           ) : (
@@ -42,11 +42,11 @@ export function Newsletter() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="w-full min-w-0 flex-1 px-4 py-3 rounded-lg type-body bg-paper-white text-carbon-black placeholder:text-smoke focus:outline-none focus:ring-2 focus:ring-voltage-yellow"
+                className="w-full min-w-0 flex-1 px-4 py-3 rounded-lg type-body bg-paper-white text-text placeholder:text-smoke focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <button
                 type="submit"
-                className="px-5 py-3 rounded-lg type-body bg-carbon-black text-paper-white hover:bg-graphite transition-colors duration-200 shrink-0"
+                className="px-5 py-3 rounded-lg type-body bg-primary text-text-inverse hover:bg-primary-hover transition-colors duration-200 shrink-0"
               >
                 Subscribe
               </button>

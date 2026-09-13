@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   motion,
   useReducedMotion,
   type Variants,
 } from "framer-motion";
+import { FlipParticleField } from "./lets-work/flip/FlipParticleField";
 import { SandDuneBackground } from "./lets-work/SandDuneBackground";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -23,20 +24,25 @@ const MASK_REVEAL: Variants = {
 };
 
 export function LetsWorkTogether() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const scrollHintRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
+  const [useFallback, setUseFallback] = useState(false);
 
   return (
-    <section
-      ref={sectionRef}
-      className="lwt"
-      aria-label="Work with us"
-    >
-      {/* Height-field sand simulation */}
-      {!reduced && <SandDuneBackground />}
+    <section className="lwt" aria-label="Work with us">
+      <div ref={viewportRef} className="lwt-sticky">
+        {!reduced &&
+          (useFallback ? (
+            <SandDuneBackground />
+          ) : (
+            <FlipParticleField
+              sectionRef={viewportRef}
+              scrollHintRef={scrollHintRef}
+              onUnsupported={() => setUseFallback(true)}
+            />
+          ))}
 
-      {/* Text sits above the particles */}
-      <div className="lwt-sticky">
         <div className="lwt-content">
           <motion.div
             className="lwt-subtitle"
@@ -80,32 +86,32 @@ export function LetsWorkTogether() {
             ))}
           </motion.a>
         </div>
-      </div>
 
-      <div className="lwt-scroll-hint" aria-hidden="true">
-        <span className="lwt-scroll-arrow">
-          <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-            <path
-              d="M6 1v10.5M2 8.5 6 12.5 10 8.5"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        <span>Continue to scroll</span>
-        <span className="lwt-scroll-arrow">
-          <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
-            <path
-              d="M6 1v10.5M2 8.5 6 12.5 10 8.5"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
+        <div ref={scrollHintRef} className="lwt-scroll-hint" aria-hidden="true">
+          <span className="lwt-scroll-arrow">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+              <path
+                d="M6 1v10.5M2 8.5 6 12.5 10 8.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span>Continue to scroll</span>
+          <span className="lwt-scroll-arrow">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+              <path
+                d="M6 1v10.5M2 8.5 6 12.5 10 8.5"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </div>
       </div>
     </section>
   );

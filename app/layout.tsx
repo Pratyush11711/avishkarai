@@ -1,25 +1,7 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { GeistMono } from "geist/font/mono";
+import { SplashCursorLayer } from "@/components/fx/SplashCursorLayer";
+import { aeonik, ibmPlexMono, lusionMono } from "@/lib/fonts";
 import "./globals.css";
-
-const suisseIntl = Inter({
-  subsets: ["latin"],
-  variable: "--font-suisseintl",
-  weight: ["400", "500", "700"],
-});
-
-const suisseIntlCond = Barlow_Condensed({
-  subsets: ["latin"],
-  variable: "--font-suisseintlcond",
-  weight: ["700"],
-});
-
-const jakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-jakarta",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: "Avishkar AI — Product & Engineering Studio",
@@ -35,13 +17,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${suisseIntl.variable} ${suisseIntlCond.variable} ${jakartaSans.variable} ${GeistMono.variable} h-full`}
+      className={`${aeonik.variable} ${ibmPlexMono.variable} ${lusionMono.variable} min-h-full`}
       suppressHydrationWarning
     >
       <body
-        className={`${suisseIntl.className} min-h-full flex flex-col antialiased bg-warm-canvas text-carbon-black`}
+        className={`${aeonik.className} min-h-full flex flex-col antialiased bg-bg text-text`}
         suppressHydrationWarning
       >
+        <SplashCursorLayer />
         {children}
       </body>
     </html>

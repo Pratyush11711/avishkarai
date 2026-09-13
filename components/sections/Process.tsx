@@ -59,8 +59,8 @@ export function Process() {
               className={clsx(
                 "relative overflow-hidden rounded-[32px] p-8 md:p-12",
                 step.inverted
-                  ? "bg-carbon-black text-paper-white"
-                  : "bg-paper-white text-carbon-black"
+                  ? "bg-deep-navy text-text-inverse"
+                  : "bg-paper-white text-text"
               )}
             >
               <div className="grid md:grid-cols-[minmax(7rem,auto)_1fr] gap-6 md:gap-12 items-start">
@@ -84,14 +84,19 @@ export function Process() {
                     )}
                   </div>
 
-                  <p className="type-caption text-smoke mb-4">
+                  <p
+                    className={clsx(
+                      "type-caption mb-4",
+                      step.inverted ? "text-text-inverse/60" : "text-smoke"
+                    )}
+                  >
                     {step.subtitle}
                   </p>
 
                   <p
                     className={clsx(
                       "type-body max-w-[62ch]",
-                      step.inverted ? "text-smoke" : "text-slate"
+                      step.inverted ? "text-text-inverse/75" : "text-slate"
                     )}
                   >
                     {step.body}
