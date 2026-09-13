@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { SectionBoundary } from "@/components/ui/SectionBoundary";
 
@@ -8,17 +8,19 @@ function Empty() {
   return null;
 }
 
+type Loaded = ComponentType<{ children?: ReactNode }>;
+
 function load(
   importer: () => Promise<Record<string, unknown>>,
   names: string[],
   ssr = true
-) {
+): Loaded {
   return dynamic(
     () =>
       importer()
         .then((m) => {
           const Comp = names.map((n) => m[n]).find(Boolean) ?? m.default ?? Empty;
-          return { default: Comp as ComponentType };
+          return { default: Comp as Loaded };
         })
         .catch(() => ({ default: Empty })),
     { ssr }

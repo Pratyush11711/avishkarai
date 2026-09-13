@@ -116,3 +116,5 @@ export function LetsWorkTogether() {
     </section>
   );
 }
+
+export default LetsWorkTogether;

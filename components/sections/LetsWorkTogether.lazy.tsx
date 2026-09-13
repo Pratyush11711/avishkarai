@@ -11,7 +11,7 @@ export const LetsWorkTogether = dynamic(
   () =>
     import("./LetsWorkTogether")
       .then((m) => ({
-        default: m.LetsWorkTogether ?? m.default ?? LwtSlot,
+        default: m.LetsWorkTogether ?? LwtSlot,
       }))
       .catch(() => ({ default: LwtSlot })),
   { ssr: false, loading: () => <LwtSlot /> }
