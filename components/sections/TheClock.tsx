@@ -30,11 +30,16 @@ const INK = [
   "#4fd8ff",
 ];
 
-const BASE_NAVY = "#050a34";
-/** How hard the ink tints the solid section ground. */
-const GROUND_MIX = 0.34;
-/** Wash overlay strength — follows the same ink as the spotlight. */
-const WASH_A = 0.5;
+/** Solid section grounds — dark cousins of the ink, like the reference. */
+const GROUND = [
+  "#050a34",
+  "#0a1550",
+  "#050a34",
+  "#0a1550",
+  "#050a34",
+  "#0a1550",
+  "#050a34",
+];
 
 type ClockLine = { el: HTMLElement };
 
@@ -74,10 +79,6 @@ function paintWash(el: HTMLElement, hex: string, a: number) {
   el.style.setProperty("--clock-g", String(g));
   el.style.setProperty("--clock-b", String(b));
   el.style.setProperty("--clock-a", a.toFixed(3));
-}
-
-function groundFromInk(ink: string) {
-  return mixHex(BASE_NAVY, ink, GROUND_MIX);
 }
 
 function muteLines(lines: ClockLine[]) {
@@ -233,8 +234,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       frameProgress = progress
     ) => {
       const ink = along(INK, progress);
-      section.style.backgroundColor = groundFromInk(ink);
-      if (washEl) paintWash(washEl, ink, WASH_A);
+      if (washEl) paintWash(washEl, ink, 0.12);
       applySpotlight(active, local, ink);
       sequenceRef.current?.setProgress(frameProgress);
     };
@@ -243,8 +243,8 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       [beat1Ref, beat2Ref, beat3Ref, moduleRef, ctaRef].forEach((r) => {
         if (r.current) gsap.set(r.current, { autoAlpha: 1, y: 0 });
       });
-      section.style.backgroundColor = groundFromInk(INK[2]);
-      if (washEl) paintWash(washEl, INK[2], WASH_A);
+      section.style.backgroundColor = GROUND[2];
+      if (washEl) paintWash(washEl, INK[2], 0.22);
       return;
     }
 
@@ -281,8 +281,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       gsap.set(beats, { autoAlpha: 0, y: 24 });
       gsap.set([moduleRef.current, ctaRef.current], { autoAlpha: 0, y: 16 });
       muteLines(allLines);
-      section.style.backgroundColor = groundFromInk(INK[0]);
-      if (washEl) paintWash(washEl, INK[0], WASH_A);
+      if (washEl) paintWash(washEl, INK[0], 0);
 
       const textTl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
