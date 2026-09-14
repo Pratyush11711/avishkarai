@@ -150,6 +150,7 @@ export function ExpertiseSection() {
     function arrange(dt = 1 / 60) {
       const rect = scrollEl.getBoundingClientRect();
       const scrollable = Math.max(1, scrollEl.offsetHeight - window.innerHeight);
+      /* Stay stacked until the section has docked, then deal on further scroll. */
       let target =
         paused || mobile.matches || dealtRef.current
           ? 1
@@ -157,14 +158,14 @@ export function ExpertiseSection() {
               0,
               Math.min(
                 1,
-                (window.innerHeight * 0.18 - rect.top) / (scrollable * 0.78)
+                (-rect.top) / (scrollable * 0.88)
               )
             );
 
-      progressRef.current = damp(progressRef.current, target, 5.5, dt);
+      progressRef.current = damp(progressRef.current, target, 4.2, dt);
       const n = cards.length;
       const center = (n - 1) / 2;
-      const staggerBudget = 0.22;
+      const staggerBudget = 0.28;
       const t = lastTimeRef.current;
 
       cards.forEach((card, i) => {
@@ -182,7 +183,7 @@ export function ExpertiseSection() {
         const autoBack = !(
           mobile.matches ||
           paused ||
-          spread > 0.55
+          spread > 0.62
         );
         const showBack = man.has(i) ? (man.get(i) as boolean) : autoBack;
         setFace(i, showBack, !man.has(i) && !mobile.matches && !paused);
@@ -202,16 +203,31 @@ export function ExpertiseSection() {
           );
           const cardH = cardW * CARD_RATIO;
           const step = cardW + gutter;
+          const stackX = offset * 4;
+          const stackY = -offset * 3;
+          const stackAngle = offset * 1.15;
           const fanX = offset * Math.min(64, cardW * 0.28);
           const fanY = Math.abs(offset) * 10;
           const fanAngle = offset * 7;
           const rowX = offset * step;
           const floatY = paused
             ? 0
-            : Math.sin(t * 0.00155 + i * 1.12) * (4 + 3 * (1 - spread));
-          const x = fanX + (rowX - fanX) * spread;
-          const y = fanY + (0 - fanY) * spread + floatY;
-          const angle = fanAngle * (1 - spread);
+            : Math.sin(t * 0.00155 + i * 1.12) * (2 + 4 * (1 - spread));
+
+          let x: number;
+          let y: number;
+          let angle: number;
+          if (spread < 0.42) {
+            const k = smoothstep(spread / 0.42);
+            x = stackX + (fanX - stackX) * k;
+            y = stackY + (fanY - stackY) * k + floatY;
+            angle = stackAngle + (fanAngle - stackAngle) * k;
+          } else {
+            const k = smoothstep((spread - 0.42) / 0.58);
+            x = fanX + (rowX - fanX) * k;
+            y = fanY + (0 - fanY) * k + floatY;
+            angle = fanAngle * (1 - k);
+          }
 
           card.style.width = `${cardW}px`;
           card.style.height = `${cardH}px`;

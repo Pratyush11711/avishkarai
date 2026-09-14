@@ -2,11 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ScrollTrigger } from "@/lib/gsap";
 import { PrincipleRail } from "@/components/sections/PrincipleRail";
 import { usePrefersReducedMotion } from "@/components/hero/HeroVideo";
-
-const AUTO_ADVANCE_MS = 6000;
-const TOUCH_RESUME_MS = 1500;
 
 type Principle = {
   id: string;
@@ -56,6 +54,16 @@ const PRINCIPLES: Principle[] = [
   },
 ];
 
+const COUNT = PRINCIPLES.length;
+
+function splitProgress(progress: number) {
+  const p = Math.min(1, Math.max(0, progress));
+  const scaled = p * COUNT;
+  const index = Math.min(COUNT - 1, Math.floor(scaled));
+  const segmentFill = Math.min(1, scaled - index);
+  return { index, segmentFill, overallProgress: p };
+}
+
 function BulletList({
   bullets,
   reducedMotion,
@@ -73,7 +81,7 @@ function BulletList({
           transition={
             reducedMotion
               ? { duration: 0 }
-              : { delay: 0.1 + i * 0.08, duration: 0.25 }
+              : { delay: 0.08 + i * 0.06, duration: 0.22 }
           }
           className="flex items-start gap-3"
         >
@@ -112,23 +120,38 @@ function HeadingConnector({ reducedMotion }: { reducedMotion: boolean }) {
 export function WhatWeStandOn() {
   "use no memo";
   const reducedMotion = usePrefersReducedMotion();
+  const trackRef = useRef<HTMLElement>(null);
+  const stRef = useRef<ScrollTrigger | null>(null);
+  const indexRef = useRef(0);
+
   const [index, setIndex] = useState(0);
-  const [fillKey, setFillKey] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [inView, setInView] = useState(false);
+  const [segmentFill, setSegmentFill] = useState(0);
+  const [overallProgress, setOverallProgress] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [compact, setCompact] = useState(false);
-  const touchResumeRef = useRef<number>(0);
-  const indexRef = useRef(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-  indexRef.current = index;
 
-  const goTo = useCallback((next: number) => {
-    const current = indexRef.current;
-    const wrapped = (next + PRINCIPLES.length) % PRINCIPLES.length;
-    setDirection(next < current || (current === 0 && next < 0) ? -1 : 1);
-    setIndex(wrapped);
-    setFillKey((k) => k + 1);
+  const targetRef = useRef(0);
+  const currentRef = useRef(0);
+  const rafRef = useRef(0);
+
+  const lastFillRef = useRef(-1);
+  const lastProgressRef = useRef(-1);
+
+  const paint = useCallback((progress: number) => {
+    const next = splitProgress(progress);
+    if (next.index !== indexRef.current) {
+      setDirection(next.index > indexRef.current ? 1 : -1);
+      indexRef.current = next.index;
+      setIndex(next.index);
+    }
+    if (Math.abs(next.segmentFill - lastFillRef.current) > 0.002) {
+      lastFillRef.current = next.segmentFill;
+      setSegmentFill(next.segmentFill);
+    }
+    if (Math.abs(next.overallProgress - lastProgressRef.current) > 0.002) {
+      lastProgressRef.current = next.overallProgress;
+      setOverallProgress(next.overallProgress);
+    }
   }, []);
 
   useEffect(() => {
@@ -140,29 +163,61 @@ export function WhatWeStandOn() {
   }, []);
 
   useEffect(() => {
-    const node = cardRef.current;
-    if (!node) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: "80px 0px" }
-    );
-    io.observe(node);
-    return () => io.disconnect();
-  }, []);
+    const track = trackRef.current;
+    if (!track || reducedMotion) {
+      paint(0);
+      return;
+    }
 
-  useEffect(() => {
-    if (reducedMotion || paused || !inView) return undefined;
-    const id = window.setTimeout(() => {
-      goTo(indexRef.current + 1);
-    }, AUTO_ADVANCE_MS);
-    return () => window.clearTimeout(id);
-  }, [index, fillKey, paused, inView, reducedMotion, goTo]);
+    const st = ScrollTrigger.create({
+      id: "principles-rail",
+      trigger: track,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 1.6,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => {
+        targetRef.current = self.progress;
+      },
+    });
+    stRef.current = st;
+    targetRef.current = st.progress;
+    currentRef.current = st.progress;
+    paint(st.progress);
 
-  useEffect(() => {
-    return () => {
-      if (touchResumeRef.current) window.clearTimeout(touchResumeRef.current);
+    const tick = () => {
+      const cur = currentRef.current;
+      const next = cur + (targetRef.current - cur) * 0.08;
+      currentRef.current = Math.abs(targetRef.current - next) < 0.0008 ? targetRef.current : next;
+      paint(currentRef.current);
+      rafRef.current = requestAnimationFrame(tick);
     };
-  }, []);
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      st.kill();
+      stRef.current = null;
+    };
+  }, [paint, reducedMotion]);
+
+  const goTo = useCallback(
+    (next: number) => {
+      const clamped = Math.min(COUNT - 1, Math.max(0, next));
+      const st = stRef.current;
+      if (st && !reducedMotion) {
+        const span = st.end - st.start;
+        st.scroll(st.start + ((clamped + 0.08) / COUNT) * span);
+        return;
+      }
+      setDirection(clamped > indexRef.current ? 1 : -1);
+      indexRef.current = clamped;
+      setIndex(clamped);
+      setSegmentFill(1);
+      setOverallProgress((clamped + 1) / COUNT);
+    },
+    [reducedMotion]
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
@@ -175,25 +230,13 @@ export function WhatWeStandOn() {
     }
   };
 
-  const handleTouchStart = () => {
-    if (touchResumeRef.current) window.clearTimeout(touchResumeRef.current);
-    setPaused(true);
-  };
-
-  const handleTouchEnd = () => {
-    if (touchResumeRef.current) window.clearTimeout(touchResumeRef.current);
-    touchResumeRef.current = window.setTimeout(() => {
-      setPaused(false);
-      setFillKey((k) => k + 1);
-    }, TOUCH_RESUME_MS);
-  };
-
   const active = PRINCIPLES[index];
 
   return (
     <section
+      ref={trackRef}
       id="principles"
-      className="relative z-0 pb-14 md:pb-20 pt-[calc(5.5rem+24px)]"
+      className="principles-track relative z-0"
       aria-label="What we stand on"
       style={
         {
@@ -202,76 +245,69 @@ export function WhatWeStandOn() {
         } as React.CSSProperties
       }
     >
-      <div className="page-wrap">
-        <div className="mb-16">
-          <span className="type-caption text-smoke">What we stand on</span>
-          <h2 className="type-heading mt-3 max-w-[16ch] text-carbon-black">
-            The principles behind every build.
-          </h2>
-        </div>
+      <div className="principles-sticky">
+        <div className="page-wrap">
+          <div className="mb-16">
+            <span className="type-caption text-smoke">What we stand on</span>
+            <h2 className="type-heading mt-3 max-w-[16ch] text-carbon-black">
+              The principles behind every build.
+            </h2>
+          </div>
 
-        <div className="relative">
-          <HeadingConnector reducedMotion={reducedMotion} />
+          <div className="relative">
+            <HeadingConnector reducedMotion={reducedMotion} />
 
-          <div
-            ref={cardRef}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => {
-              setPaused(false);
-              setFillKey((k) => k + 1);
-            }}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            className="relative rounded-[32px] bg-paper-white p-8 shadow-sm outline-none md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
-          >
-            <PrincipleRail
-              count={PRINCIPLES.length}
-              activeIndex={index}
-              fillKey={fillKey}
-              paused={paused}
-              onSelect={goTo}
-              compact={compact}
-              reducedMotion={reducedMotion}
-            />
+            <div
+              tabIndex={0}
+              onKeyDown={handleKeyDown}
+              className="relative min-h-[28rem] rounded-[32px] bg-paper-white p-8 shadow-sm outline-none md:min-h-[32rem] md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+            >
+              <PrincipleRail
+                count={COUNT}
+                activeIndex={index}
+                segmentFill={reducedMotion ? 1 : segmentFill}
+                overallProgress={reducedMotion ? (index + 1) / COUNT : overallProgress}
+                onSelect={goTo}
+                compact={compact}
+              />
 
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={active.id}
-                role="tabpanel"
-                id="principles-panel"
-                aria-live="polite"
-                aria-labelledby={`principle-title-${active.id}`}
-                custom={direction}
-                initial={
-                  reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * 24 }
-                }
-                animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                exit={
-                  reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * -24 }
-                }
-                transition={
-                  reducedMotion
-                    ? { duration: 0.12 }
-                    : { duration: 0.22, ease: [0.4, 0, 0.2, 1] }
-                }
-                className="mt-8"
-              >
-                <span className="type-caption text-smoke">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3
-                  id={`principle-title-${active.id}`}
-                  className="mt-2 max-w-[14ch] font-medium tracking-[-0.02em] text-carbon-black text-[28px] md:text-4xl md:leading-[1.15]"
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={active.id}
+                  role="tabpanel"
+                  id="principles-panel"
+                  aria-live="polite"
+                  aria-labelledby={`principle-title-${active.id}`}
+                  custom={direction}
+                  initial={
+                    reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * 24 }
+                  }
+                  animate={reducedMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                  exit={
+                    reducedMotion ? { opacity: 0 } : { opacity: 0, x: direction * -24 }
+                  }
+                  transition={
+                    reducedMotion
+                      ? { duration: 0.12 }
+                      : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+                  }
+                  className="mt-8"
                 >
-                  {active.title}
-                </h3>
-                <p className="mt-4 text-lg text-slate">{active.intro}</p>
-                <BulletList bullets={active.bullets} reducedMotion={reducedMotion} />
-                <p className="mt-6 font-semibold text-carbon-black">{active.closer}</p>
-              </motion.div>
-            </AnimatePresence>
+                  <span className="type-caption text-smoke">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3
+                    id={`principle-title-${active.id}`}
+                    className="mt-2 max-w-[14ch] font-medium tracking-[-0.02em] text-carbon-black text-[28px] md:text-4xl md:leading-[1.15]"
+                  >
+                    {active.title}
+                  </h3>
+                  <p className="mt-4 text-lg text-slate">{active.intro}</p>
+                  <BulletList bullets={active.bullets} reducedMotion={reducedMotion} />
+                  <p className="mt-6 font-semibold text-carbon-black">{active.closer}</p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

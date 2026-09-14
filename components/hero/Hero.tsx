@@ -13,7 +13,10 @@ const HeroCrossField = dynamic(
       .then((m) => ({
         default: m.HeroCrossField ?? m.default ?? (() => null),
       }))
-      .catch(() => ({ default: () => null })),
+      .catch((error) => {
+        console.error("HeroCrossField failed to load", error);
+        return { default: () => null };
+      }),
   { ssr: false }
 );
 

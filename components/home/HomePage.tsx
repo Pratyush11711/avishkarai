@@ -95,7 +95,7 @@ export function HomePage() {
           <TheClock />
         </SectionBoundary>
 
-        <div className="curtain z-[4] bg-bg">
+        <div className="relative z-[4] bg-bg">
           <SectionBoundary>
             <WhatWeStandOn />
           </SectionBoundary>
