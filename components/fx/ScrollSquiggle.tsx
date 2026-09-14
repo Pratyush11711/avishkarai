@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
-import { ScrollTrigger } from "@/lib/gsap";
 
 /** Exact path from https://codepen.io/juan-frontdev/pen/JjQdaMN */
 const SQUIGGLE_D =
   "m-78-34c108.3-28.4 485.8 139.4 496 376 5.3 122.6-83.2 290.8-160 280-64.3-9.1-137.7-190.7-124-240 27.7-99.5 335.1 309.8 500 216 46.7-26.5 81.5-109.2 55-144-24.3-31.8-89-28.7-141 0-187.3 103.3-87.2 240.8-209 463-79.5 145.1-99.2 309.1-176 281-25.7-9.4-60.4-61.1-46-101 11.4-31.6 40.1-55 73-49 186.5 34.2 363.4 177.8 338 366-12.6 93.3-178.9 150.3-157.6 190.3 21.6 40.5 230.9-4.4 248.6-32.3 25.1-39.4-230.2-181.8-333-121-90.9 53.7-136.6 191.7-79 303 41.8 80.8 149.1 28.2 196 115 41.7 77.1 15.5 238.1 0 202";
+
+function clamp01(n: number) {
+  return n < 0 ? 0 : n > 1 ? 1 : n;
+}
 
 export function ScrollSquiggle({ children }: { children: ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -17,29 +20,72 @@ export function ScrollSquiggle({ children }: { children: ReactNode }) {
     const path = pathRef.current;
     if (!wrap || !path) return;
 
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const length = path.getTotalLength();
+    path.style.strokeDasharray = `${length}`;
+
     const paint = (progress: number) => {
-      path.style.strokeDasharray = `${length}`;
-      path.style.strokeDashoffset = `${length * (1 - progress)}`;
+      path.style.strokeDashoffset = `${length * (1 - clamp01(progress))}`;
     };
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (reduced) {
       paint(1);
       return;
     }
 
     paint(0);
 
-    const st = ScrollTrigger.create({
-      trigger: wrap,
-      start: "top 80%",
-      end: "bottom top",
-      scrub: 0.45,
-      invalidateOnRefresh: true,
-      onUpdate: (self) => paint(self.progress),
-    });
+    const measure = () => {
+      const faq = document.getElementById("faq");
+      const startLine = window.innerHeight * 0.8;
+      const from = wrap.getBoundingClientRect().top;
+      const to = faq ? faq.getBoundingClientRect().top : wrap.getBoundingClientRect().bottom;
+      const span = to - from;
+      if (span <= 1) {
+        paint(from <= startLine ? 1 : 0);
+        return;
+      }
+      paint((startLine - from) / span);
+    };
 
-    return () => st.kill();
+    let raf = 0;
+    let watching = false;
+
+    const loop = () => {
+      measure();
+      raf = requestAnimationFrame(loop);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!watching) {
+            watching = true;
+            raf = requestAnimationFrame(loop);
+          }
+        } else {
+          watching = false;
+          cancelAnimationFrame(raf);
+          measure();
+        }
+      },
+      { rootMargin: "20% 0px" }
+    );
+    io.observe(wrap);
+    const faq = document.getElementById("faq");
+    if (faq) io.observe(faq);
+
+    measure();
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+
+    return () => {
+      watching = false;
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   const gradId = `squiggle-grad-${uid}`;
