@@ -1904,6 +1904,14 @@ a:focus-visible .cta-wipe-band {
   scroll-margin-top: 88px;
 }
 
+#studio,
+#work,
+#capabilities,
+#process,
+#contact {
+  scroll-margin-top: 96px;
+}
+
 .lh-ribbon {
   position: fixed;
   inset: 0;

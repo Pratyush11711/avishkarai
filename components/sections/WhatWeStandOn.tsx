@@ -230,7 +230,7 @@ export function WhatWeStandOn() {
   return (
     <section
       ref={trackRef}
-      id="principles"
+      id="studio"
       className="principles-track relative z-0"
       aria-label="What we stand on"
       style={

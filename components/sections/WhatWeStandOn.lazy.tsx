@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 function PrinciplesSlot() {
   return (
     <section
-      id="principles"
+      id="studio"
       aria-hidden
       className="relative z-0 min-h-[24rem] pb-14 pt-[calc(5.5rem+24px)] md:pb-20"
     />

@@ -4,6 +4,22 @@ import { useEffect, useRef } from "react";
 import Lenis from "lenis";
 import { gsap, ScrollTrigger } from "./gsap";
 
+const NAV_OFFSET = -96;
+
+function scrollToHash(hash: string, lenis: Lenis | null) {
+  const id = hash.replace(/^#/, "");
+  if (!id) return false;
+  const el = document.getElementById(id);
+  if (!el) return false;
+  if (lenis) {
+    lenis.scrollTo(el, { offset: NAV_OFFSET, duration: 1.05 });
+  } else {
+    const top = el.getBoundingClientRect().top + window.scrollY + NAV_OFFSET;
+    window.scrollTo({ top, behavior: "smooth" });
+  }
+  return true;
+}
+
 export function SmoothScrollProvider({
   children,
 }: {
@@ -52,7 +68,29 @@ export function SmoothScrollProvider({
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(ticker);
       lenis.destroy();
+      lenisRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const link = (event.target as HTMLElement | null)?.closest("a[href^='#']");
+      if (!link) return;
+      const href = link.getAttribute("href");
+      if (!href || href === "#") return;
+      if (!scrollToHash(href, lenisRef.current)) return;
+      event.preventDefault();
+      history.pushState(null, "", href);
+    };
+
+    document.addEventListener("click", onClick);
+    if (window.location.hash) {
+      requestAnimationFrame(() => {
+        scrollToHash(window.location.hash, lenisRef.current);
+      });
+    }
+
+    return () => document.removeEventListener("click", onClick);
   }, []);
 
   return <>{children}</>;
