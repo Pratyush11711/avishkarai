@@ -27,7 +27,7 @@ export function PrincipleRail({
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute top-1/2 z-[1] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] opacity-70 blur-xl"
+        className="pointer-events-none absolute top-1/2 z-[1] h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] opacity-55 blur-md"
         style={{ left: `${tip * 100}%` }}
       />
 
@@ -63,7 +63,7 @@ export function PrincipleRail({
 
       <span
         aria-hidden
-        className="pointer-events-none absolute top-1/2 z-[3] h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] shadow-[0_0_18px_5px_rgba(48,64,255,0.5)]"
+        className="pointer-events-none absolute top-1/2 z-[3] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] shadow-[0_0_8px_2px_rgba(48,64,255,0.4)]"
         style={{ left: `${tip * 100}%` }}
       />
     </div>
