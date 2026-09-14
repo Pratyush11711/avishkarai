@@ -11,6 +11,7 @@ import {
 } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ClockLoopVideo } from "@/components/sections/ClockVideos";
 import {
   ScrollScrubSequence,
   type ScrollScrubSequenceHandle,
@@ -255,6 +256,19 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
+  const [isDesktop, setIsDesktop] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 768px)").matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -419,14 +433,18 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         className="clock-section"
         aria-label="The Clock"
       >
-      <ScrollScrubSequence
-        ref={sequenceRef}
-        framePath="/combined"
-        frameCount={154}
-        frameNamePattern="ezgif-frame-XXX.jpg"
-        posterSrc="/combined/ezgif-frame-001.jpg"
-        className="clock-videos-wrap clock-sequence"
-      />
+      {isDesktop ? (
+        <ScrollScrubSequence
+          ref={sequenceRef}
+          framePath="/combined"
+          frameCount={154}
+          frameNamePattern="ezgif-frame-XXX.jpg"
+          posterSrc="/combined/ezgif-frame-001.jpg"
+          className="clock-videos-wrap clock-sequence"
+        />
+      ) : (
+        <ClockLoopVideo reducedMotion={reducedMotion} />
+      )}
       <div className="clock-scene-scrim" aria-hidden />
       <div ref={washRef} className="clock-wash" aria-hidden />
       <div className="relative z-[2] h-full flex flex-col justify-center page-wrap py-16 pb-64 md:py-20">

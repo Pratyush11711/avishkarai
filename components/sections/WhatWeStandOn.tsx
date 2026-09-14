@@ -55,12 +55,27 @@ const PRINCIPLES: Principle[] = [
 ];
 
 const COUNT = PRINCIPLES.length;
+const INDEX_THRESH = 0.08;
 
-function splitProgress(progress: number) {
+function splitProgress(progress: number, heldIndex: number) {
   const p = Math.min(1, Math.max(0, progress));
   const scaled = p * COUNT;
-  const index = Math.min(COUNT - 1, Math.floor(scaled));
-  const segmentFill = Math.min(1, scaled - index);
+  const rawIndex = Math.min(COUNT - 1, Math.max(0, Math.floor(scaled)));
+  const local = scaled - rawIndex;
+
+  let index = heldIndex;
+  if (rawIndex > heldIndex) {
+    if (rawIndex >= heldIndex + 2 || local >= INDEX_THRESH) index = rawIndex;
+  } else if (rawIndex < heldIndex) {
+    if (rawIndex <= heldIndex - 2 || local <= 1 - INDEX_THRESH) index = rawIndex;
+  } else {
+    index = rawIndex;
+  }
+  index = Math.min(COUNT - 1, Math.max(0, index));
+
+  const segmentFill =
+    rawIndex > index ? 1 : rawIndex < index ? 0 : Math.min(1, Math.max(0, local));
+
   return { index, segmentFill, overallProgress: p };
 }
 
@@ -72,22 +87,25 @@ function BulletList({
   reducedMotion: boolean;
 }) {
   return (
-    <ul className="mt-4 space-y-3">
+    <ul className="mt-3 space-y-2 md:mt-4 md:space-y-3">
       {bullets.map((b, i) => (
-        <motion.li
-          key={b}
-          initial={reducedMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={
-            reducedMotion
-              ? { duration: 0 }
-              : { delay: 0.08 + i * 0.06, duration: 0.22 }
-          }
-          className="flex items-start gap-3"
-        >
+        <li key={b} className="flex items-start gap-3">
           <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
-          <span className="font-mono text-sm text-slate">{b}</span>
-        </motion.li>
+          <span className="principles-line min-w-0 flex-1">
+            <motion.span
+              initial={reducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={
+                reducedMotion
+                  ? { duration: 0 }
+                  : { delay: 0.08 + i * 0.06, duration: 0.22 }
+              }
+              className="block font-mono text-sm leading-snug text-slate"
+            >
+              {b}
+            </motion.span>
+          </span>
+        </li>
       ))}
     </ul>
   );
@@ -138,7 +156,7 @@ export function WhatWeStandOn() {
   const lastProgressRef = useRef(-1);
 
   const paint = useCallback((progress: number) => {
-    const next = splitProgress(progress);
+    const next = splitProgress(progress, indexRef.current);
     if (next.index !== indexRef.current) {
       setDirection(next.index > indexRef.current ? 1 : -1);
       indexRef.current = next.index;
@@ -174,7 +192,7 @@ export function WhatWeStandOn() {
       trigger: track,
       start: "top top",
       end: "bottom bottom",
-      scrub: 1.6,
+      scrub: 1.8,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         targetRef.current = self.progress;
@@ -184,6 +202,7 @@ export function WhatWeStandOn() {
     targetRef.current = st.progress;
     currentRef.current = st.progress;
     paint(st.progress);
+    ScrollTrigger.refresh();
 
     const tick = () => {
       const cur = currentRef.current;
@@ -207,7 +226,7 @@ export function WhatWeStandOn() {
       const st = stRef.current;
       if (st && !reducedMotion) {
         const span = st.end - st.start;
-        st.scroll(st.start + ((clamped + 0.08) / COUNT) * span);
+        st.scroll(st.start + ((clamped + 0.22) / COUNT) * span);
         return;
       }
       setDirection(clamped > indexRef.current ? 1 : -1);
@@ -242,14 +261,15 @@ export function WhatWeStandOn() {
         {
           "--accent": "var(--color-primary)",
           "--rail-track": "color-mix(in srgb, var(--color-text) 10%, transparent)",
+          "--principles-runway": COUNT,
         } as React.CSSProperties
       }
     >
       <div className="principles-sticky">
-        <div className="page-wrap">
-          <div className="mb-16">
+        <div className="page-wrap principles-sticky-inner">
+          <div className="mb-6 md:mb-8">
             <span className="type-caption text-smoke">What we stand on</span>
-            <h2 className="type-heading mt-3 max-w-[16ch] text-carbon-black">
+            <h2 className="type-heading mt-2 max-w-[16ch] text-carbon-black md:mt-3">
               The principles behind every build.
             </h2>
           </div>
@@ -260,7 +280,7 @@ export function WhatWeStandOn() {
             <div
               tabIndex={0}
               onKeyDown={handleKeyDown}
-              className="relative min-h-[28rem] rounded-[32px] bg-paper-white p-8 shadow-sm outline-none md:min-h-[32rem] md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+              className="principles-card relative rounded-[32px] bg-paper-white p-6 shadow-sm outline-none md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
             >
               <PrincipleRail
                 count={COUNT}
@@ -291,7 +311,7 @@ export function WhatWeStandOn() {
                       ? { duration: 0.12 }
                       : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
                   }
-                  className="mt-8"
+                  className="mt-5 overflow-visible md:mt-8"
                 >
                   <span className="type-caption text-smoke">
                     {String(index + 1).padStart(2, "0")}
@@ -304,7 +324,7 @@ export function WhatWeStandOn() {
                   </h3>
                   <p className="mt-4 text-lg text-slate">{active.intro}</p>
                   <BulletList bullets={active.bullets} reducedMotion={reducedMotion} />
-                  <p className="mt-6 font-semibold text-carbon-black">{active.closer}</p>
+                  <p className="mt-4 font-semibold text-carbon-black md:mt-6">{active.closer}</p>
                 </motion.div>
               </AnimatePresence>
             </div>

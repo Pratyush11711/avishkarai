@@ -24,7 +24,7 @@ function useInView(once = true, eager = false) {
           if (once) io.disconnect();
         }
       },
-      { rootMargin: "-10% 0px -10% 0px", threshold: 0.2 }
+      { rootMargin: "20% 0px 20% 0px", threshold: 0.01 }
     );
     io.observe(node);
     return () => io.disconnect();
@@ -36,14 +36,18 @@ function useInView(once = true, eager = false) {
 export function HeadingReveal({
   text,
   eager = false,
+  accent = false,
+  startIndex = 0,
 }: {
   text: string;
   eager?: boolean;
+  accent?: boolean;
+  startIndex?: number;
 }) {
   const { ref, on } = useInView(true, eager);
   const words = text.split(" ");
 
-  let index = 0;
+  let index = startIndex;
   return (
     <span ref={ref} className={on ? "is-type-on" : undefined}>
       {words.map((word, w) => {
@@ -57,7 +61,7 @@ export function HeadingReveal({
                   return (
                     <span
                       key={`${ch}-${i}`}
-                      className="lusion-type-char lusion-type-char-head"
+                      className={`lusion-type-char lusion-type-char-head${accent ? " lusion-type-char-accent" : ""}`}
                       style={{ "--i": i } as React.CSSProperties}
                     >
                       {ch}
@@ -83,7 +87,6 @@ export function LineReveal({
 }) {
   const { ref, on } = useInView();
   const words = text.split(" ");
-  let index = 0;
 
   return (
     <span ref={ref} className={`${className ?? ""} ${on ? "is-type-on" : ""}`.trim()}>
@@ -91,18 +94,12 @@ export function LineReveal({
         <span key={`${word}-${w}`}>
           <span className="lusion-type-word">
             <span className="lusion-type-line">
-              {Array.from(word).map((ch) => {
-                const i = index++;
-                return (
-                  <span
-                    key={`${ch}-${i}`}
-                    className="lusion-type-char"
-                    style={{ "--i": i } as React.CSSProperties}
-                  >
-                    {ch}
-                  </span>
-                );
-              })}
+              <span
+                className="lusion-type-char lusion-type-char-copy"
+                style={{ "--i": Math.min(w, 8) } as React.CSSProperties}
+              >
+                {word}
+              </span>
             </span>
           </span>
           {w < words.length - 1 ? " " : null}

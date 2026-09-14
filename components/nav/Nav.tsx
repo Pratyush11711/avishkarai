@@ -52,9 +52,38 @@ export function Nav() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    const onResize = () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [mobileOpen]);
+
   return (
     <header className="fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none">
-      <div className="relative mx-auto w-[min(1080px,calc(100%-16px))] sm:w-[min(1080px,calc(100%-24px))] lg:w-[min(1080px,calc(100%-40px))] pointer-events-auto">
+      {mobileOpen && (
+        <button
+          type="button"
+          className="lg:hidden fixed inset-0 z-0 bg-[#12131a]/30 pointer-events-auto"
+          aria-label="Close menu"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <div className="relative z-[1] mx-auto w-[min(1080px,calc(100%-16px))] sm:w-[min(1080px,calc(100%-24px))] lg:w-[min(1080px,calc(100%-40px))] pointer-events-auto">
         <div className="relative">
         <GradualBlur
           contain
@@ -80,7 +109,7 @@ export function Nav() {
                   key={link.href}
                   href={link.href}
                   className={clsx(
-                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none px-3.5 xl:px-4 py-2 rounded-full border border-transparent transition-all duration-200",
+                    "whitespace-nowrap text-[14px] xl:text-[15px] font-normal leading-none tracking-[-0.038em] px-3.5 xl:px-4 py-2 rounded-full border border-transparent transition-all duration-200",
                     isActive
                       ? "px-6 xl:px-8 py-2.5 text-[var(--nav-link-active)] bg-[var(--nav-link-chip-active)] border-[var(--nav-link-chip-border)]"
                       : "text-[var(--nav-link)] hover:text-[var(--nav-link-active)] hover:bg-[var(--nav-link-chip)] hover:border-[var(--nav-link-chip-border)]"
@@ -95,7 +124,7 @@ export function Nav() {
           <div className="flex items-center gap-2 shrink-0">
             <a
               href="#contact"
-              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-semibold leading-none"
+              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-normal leading-none tracking-[-0.038em]"
             >
               Book a build
               <span className="w-10 h-10 rounded-full bg-paper-white text-carbon-black inline-flex items-center justify-center shrink-0">
@@ -107,9 +136,11 @@ export function Nav() {
 
             <button
               type="button"
-              className="lg:hidden w-10 h-10 rounded-full inline-flex items-center justify-center text-carbon-black bg-mist-gray border border-ash"
+              className="lg:hidden w-11 h-11 rounded-full inline-flex items-center justify-center text-carbon-black bg-mist-gray border border-ash"
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label="Toggle menu"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 {mobileOpen ? (
@@ -133,13 +164,14 @@ export function Nav() {
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
+              id="mobile-nav"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="lg:hidden overflow-hidden mt-2"
+              className="lg:hidden overflow-hidden mt-2 relative z-[2]"
             >
-              <div className="site-nav-pill rounded-[28px] px-5 py-5 flex flex-col gap-2">
+              <nav className="site-nav-mobile rounded-[28px] px-3 py-3 flex flex-col gap-1 max-h-[min(70dvh,calc(100dvh-5.5rem))] overflow-y-auto">
                 {NAV_LINKS.map((link) => {
                   const isActive = activeSection === link.href.replace("#", "");
                   return (
@@ -147,10 +179,8 @@ export function Nav() {
                       key={link.href}
                       href={link.href}
                       className={clsx(
-                        "text-[15px] font-medium px-4 py-3 rounded-full",
-                        isActive
-                          ? "text-[var(--nav-link-active)] bg-[var(--nav-link-chip-active)]"
-                          : "text-[var(--nav-link)]"
+                        "flex items-center min-h-12 px-4 rounded-2xl text-[16px] font-normal tracking-[-0.038em] text-carbon-black",
+                        isActive ? "bg-mist-gray" : "bg-transparent"
                       )}
                       onClick={() => setMobileOpen(false)}
                     >
@@ -160,7 +190,7 @@ export function Nav() {
                 })}
                 <a
                   href="#contact"
-                  className="nav-cta mt-3 inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-semibold"
+                  className="nav-cta mt-2 inline-flex items-center justify-between gap-3 min-h-12 pl-5 pr-1.5 py-1.5 rounded-full bg-primary text-text-inverse text-[16px] font-normal tracking-[-0.038em]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Book a build
@@ -170,7 +200,7 @@ export function Nav() {
                     </span>
                   </span>
                 </a>
-              </div>
+              </nav>
             </motion.div>
           )}
         </AnimatePresence>

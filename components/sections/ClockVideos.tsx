@@ -11,6 +11,51 @@ function restart(video: HTMLVideoElement | null) {
   video.play().catch(() => {});
 }
 
+/** Temporary looped preview in the clock slot. Swap back to ScrollScrubSequence when done. */
+export function ClockLoopVideo({
+  src = "/clock.mp4",
+  reducedMotion = false,
+}: {
+  src?: string;
+  reducedMotion?: boolean;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (reducedMotion) {
+      video.pause();
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, [reducedMotion]);
+
+  return (
+    <div className="clock-videos-wrap clock-sequence" aria-hidden="true">
+      <video
+        ref={videoRef}
+        className="clock-loop-video"
+        src={src}
+        muted
+        loop
+        playsInline
+        autoPlay={!reducedMotion}
+        preload="auto"
+      />
+    </div>
+  );
+}
+
 export function ClockVideos({
   playing,
   active,

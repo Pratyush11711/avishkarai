@@ -20,16 +20,6 @@ const HeroCrossField = dynamic(
   { ssr: false }
 );
 
-const HeroReel = dynamic(
-  () =>
-    import("./HeroReel")
-      .then((m) => ({
-        default: m.HeroReel ?? m.default ?? (() => null),
-      }))
-      .catch(() => ({ default: () => null })),
-  { ssr: false }
-);
-
 const HeroRibbon = dynamic(
   () =>
     import("./HeroRibbon")
@@ -67,15 +57,12 @@ export function Hero() {
           aria-label="Hero"
         >
           <div className="lh-intro-copy">
-            <p className="lh-kicker">
-              <span className="lh-kicker-dot" aria-hidden="true" />
-              Product &amp; engineering studio
-            </p>
             <h1 className="lh-intro-title">
-              <HeadingReveal
-                eager
-                text="We build production-grade software and interactive product experiences that help teams ship in eight weeks"
-              />
+              We build production-grade software
+              <br className="lh-intro-br" />
+              and interactive product experiences
+              <br className="lh-intro-br" />
+              that help teams ship in eight weeks.
             </h1>
           </div>
 
@@ -145,10 +132,6 @@ export function Hero() {
             </div>
           </div>
         </section>
-
-        <HeroErrorBoundary fallback={null}>
-          <HeroReel />
-        </HeroErrorBoundary>
       </div>
     </>
   );

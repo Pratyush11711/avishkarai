@@ -121,6 +121,11 @@ export function HeroRibbon({
     const draw = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
+      if (vw <= 900) {
+        ctx.clearRect(0, 0, vw, vh);
+        raf = 0;
+        return;
+      }
       const rect = trigger.getBoundingClientRect();
       const screenY = rect.top;
       let show = saturate(-(screenY - START * vh) / (DISTANCE * vh));
@@ -175,12 +180,17 @@ export function HeroRibbon({
       raf = requestAnimationFrame(draw);
     };
 
+    const onResize = () => {
+      resize();
+      if (!raf) draw();
+    };
+
     resize();
     draw();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", onResize);
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
     };
   }, [triggerRef]);
 
