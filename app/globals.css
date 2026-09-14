@@ -555,8 +555,8 @@ a:focus-visible .cta-wipe-band {
   backdrop-filter: blur(var(--nav-pill-blur)) saturate(160%);
   -webkit-backdrop-filter: blur(var(--nav-pill-blur)) saturate(160%);
   font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 400;
-  letter-spacing: -0.038em;
+  font-weight: 500;
+  letter-spacing: -0.03em;
 }
 
 .site-nav-mobile {
@@ -592,8 +592,56 @@ a:focus-visible .cta-wipe-band {
   overflow: hidden;
 }
 
+.clock-copy-col,
+.clock-section,
+.clock-section * {
+  scrollbar-width: none;
+}
+
+.clock-copy-col::-webkit-scrollbar,
+.clock-section::-webkit-scrollbar,
+.clock-section *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .clock-copy {
   color: rgba(255, 255, 255, 0.14);
+}
+
+.clock-heading {
+  margin: 0 0 1rem;
+  max-width: 16ch;
+  font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.12;
+  letter-spacing: -0.045em;
+}
+
+.clock-heading-long {
+  max-width: 18ch;
+  margin-bottom: 1.5rem;
+}
+
+.clock-body {
+  margin: 0;
+  max-width: 36rem;
+  font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  font-size: clamp(17px, 1.45vw, 22px);
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+}
+
+.clock-line {
+  display: block;
+  color: rgba(255, 255, 255, 0.14);
+}
+
+.clock-body .clock-line + .clock-line {
+  margin-top: 0.28em;
 }
 
 .cta-heading {
@@ -634,19 +682,10 @@ a:focus-visible .cta-wipe-band {
   }
 }
 
-.clock-section .type-display {
+.clock-section .clock-heading,
+.clock-section .clock-body {
   overflow-wrap: normal;
   word-break: normal;
-  font-size: clamp(28px, 4.4vw, 58px);
-  line-height: 0.96;
-  letter-spacing: -0.02em;
-  word-spacing: 0.12em;
-}
-
-.clock-word {
-  display: inline;
-  color: rgba(255, 255, 255, 0.14);
-  white-space: nowrap;
 }
 
 .clock-wash {
@@ -661,14 +700,19 @@ a:focus-visible .cta-wipe-band {
   --clock-a: 0;
   background:
     radial-gradient(
-      ellipse 110% 90% at 30% 40%,
+      ellipse 130% 110% at 18% 38%,
       rgba(var(--clock-r), var(--clock-g), var(--clock-b), var(--clock-a)) 0%,
-      transparent 72%
+      transparent 70%
     ),
     radial-gradient(
-      ellipse 80% 70% at 90% 80%,
-      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.55)) 0%,
-      transparent 70%
+      ellipse 100% 90% at 92% 72%,
+      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.75)) 0%,
+      transparent 68%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(var(--clock-r), var(--clock-g), var(--clock-b), calc(var(--clock-a) * 0.42)) 0%,
+      transparent 58%
     );
 }
 
@@ -682,7 +726,7 @@ a:focus-visible .cta-wipe-band {
 
 @media (prefers-reduced-motion: reduce) {
   .clock-copy,
-  .clock-word {
+  .clock-line {
     color: #ffffff;
   }
 }
@@ -1891,23 +1935,43 @@ a:focus-visible .cta-wipe-band {
   font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   font-size: clamp(34px, 6.6vw, 104px);
-  line-height: 1.12;
+  line-height: 1;
   letter-spacing: -0.045em;
   overflow-wrap: break-word;
 }
 
 .lh-statement-title .lusion-type-word {
-  margin-right: 0.28em;
+  margin-right: 0;
 }
 
-.lh-statement-title .lusion-type-line {
-  line-height: 1.22;
-  padding-bottom: 0.16em;
-}
-
-.lh-statement-line {
+/* Clip per visual line so the char-up animation has room, then
+   pull the lines back together so leading stays tight. */
+.lh-statement-line,
+.work-title-line {
   display: block;
   min-width: 0;
+  overflow: hidden;
+  padding: 0.16em 0.12em 0.22em 0.04em;
+  margin-top: -0.14em;
+  margin-bottom: -0.12em;
+}
+
+.lh-statement-line:first-child,
+.work-title-line:first-child {
+  margin-top: 0;
+}
+
+.lh-statement-line:last-child,
+.work-title-line:last-child {
+  margin-bottom: 0;
+}
+
+.lh-statement-title .lusion-type-line,
+.work-title .lusion-type-line {
+  display: block;
+  overflow: visible;
+  line-height: 1;
+  padding: 0;
 }
 
 .lh-statement-aside {
@@ -1994,16 +2058,17 @@ a:focus-visible .cta-wipe-band {
 
   .lh-statement-title {
     font-size: clamp(28px, 7.8vw, 44px);
-    line-height: 1.18;
+    line-height: 1;
   }
 
   .lh-statement-title .lusion-type-line {
-    line-height: 1.28;
-    padding: 0.08em 0.12em 0.22em 0.02em;
+    line-height: 1;
+    padding: 0;
+    overflow: visible;
   }
 
   .lh-statement-title .lusion-type-word {
-    margin-right: 0.16em;
+    margin-right: 0;
   }
 
   .lh-statement-aside {
@@ -2030,7 +2095,7 @@ a:focus-visible .cta-wipe-band {
 
   .work-title {
     font-size: clamp(26px, 8.2vw, 40px);
-    line-height: 1.16;
+    line-height: 1;
   }
 }
 
@@ -2046,6 +2111,10 @@ a:focus-visible .cta-wipe-band {
 }
 
 /* ─── Clock media (videos sit where the 3-D ship used to) ────────────────── */
+
+.clock-media-col {
+  display: none;
+}
 
 .clock-videos-wrap {
   position: absolute;
@@ -2093,10 +2162,17 @@ a:focus-visible .cta-wipe-band {
 }
 
 @media (min-width: 768px) {
+  .clock-media-col {
+    display: block;
+    position: relative;
+    min-height: 280px;
+    align-self: stretch;
+  }
+
   .clock-videos-wrap {
-    inset: 50% 4% auto 50%;
-    transform: translateY(-50%);
-    height: min(72vh, 680px);
+    inset: 0;
+    transform: none;
+    height: auto;
     width: auto;
   }
 
@@ -2164,7 +2240,7 @@ a:focus-visible .cta-wipe-band {
   font-family: var(--font-suisseintl), ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   font-size: clamp(32px, 6.2vw, 104px);
-  line-height: 1.12;
+  line-height: 1;
   letter-spacing: -0.035em;
   color: var(--color-carbon-black);
   overflow-wrap: break-word;

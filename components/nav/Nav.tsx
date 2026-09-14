@@ -101,7 +101,7 @@ export function Nav() {
             <BrandLogo on="light" />
           </a>
 
-          <nav className="hidden lg:flex flex-1 items-center justify-center gap-8 xl:gap-12 min-w-0">
+          <nav className="hidden lg:flex flex-1 items-center justify-center gap-12 xl:gap-16 min-w-0">
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.href.replace("#", "");
               return (
@@ -109,7 +109,7 @@ export function Nav() {
                   key={link.href}
                   href={link.href}
                   className={clsx(
-                    "whitespace-nowrap text-[14px] xl:text-[15px] font-normal leading-none tracking-[-0.038em] px-3.5 xl:px-4 py-2 rounded-full border border-transparent transition-all duration-200",
+                    "whitespace-nowrap text-[14px] xl:text-[15px] font-medium leading-none tracking-[-0.03em] px-3.5 xl:px-4 py-2 rounded-full border border-transparent transition-all duration-200",
                     isActive
                       ? "px-6 xl:px-8 py-2.5 text-[var(--nav-link-active)] bg-[var(--nav-link-chip-active)] border-[var(--nav-link-chip-border)]"
                       : "text-[var(--nav-link)] hover:text-[var(--nav-link-active)] hover:bg-[var(--nav-link-chip)] hover:border-[var(--nav-link-chip-border)]"
@@ -124,7 +124,7 @@ export function Nav() {
           <div className="flex items-center gap-2 shrink-0">
             <a
               href="#contact"
-              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-normal leading-none tracking-[-0.038em]"
+              className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-medium leading-none tracking-[-0.03em]"
             >
               Book a build
               <span className="w-10 h-10 rounded-full bg-paper-white text-carbon-black inline-flex items-center justify-center shrink-0">
@@ -179,7 +179,7 @@ export function Nav() {
                       key={link.href}
                       href={link.href}
                       className={clsx(
-                        "flex items-center min-h-12 px-4 rounded-2xl text-[16px] font-normal tracking-[-0.038em] text-carbon-black",
+                        "flex items-center min-h-12 px-4 rounded-2xl text-[16px] font-medium tracking-[-0.03em] text-carbon-black",
                         isActive ? "bg-mist-gray" : "bg-transparent"
                       )}
                       onClick={() => setMobileOpen(false)}
@@ -190,7 +190,7 @@ export function Nav() {
                 })}
                 <a
                   href="#contact"
-                  className="nav-cta mt-2 inline-flex items-center justify-between gap-3 min-h-12 pl-5 pr-1.5 py-1.5 rounded-full bg-primary text-text-inverse text-[16px] font-normal tracking-[-0.038em]"
+                  className="nav-cta mt-2 inline-flex items-center justify-between gap-3 min-h-12 pl-5 pr-1.5 py-1.5 rounded-full bg-primary text-text-inverse text-[16px] font-medium tracking-[-0.03em]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Book a build

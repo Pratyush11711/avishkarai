@@ -30,18 +30,13 @@ const INK = [
   "#4fd8ff",
 ];
 
-/** Solid section grounds — dark cousins of the ink, like the reference. */
-const GROUND = [
-  "#050a34",
-  "#0a1550",
-  "#050a34",
-  "#0a1550",
-  "#050a34",
-  "#0a1550",
-  "#050a34",
-];
+const BASE_NAVY = "#050a34";
+/** How hard the ink tints the solid section ground. */
+const GROUND_MIX = 0.34;
+/** Wash overlay strength — follows the same ink as the spotlight. */
+const WASH_A = 0.5;
 
-type ClockWord = { el: HTMLElement; accent: boolean };
+type ClockLine = { el: HTMLElement };
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "").trim();
@@ -81,86 +76,40 @@ function paintWash(el: HTMLElement, hex: string, a: number) {
   el.style.setProperty("--clock-a", a.toFixed(3));
 }
 
-function muteWords(words: ClockWord[]) {
-  words.forEach((word) => {
-    word.el.style.color = DIM;
+function groundFromInk(ink: string) {
+  return mixHex(BASE_NAVY, ink, GROUND_MIX);
+}
+
+function muteLines(lines: ClockLine[]) {
+  lines.forEach((line) => {
+    line.el.style.color = DIM;
   });
 }
 
-/**
- * Moving spotlight: a band of words around `t` (0–1) lights up in `ink`.
- * Accent words in the band go white. Everything else stays dim.
- */
-function applySpotlight(words: ClockWord[], t: number, ink: string) {
-  if (!words.length) return;
-  const n = words.length;
+/** Lights one full line at a time as you scroll, with a soft neighbor. */
+function applySpotlight(lines: ClockLine[], t: number, ink: string) {
+  if (!lines.length) return;
+  const n = lines.length;
   const center = Math.min(Math.max(t, 0), 1) * (n - 1);
-  const radius = Math.max(3.4, Math.min(9, n * 0.18));
+  const radius = 0.78;
   const [ir, ig, ib] = hexToRgb(ink);
 
-  words.forEach((word, i) => {
+  lines.forEach((line, i) => {
     const falloff = Math.max(0, 1 - Math.abs(i - center) / radius);
     const k = falloff * falloff;
-    if (k < 0.03) {
-      word.el.style.color = DIM;
+    if (k < 0.04) {
+      line.el.style.color = DIM;
       return;
     }
-    if (word.accent) {
-      word.el.style.color = `rgba(255, 255, 255, ${0.14 + 0.86 * k})`;
-      return;
-    }
-    word.el.style.color = `rgba(${ir}, ${ig}, ${ib}, ${0.14 + 0.86 * k})`;
+    line.el.style.color = `rgba(${ir}, ${ig}, ${ib}, ${0.2 + 0.8 * k})`;
   });
 }
 
-function splitWords(el: HTMLElement | null): {
-  words: ClockWord[];
-  revert: () => void;
-} {
-  if (!el) return { words: [], revert: () => {} };
-
-  const original = el.innerHTML;
-  const words: ClockWord[] = [];
-
-  const wrapText = (text: string, accent: boolean) => {
-    const frag = document.createDocumentFragment();
-    text.split(/(\s+)/).forEach((part) => {
-      if (!part) return;
-      if (/^\s+$/.test(part)) {
-        frag.appendChild(document.createTextNode(part));
-        return;
-      }
-      const span = document.createElement("span");
-      span.className = "clock-word";
-      span.textContent = part;
-      frag.appendChild(span);
-      words.push({ el: span, accent });
-    });
-    return frag;
-  };
-
-  const next: Node[] = [];
-  el.childNodes.forEach((node) => next.push(node));
-  next.forEach((node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent ?? "";
-      if (!text.trim()) return;
-      el.replaceChild(wrapText(text, false), node);
-      return;
-    }
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const child = node as HTMLElement;
-      const accent = child.hasAttribute("data-clock-accent");
-      el.replaceChild(wrapText(child.textContent ?? "", accent), child);
-    }
-  });
-
-  return {
-    words,
-    revert: () => {
-      el.innerHTML = original;
-    },
-  };
+function collectLines(el: HTMLElement | null): ClockLine[] {
+  if (!el) return [];
+  return [...el.querySelectorAll<HTMLElement>(".clock-line")].map((node) => ({
+    el: node,
+  }));
 }
 
 function useLastThursdayLabel() {
@@ -238,7 +187,6 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
     },
     [forwardedRef]
   );
-  const introRef = useRef<HTMLParagraphElement>(null);
   const beat1Ref = useRef<HTMLDivElement>(null);
   const beat2Ref = useRef<HTMLDivElement>(null);
   const beat3Ref = useRef<HTMLDivElement>(null);
@@ -280,12 +228,13 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
     const paintScene = (
       progress: number,
-      active: ClockWord[],
+      active: ClockLine[],
       local: number,
       frameProgress = progress
     ) => {
       const ink = along(INK, progress);
-      if (washEl) paintWash(washEl, ink, 0.12);
+      section.style.backgroundColor = groundFromInk(ink);
+      if (washEl) paintWash(washEl, ink, WASH_A);
       applySpotlight(active, local, ink);
       sequenceRef.current?.setProgress(frameProgress);
     };
@@ -294,29 +243,19 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       [beat1Ref, beat2Ref, beat3Ref, moduleRef, ctaRef].forEach((r) => {
         if (r.current) gsap.set(r.current, { autoAlpha: 1, y: 0 });
       });
-      section.style.backgroundColor = GROUND[2];
-      if (washEl) paintWash(washEl, INK[2], 0.22);
+      section.style.backgroundColor = groundFromInk(INK[2]);
+      if (washEl) paintWash(washEl, INK[2], WASH_A);
       return;
     }
 
     const beats = [beat1Ref.current, beat2Ref.current, beat3Ref.current];
     const mm = gsap.matchMedia();
 
-    const splits = [
-      splitWords(introRef.current),
-      splitWords(h1Ref.current),
-      splitWords(p1Ref.current),
-      splitWords(h2Ref.current),
-      splitWords(p2Ref.current),
-      splitWords(h3Ref.current),
-    ];
-    const allWords = splits.flatMap((s) => s.words);
-    muteWords(allWords);
-
-    const revertSplits = () => splits.forEach((s) => s.revert());
-    const beat1Words = [...splits[1].words, ...splits[2].words];
-    const beat2Words = [...splits[3].words, ...splits[4].words];
-    const beat3Words = splits[5].words;
+    const beat1Lines = [...collectLines(h1Ref.current), ...collectLines(p1Ref.current)];
+    const beat2Lines = [...collectLines(h2Ref.current), ...collectLines(p2Ref.current)];
+    const beat3Lines = collectLines(h3Ref.current);
+    const allLines = [...beat1Lines, ...beat2Lines, ...beat3Lines];
+    muteLines(allLines);
 
     mm.add("(max-width: 767px)", () => {
       gsap.set([...beats, moduleRef.current, ctaRef.current], {
@@ -330,10 +269,10 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         end: "bottom 25%",
         scrub: 0.4,
         onUpdate: (self) => {
-          paintScene(self.progress, allWords, self.progress);
+          paintScene(self.progress, allLines, self.progress);
         },
       });
-      paintScene(0, allWords, 0);
+      paintScene(0, allLines, 0);
 
       return () => st.kill();
     });
@@ -341,22 +280,23 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
     mm.add("(min-width: 768px)", () => {
       gsap.set(beats, { autoAlpha: 0, y: 24 });
       gsap.set([moduleRef.current, ctaRef.current], { autoAlpha: 0, y: 16 });
-      muteWords(allWords);
-      if (washEl) paintWash(washEl, INK[0], 0);
+      muteLines(allLines);
+      section.style.backgroundColor = groundFromInk(INK[0]);
+      if (washEl) paintWash(washEl, INK[0], WASH_A);
 
       const textTl = gsap.timeline({ paused: true, defaults: { ease: "none" } });
 
-      const hold = (words: ClockWord[]) =>
-        Math.max(1.6, words.length * 0.048);
+      const hold = (lines: ClockLine[]) =>
+        Math.max(2.2, lines.length * 0.85);
 
       textTl
         .addLabel("beat1", 0)
         .to(beat1Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat1")
-        .to({}, { duration: hold(beat1Words) })
+        .to({}, { duration: hold(beat1Lines) })
         .to(beat1Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat2")
         .to(beat2Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat2")
-        .to({}, { duration: hold(beat2Words) })
+        .to({}, { duration: hold(beat2Lines) })
         .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat3")
         .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat3")
@@ -377,23 +317,23 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         const end = textTl.duration() || 1;
         const frameProgress = Math.min(1, time / end);
 
-        let active = beat1Words;
+        let active = beat1Lines;
         let local = 0;
         if (time < t2) {
-          active = beat1Words;
+          active = beat1Lines;
           local = t2 > t1 ? (time - t1) / (t2 - t1) : 0;
-          muteWords(beat2Words);
-          muteWords(beat3Words);
+          muteLines(beat2Lines);
+          muteLines(beat3Lines);
         } else if (time < t3) {
-          active = beat2Words;
+          active = beat2Lines;
           local = t3 > t2 ? (time - t2) / (t3 - t2) : 0;
-          muteWords(beat1Words);
-          muteWords(beat3Words);
+          muteLines(beat1Lines);
+          muteLines(beat3Lines);
         } else {
-          active = beat3Words;
+          active = beat3Lines;
           local = (time - t3) / Math.max(end - t3, 0.001);
-          muteWords(beat1Words);
-          muteWords(beat2Words);
+          muteLines(beat1Lines);
+          muteLines(beat2Lines);
         }
 
         paintScene(progress, active, local, frameProgress);
@@ -420,7 +360,9 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
     return () => {
       mm.revert();
-      revertSplits();
+      allLines.forEach((line) => {
+        line.el.style.color = "";
+      });
     };
   }, [reducedMotion]);
 
@@ -433,94 +375,74 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         className="clock-section"
         aria-label="The Clock"
       >
-      {isDesktop ? (
-        <ScrollScrubSequence
-          ref={sequenceRef}
-          framePath="/combined"
-          frameCount={154}
-          frameNamePattern="ezgif-frame-XXX.jpg"
-          posterSrc="/combined/ezgif-frame-001.jpg"
-          className="clock-videos-wrap clock-sequence"
-        />
-      ) : (
-        <ClockLoopVideo reducedMotion={reducedMotion} />
-      )}
+      {!isDesktop && <ClockLoopVideo reducedMotion={reducedMotion} />}
       <div className="clock-scene-scrim" aria-hidden />
       <div ref={washRef} className="clock-wash" aria-hidden />
-      <div className="relative z-[2] h-full flex flex-col justify-center page-wrap py-16 pb-64 md:py-20">
-        <p className="type-caption text-text-inverse/60 mb-4">04 · The Clock</p>
-        <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,46%)] gap-10 lg:gap-16 items-center">
-          <div className="relative w-full min-w-0 min-h-0 md:min-h-[320px]">
+      <div className="relative z-[2] h-full min-h-0 flex flex-col justify-start page-wrap pt-[max(5.5rem,env(safe-area-inset-top))] pb-8 md:pt-28 md:pb-10">
+        <p className="type-caption text-text-inverse/60 mb-4 shrink-0">04 · The Clock</p>
+        <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,46%)] gap-8 lg:gap-16 items-stretch">
+          <div className="clock-copy-col relative w-full min-w-0 min-h-0 grid md:items-center">
             <div
               ref={beat1Ref}
-              className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
+              className="relative mb-12 md:mb-0 md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
             >
-              <h2
-                ref={h1Ref}
-                className="clock-copy type-display mb-6"
-              >
-                You know the pattern.
+              <h2 ref={h1Ref} className="clock-heading">
+                <span className="clock-line">You know the pattern.</span>
               </h2>
-              <p ref={p1Ref} className="clock-copy type-body max-w-[54ch]">
-                A{" "}
-                <span data-clock-accent="#5c8dff">six-week discovery</span>{" "}
-                phase. A{" "}
-                <span data-clock-accent="#4fd8ff">kickoff deck</span>. Status
-                calls where the honest answer is “
-                <span data-clock-accent="#3040ff">
-                  we’re still setting up the environment
+              <p ref={p1Ref} className="clock-body">
+                <span className="clock-line">
+                  A six-week discovery phase. A kickoff deck.
                 </span>
-                .” A demo in{" "}
-                <span data-clock-accent="#1b2bff">month four</span> that looks
-                nothing like what you described.
+                <span className="clock-line">
+                  Status calls where the honest answer is “we’re still setting
+                  up the environment.”
+                </span>
+                <span className="clock-line">
+                  A demo in month four that looks nothing like what you
+                  described.
+                </span>
               </p>
             </div>
 
             <div
               ref={beat2Ref}
-              className="relative mb-12 md:mb-0 md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
+              className="relative mb-12 md:mb-0 md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
             >
-              <h2
-                ref={h2Ref}
-                className="clock-copy type-display mb-6"
-              >
-                We run on a different clock.
+              <h2 ref={h2Ref} className="clock-heading">
+                <span className="clock-line">We run on a different clock.</span>
               </h2>
-              <p ref={p2Ref} className="clock-copy type-body max-w-[54ch]">
-                <span data-clock-accent="#4fd8ff">
-                  Scope is locked in week one.
-                </span>{" "}
-                From week two, there is a working build in your hands every{" "}
-                <span data-clock-accent="#3040ff">Thursday</span>:{" "}
-                <span data-clock-accent="#5c8dff">
-                  deployed, clickable, on a real URL, not a Figma frame.
-                </span>{" "}
-                A focused MVP is live in{" "}
-                <span data-clock-accent="#1b2bff">eight weeks</span>. A
-                multi-tenant platform with third-party integrations and a
-                compliance layer runs 10 to 14. We tell you which one you are
-                during the{" "}
-                <span data-clock-accent="#ebecfe">
-                  Build Review, in writing
+              <p ref={p2Ref} className="clock-body">
+                <span className="clock-line">Scope is locked in week one.</span>
+                <span className="clock-line">
+                  From week two, there is a working build in your hands every
+                  Thursday: deployed, clickable, on a real URL, not a Figma
+                  frame.
                 </span>
-                , before there is a contract to sign. The eight weeks on our
-                homepage is{" "}
-                <span data-clock-accent="#4fd8ff">
-                  a commitment, not a range we hope you forget.
+                <span className="clock-line">
+                  A focused MVP is live in eight weeks. A multi-tenant platform
+                  with third-party integrations and a compliance layer runs 10
+                  to 14.
+                </span>
+                <span className="clock-line">
+                  We tell you which one you are during the Build Review, in
+                  writing, before there is a contract to sign.
+                </span>
+                <span className="clock-line">
+                  The eight weeks on our homepage is a commitment, not a range
+                  we hope you forget.
                 </span>
               </p>
             </div>
 
             <div
               ref={beat3Ref}
-              className="relative md:absolute md:top-0 md:left-0 md:right-0 will-change-[opacity,transform]"
+              className="relative md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
             >
-              <h2
-                ref={h3Ref}
-                className="clock-copy type-display mb-8"
-              >
-                You will never have to ask what we&apos;re working on.{" "}
-                <span data-clock-accent="#4fd8ff">You&apos;ll be using it.</span>
+              <h2 ref={h3Ref} className="clock-heading clock-heading-long">
+                <span className="clock-line">
+                  You will never have to ask what we&apos;re working on.
+                </span>
+                <span className="clock-line">You&apos;ll be using it.</span>
               </h2>
               <DeployStamp moduleRef={moduleRef} />
               <div ref={ctaRef} className="mt-7">
@@ -530,7 +452,18 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
               </div>
             </div>
           </div>
-          <div className="hidden md:block min-h-[280px]" aria-hidden />
+          {isDesktop ? (
+            <div className="clock-media-col">
+              <ScrollScrubSequence
+                ref={sequenceRef}
+                framePath="/combined"
+                frameCount={154}
+                frameNamePattern="ezgif-frame-XXX.jpg"
+                posterSrc="/combined/ezgif-frame-001.jpg"
+                className="clock-videos-wrap clock-sequence"
+              />
+            </div>
+          ) : null}
         </div>
       </div>
       </section>

@@ -133,7 +133,12 @@ export function SelectedWork() {
       <div className="page-wrap">
         <div className="work-head">
           <h2 className="work-title">
-            <HeadingReveal text="We'd rather show you than tell you." />
+            <span className="work-title-line">
+              <HeadingReveal text="We'd rather show you" />
+            </span>
+            <span className="work-title-line">
+              <HeadingReveal text="than tell you." />
+            </span>
           </h2>
           <LineReveal text={`${CASE_STUDIES.length} projects`} className="work-note" />
         </div>

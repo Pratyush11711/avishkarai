@@ -111,30 +111,6 @@ function BulletList({
   );
 }
 
-function HeadingConnector({ reducedMotion }: { reducedMotion: boolean }) {
-  return (
-    <svg
-      className="pointer-events-none absolute left-1/2 top-0 h-16 w-px -translate-x-1/2 -translate-y-full"
-      viewBox="0 0 2 64"
-      aria-hidden
-    >
-      <motion.path
-        d="M1 0 V64"
-        fill="none"
-        stroke="var(--accent)"
-        strokeWidth="1.5"
-        strokeDasharray="1 1"
-        initial={reducedMotion ? { pathLength: 1 } : { pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }}
-        transition={
-          reducedMotion ? { duration: 0 } : { duration: 0.5, ease: "easeOut" }
-        }
-      />
-    </svg>
-  );
-}
-
 export function WhatWeStandOn() {
   "use no memo";
   const reducedMotion = usePrefersReducedMotion();
@@ -274,14 +250,11 @@ export function WhatWeStandOn() {
             </h2>
           </div>
 
-          <div className="relative">
-            <HeadingConnector reducedMotion={reducedMotion} />
-
-            <div
-              tabIndex={0}
-              onKeyDown={handleKeyDown}
-              className="principles-card relative rounded-[32px] bg-paper-white p-6 shadow-sm outline-none md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
-            >
+          <div
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            className="principles-card relative rounded-[32px] bg-paper-white p-6 shadow-sm outline-none md:p-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+          >
               <PrincipleRail
                 count={COUNT}
                 activeIndex={index}
@@ -327,7 +300,6 @@ export function WhatWeStandOn() {
                   <p className="mt-4 font-semibold text-carbon-black md:mt-6">{active.closer}</p>
                 </motion.div>
               </AnimatePresence>
-            </div>
           </div>
         </div>
       </div>

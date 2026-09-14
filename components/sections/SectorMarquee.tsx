@@ -7,13 +7,11 @@ const SECTORS = [
   "Telehealth",
   "Regulated health",
   "Life sciences",
-  "Medical devices",
-  "Care services",
-  "Enterprise operations",
-  "Industrial safety",
-  "Compliance and audit",
+  "Bespoke development",
+  "Design",
+  "UI/UX",
+  "Scalable Applications",
   "Marketplaces",
-  "Field operations",
 ];
 
 export function SectorMarquee() {

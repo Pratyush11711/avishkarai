@@ -58,9 +58,9 @@ export function Hero() {
         >
           <div className="lh-intro-copy">
             <h1 className="lh-intro-title">
-              We build production-grade software
+              We build production-grade software{" "}
               <br className="lh-intro-br" />
-              and interactive product experiences
+              and interactive product experiences{" "}
               <br className="lh-intro-br" />
               that help teams ship in eight weeks.
             </h1>
