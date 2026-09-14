@@ -262,19 +262,11 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         autoAlpha: 1,
         y: 0,
       });
-
-      const st = ScrollTrigger.create({
-        trigger: section,
-        start: "top 75%",
-        end: "bottom 25%",
-        scrub: 0.4,
-        onUpdate: (self) => {
-          paintScene(self.progress, allLines, self.progress);
-        },
+      allLines.forEach((line) => {
+        line.el.style.color = "";
       });
-      paintScene(0, allLines, 0);
-
-      return () => st.kill();
+      if (washEl) paintWash(washEl, INK[3], 0.1);
+      section.style.backgroundColor = GROUND[0];
     });
 
     mm.add("(min-width: 768px)", () => {
@@ -383,7 +375,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
           <div className="clock-copy-col relative w-full min-w-0 min-h-0 grid md:items-center">
             <div
               ref={beat1Ref}
-              className="relative mb-12 md:mb-0 md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
+              className="relative md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
             >
               <h2 ref={h1Ref} className="clock-heading">
                 <span className="clock-line">You know the pattern.</span>
@@ -405,7 +397,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
 
             <div
               ref={beat2Ref}
-              className="relative mb-12 md:mb-0 md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
+              className="relative md:col-start-1 md:row-start-1 will-change-[opacity,transform]"
             >
               <h2 ref={h2Ref} className="clock-heading">
                 <span className="clock-line">We run on a different clock.</span>
@@ -456,9 +448,10 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
               <ScrollScrubSequence
                 ref={sequenceRef}
                 framePath="/combined"
-                frameCount={154}
+                frameCount={153}
                 frameNamePattern="ezgif-frame-XXX.jpg"
-                posterSrc="/combined/ezgif-frame-001.jpg"
+                posterSrc="/combined/ezgif-frame-001.jpg?v=4k"
+                version="4k"
                 className="clock-videos-wrap clock-sequence"
               />
             </div>

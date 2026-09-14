@@ -2200,12 +2200,53 @@ a:focus-visible .cta-wipe-band {
 }
 
 @media (max-width: 767px) {
+  .clock-track {
+    height: auto;
+  }
+
+  .clock-section {
+    position: relative;
+    height: auto;
+    min-height: 0;
+  }
+
+  .clock-copy-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3.25rem;
+  }
+
+  .clock-heading {
+    max-width: 14ch;
+    font-size: clamp(30px, 8.6vw, 40px);
+    color: #f4f5ff;
+  }
+
+  .clock-heading .clock-line {
+    color: #f4f5ff;
+  }
+
+  .clock-body {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+
+  .clock-body .clock-line {
+    color: rgba(244, 245, 255, 0.78);
+  }
+
+  .clock-videos-wrap {
+    inset: 0;
+    height: auto;
+    opacity: 0.32;
+  }
+
   .clock-scene-scrim {
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-deep-navy) 84%, transparent) 0%,
-      color-mix(in srgb, var(--color-deep-navy) 58%, transparent) 52%,
-      color-mix(in srgb, var(--color-deep-navy) 32%, transparent) 100%
+      rgba(5, 10, 52, 0.88) 0%,
+      rgba(5, 10, 52, 0.9) 42%,
+      rgba(5, 10, 52, 0.94) 100%
     );
   }
 }
@@ -3264,6 +3305,7 @@ a:focus-visible .cta-wipe-band {
   display: block;
   width: 100vw;
   height: 100vh;
+  opacity: 0.42;
 }
 
 @media (prefers-reduced-motion: reduce) {

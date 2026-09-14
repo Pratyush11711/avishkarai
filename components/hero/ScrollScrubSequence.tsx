@@ -31,6 +31,8 @@ export type ScrollScrubSequenceProps = {
   style?: CSSProperties;
   /** How the frame is letterboxed into the canvas. Default: cover. */
   fit?: "cover" | "contain";
+  /** Query string used to bust cached frames after a replace. */
+  version?: string;
 };
 
 const MAX_DPR = 2;
@@ -52,14 +54,22 @@ export function frameFileName(pattern: string, index: number): string {
 export function frameSrc(
   framePath: string,
   pattern: string,
-  index: number
+  index: number,
+  version?: string
 ): string {
   const base = framePath.replace(/\/$/, "");
-  return `${base}/${frameFileName(pattern, index)}`;
+  const url = `${base}/${frameFileName(pattern, index)}`;
+  return version ? `${url}?v=${encodeURIComponent(version)}` : url;
 }
 
-function cacheKey(path: string, count: number, pattern: string, start: number) {
-  return `${path}|${count}|${pattern}|${start}`;
+function cacheKey(
+  path: string,
+  count: number,
+  pattern: string,
+  start: number,
+  version?: string
+) {
+  return `${path}|${count}|${pattern}|${start}|${version ?? ""}`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -76,16 +86,17 @@ function preloadSequence(
   framePath: string,
   frameCount: number,
   pattern: string,
-  startIndex: number
+  startIndex: number,
+  version?: string
 ): CacheEntry {
-  const key = cacheKey(framePath, frameCount, pattern, startIndex);
+  const key = cacheKey(framePath, frameCount, pattern, startIndex, version);
   const existing = preloadCache.get(key);
   if (existing?.frames.some(Boolean)) return existing;
   if (existing) preloadCache.delete(key);
 
   const frames: (HTMLImageElement | null)[] = new Array(frameCount).fill(null);
 
-  const first = loadImage(frameSrc(framePath, pattern, startIndex))
+  const first = loadImage(frameSrc(framePath, pattern, startIndex, version))
     .then((img) => {
       frames[0] = img;
       return img;
@@ -99,7 +110,7 @@ function preloadSequence(
         const i = next++;
         try {
           frames[i] = await loadImage(
-            frameSrc(framePath, pattern, startIndex + i)
+            frameSrc(framePath, pattern, startIndex + i, version)
           );
         } catch {
           frames[i] = null;
@@ -182,6 +193,7 @@ export const ScrollScrubSequence = forwardRef<
     className,
     style,
     fit = "cover",
+    version,
   },
   ref
 ) {
@@ -194,7 +206,7 @@ export const ScrollScrubSequence = forwardRef<
   const drawRef = useRef<(force?: boolean) => void>(() => {});
 
   const resolvedPoster =
-    posterSrc ?? frameSrc(framePath, frameNamePattern, startIndex);
+    posterSrc ?? frameSrc(framePath, frameNamePattern, startIndex, version);
 
   useImperativeHandle(
     ref,
@@ -219,7 +231,8 @@ export const ScrollScrubSequence = forwardRef<
       framePath,
       frameCount,
       frameNamePattern,
-      startIndex
+      startIndex,
+      version
     );
 
     let dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
@@ -292,7 +305,7 @@ export const ScrollScrubSequence = forwardRef<
       clearTimeout(resizeTimer);
       drawRef.current = () => {};
     };
-  }, [framePath, frameCount, frameNamePattern, startIndex]);
+  }, [framePath, frameCount, frameNamePattern, startIndex, version]);
 
   return (
     <div

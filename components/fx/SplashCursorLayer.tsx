@@ -36,6 +36,11 @@ export function SplashCursorLayer() {
       COLOR="#3040ff"
       BRAND_COLORS={AVISHKAR_SPLASH_COLORS}
       TRANSPARENT
+      SPLAT_RADIUS={0.08}
+      SPLAT_FORCE={2200}
+      DENSITY_DISSIPATION={6.8}
+      VELOCITY_DISSIPATION={3.8}
+      CURL={1.4}
     />
   );
 }

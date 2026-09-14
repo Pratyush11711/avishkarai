@@ -820,11 +820,11 @@ function SplashCursor({
 
     function clickSplat(pointer) {
       const color = generateColor();
-      color.r *= 10.0;
-      color.g *= 10.0;
-      color.b *= 10.0;
-      let dx = 10 * (Math.random() - 0.5);
-      let dy = 30 * (Math.random() - 0.5);
+      color.r *= 3.0;
+      color.g *= 3.0;
+      color.b *= 3.0;
+      let dx = 4 * (Math.random() - 0.5);
+      let dy = 10 * (Math.random() - 0.5);
       splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color);
     }
 
@@ -896,7 +896,7 @@ function SplashCursor({
       const r = parseInt(val.slice(0, 2), 16) / 255;
       const g = parseInt(val.slice(2, 4), 16) / 255;
       const b = parseInt(val.slice(4, 6), 16) / 255;
-      return { r: r * 0.15, g: g * 0.15, b: b * 0.15 };
+      return { r: r * 0.08, g: g * 0.08, b: b * 0.08 };
     }
 
     function generateColor() {
@@ -907,9 +907,9 @@ function SplashCursor({
         return hexToRGB(hex);
       }
       let c = HSVtoRGB(Math.random(), 1.0, 1.0);
-      c.r *= 0.15;
-      c.g *= 0.15;
-      c.b *= 0.15;
+      c.r *= 0.08;
+      c.g *= 0.08;
+      c.b *= 0.08;
       return c;
     }
 
