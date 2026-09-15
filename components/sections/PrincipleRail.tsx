@@ -21,7 +21,7 @@ export function PrincipleRail({
 
   return (
     <div
-      className={clsx("relative", compact && "max-w-[8.5rem]")}
+      className={clsx("principles-rail relative", compact && "max-w-[8.5rem]")}
       role="tablist"
       aria-label="Principles"
     >

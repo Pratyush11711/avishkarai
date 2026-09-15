@@ -189,29 +189,31 @@ function PrincipleMedia({
   }, [reducedMotion]);
 
   return (
-    <div ref={frameRef} className="principles-figure" aria-hidden="true">
-      {PRINCIPLES.map((p) =>
-        p.video ? (
-          <video
-            key={p.id}
-            ref={(node) => {
-              refs.current[p.id] = node;
-            }}
-            data-principle-id={p.id}
-            className={
-              p.id === activeId
-                ? "principles-figure-video is-active"
-                : "principles-figure-video"
-            }
-            src={p.video}
-            muted
-            loop
-            playsInline
-            preload="auto"
-            autoPlay={!reducedMotion && p.id === activeId}
-          />
-        ) : null
-      )}
+    <div className="principles-media">
+      <div ref={frameRef} className="principles-figure" aria-hidden="true">
+        {PRINCIPLES.map((p) =>
+          p.video ? (
+            <video
+              key={p.id}
+              ref={(node) => {
+                refs.current[p.id] = node;
+              }}
+              data-principle-id={p.id}
+              className={
+                p.id === activeId
+                  ? "principles-figure-video is-active"
+                  : "principles-figure-video"
+              }
+              src={p.video}
+              muted
+              loop
+              playsInline
+              preload="auto"
+              autoPlay={!reducedMotion && p.id === activeId}
+            />
+          ) : null
+        )}
+      </div>
     </div>
   );
 }

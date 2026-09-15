@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { cssRgb, mixJourneyRgb, mixRgb } from "@/lib/process-journey";
 
 type Pt = { x: number; y: number };
 
 const SAMPLES = 130;
+const RIBBON_CYAN = { r: 78, g: 226, b: 239 };
 
 /* ─── Curve maths ───────────────────────────────────────────────────────────── */
 
@@ -139,6 +141,7 @@ export function ProcessRibbon({
   const hostRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const glowRef = useRef<SVGPathElement>(null);
+  const stopRefs = useRef<(SVGStopElement | null)[]>([]);
 
   const samplesRef = useRef<Pt[]>([]);
   const targetRef = useRef(0);
@@ -210,6 +213,38 @@ export function ProcessRibbon({
     if (!host || !path || !glow || box.w < 1) return;
 
     const fullWidth = Math.max(18, Math.min(box.w * 0.026, 38));
+    const processEl = host.parentElement?.querySelector<HTMLElement>("#process");
+
+    const paintRibbon = (journey: number) => {
+      const tone = mixJourneyRgb(journey);
+      const glowTone = mixRgb(RIBBON_CYAN, tone, 0.4 + journey * 0.35);
+      const glowCss = cssRgb(glowTone);
+      glow.setAttribute("fill", glowCss);
+      glow.setAttribute("stroke", glowCss);
+      glow.setAttribute("opacity", String(0.16 + journey * 0.18));
+
+      const stops = stopRefs.current;
+      if (stops[0]) {
+        stops[0].setAttribute(
+          "stop-color",
+          cssRgb(mixRgb({ r: 154, g: 248, b: 255 }, tone, 0.35))
+        );
+      }
+      if (stops[1]) stops[1].setAttribute("stop-color", glowCss);
+      if (stops[2]) {
+        stops[2].setAttribute(
+          "stop-color",
+          cssRgb(mixRgb({ r: 46, g: 196, b: 212 }, tone, 0.5))
+        );
+      }
+    };
+
+    const readJourney = () => {
+      if (!processEl) return currentRef.current;
+      const raw = processEl.style.getPropertyValue("--process-journey");
+      const n = Number.parseFloat(raw);
+      return Number.isFinite(n) ? n : currentRef.current;
+    };
 
     const st = ScrollTrigger.create({
       trigger: host,
@@ -230,6 +265,7 @@ export function ProcessRibbon({
       const d = buildOutline(samplesRef.current, 1, fullWidth, 0, 0);
       path.setAttribute("d", d);
       glow.setAttribute("d", d);
+      paintRibbon(1);
       return () => st.kill();
     }
 
@@ -254,6 +290,7 @@ export function ProcessRibbon({
       );
       path.setAttribute("d", d);
       glow.setAttribute("d", d);
+      paintRibbon(readJourney());
     };
 
     gsap.ticker.add(tick);
@@ -282,9 +319,27 @@ export function ProcessRibbon({
         >
           <defs>
             <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="80%">
-              <stop offset="0%" stopColor="#9af8ff" />
-              <stop offset="42%" stopColor="#4EE2EF" />
-              <stop offset="100%" stopColor="#2ec4d4" />
+              <stop
+                ref={(el) => {
+                  stopRefs.current[0] = el;
+                }}
+                offset="0%"
+                stopColor="#9af8ff"
+              />
+              <stop
+                ref={(el) => {
+                  stopRefs.current[1] = el;
+                }}
+                offset="42%"
+                stopColor="#4EE2EF"
+              />
+              <stop
+                ref={(el) => {
+                  stopRefs.current[2] = el;
+                }}
+                offset="100%"
+                stopColor="#2ec4d4"
+              />
             </linearGradient>
             <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
               <feGaussianBlur stdDeviation="6" result="blur" />

@@ -17,7 +17,9 @@ const MARGIN_X = -0.05;
 const MARGIN_Y = -0.8;
 const START = 0.4;
 const DISTANCE = 1.3;
-const COLORS: string[] = PATH.map((_, i) => colorAt(i / (PATH.length - 1)));
+const SAMPLES_PER_SEG = 10;
+
+type Pt = { x: number; y: number };
 
 function saturate(v: number) {
   return Math.min(1, Math.max(0, v));
@@ -77,15 +79,116 @@ function colorAt(lineRatio: number) {
   return `rgb(${Math.round(rgb.r * 255)},${Math.round(rgb.g * 255)},${Math.round(rgb.b * 255)})`;
 }
 
-function toScreen(
-  cp: [number, number],
-  diag: number,
-  screenY: number
-): { x: number; y: number } {
+function toScreen(cp: [number, number], diag: number, screenY: number): Pt {
   return {
     x: (cp[0] + MARGIN_X) * diag,
     y: screenY + (-MARGIN_Y - cp[1]) * diag,
   };
+}
+
+function catmullRom(p0: Pt, p1: Pt, p2: Pt, p3: Pt, t: number): Pt {
+  const t2 = t * t;
+  const t3 = t2 * t;
+  return {
+    x:
+      0.5 *
+      (2 * p1.x +
+        (-p0.x + p2.x) * t +
+        (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+    y:
+      0.5 *
+      (2 * p1.y +
+        (-p0.y + p2.y) * t +
+        (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 +
+        (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
+  };
+}
+
+function sampleAt(pts: Pt[], i: number, t: number): Pt {
+  const last = pts.length - 1;
+  return catmullRom(
+    pts[Math.max(0, i - 1)],
+    pts[i],
+    pts[Math.min(last, i + 1)],
+    pts[Math.min(last, i + 2)],
+    t
+  );
+}
+
+/** Catmull-Rom samples along the path up to a floating index `head`. */
+function sampleHead(pts: Pt[], head: number, perSeg: number): Pt[] {
+  const last = pts.length - 1;
+  const h = Math.min(Math.max(head, 0), last);
+  const out: Pt[] = [pts[0]];
+  const until = Math.floor(h);
+
+  for (let i = 0; i < until; i++) {
+    for (let s = 1; s <= perSeg; s++) out.push(sampleAt(pts, i, s / perSeg));
+  }
+
+  const frac = h - until;
+  if (frac > 0.0001 && until < last) {
+    const steps = Math.max(1, Math.round(perSeg * frac));
+    for (let s = 1; s <= steps; s++) out.push(sampleAt(pts, until, (frac * s) / steps));
+  }
+
+  return out;
+}
+
+function tangentAt(pts: Pt[], i: number): Pt {
+  const prev = pts[Math.max(0, i - 1)];
+  const next = pts[Math.min(pts.length - 1, i + 1)];
+  let tx = next.x - prev.x;
+  let ty = next.y - prev.y;
+  const m = Math.hypot(tx, ty);
+  if (m < 1e-5) return { x: 1, y: 0 };
+  return { x: tx / m, y: ty / m };
+}
+
+function traceSmooth(ctx: CanvasRenderingContext2D, poly: Pt[], move: boolean) {
+  if (poly.length === 0) return;
+  if (move) ctx.moveTo(poly[0].x, poly[0].y);
+  else ctx.lineTo(poly[0].x, poly[0].y);
+  if (poly.length === 1) return;
+
+  for (let i = 1; i < poly.length - 1; i++) {
+    ctx.quadraticCurveTo(
+      poly[i].x,
+      poly[i].y,
+      (poly[i].x + poly[i + 1].x) * 0.5,
+      (poly[i].y + poly[i + 1].y) * 0.5
+    );
+  }
+  const last = poly[poly.length - 1];
+  ctx.lineTo(last.x, last.y);
+}
+
+function fillRibbon(ctx: CanvasRenderingContext2D, pts: Pt[], radius: number) {
+  if (pts.length < 2) return;
+
+  const left: Pt[] = [];
+  const right: Pt[] = [];
+  for (let i = 0; i < pts.length; i++) {
+    const t = tangentAt(pts, i);
+    const nx = -t.y;
+    const ny = t.x;
+    left.push({ x: pts[i].x + nx * radius, y: pts[i].y + ny * radius });
+    right.push({ x: pts[i].x - nx * radius, y: pts[i].y - ny * radius });
+  }
+
+  ctx.beginPath();
+  traceSmooth(ctx, left, true);
+  traceSmooth(ctx, right.slice().reverse(), false);
+  ctx.closePath();
+  ctx.fill();
+
+  const start = pts[0];
+  const end = pts[pts.length - 1];
+  ctx.beginPath();
+  ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
+  ctx.arc(end.x, end.y, radius, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 export function HeroRibbon({
@@ -100,29 +203,36 @@ export function HeroRibbon({
     const trigger = triggerRef.current;
     if (!canvas || !trigger) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     const last = PATH.length - 1;
+    const screenPts: Pt[] = new Array(PATH.length);
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = window.innerWidth;
       const h = window.innerHeight;
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
     };
 
     const draw = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       if (vw <= 900) {
-        ctx.clearRect(0, 0, vw, vh);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         raf = 0;
         return;
       }
@@ -131,7 +241,11 @@ export function HeroRibbon({
       let show = saturate(-(screenY - START * vh) / (DISTANCE * vh));
       show = reduced ? 1 : quadInOut(show);
 
-      ctx.clearRect(0, 0, vw, vh);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dpr = canvas.width / vw;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
       if (show <= 0.001 || rect.bottom < -vh || rect.top > vh * 1.35) {
         raf = requestAnimationFrame(draw);
         return;
@@ -139,43 +253,25 @@ export function HeroRibbon({
 
       const diag = Math.hypot(vw, vh);
       const radius = 0.008 * fit(vw, 540, 1920, 2, 1) * diag;
-      const head = show * last;
-      const until = Math.min(last, Math.floor(head));
-      const frac = head - until;
-
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = radius * 2;
-
-      let prev = toScreen(PATH[0], diag, screenY);
-      for (let i = 1; i <= until; i++) {
-        const cur = toScreen(PATH[i], diag, screenY);
-        ctx.strokeStyle = COLORS[i - 1];
-        ctx.beginPath();
-        ctx.moveTo(prev.x, prev.y);
-        ctx.lineTo(cur.x, cur.y);
-        ctx.stroke();
-        prev = cur;
+      for (let i = 0; i < PATH.length; i++) {
+        screenPts[i] = toScreen(PATH[i], diag, screenY);
       }
 
-      let tip = prev;
-      if (until < last && frac > 0) {
-        const next = toScreen(PATH[until + 1], diag, screenY);
-        tip = {
-          x: prev.x + (next.x - prev.x) * frac,
-          y: prev.y + (next.y - prev.y) * frac,
-        };
-        ctx.strokeStyle = COLORS[until];
-        ctx.beginPath();
-        ctx.moveTo(prev.x, prev.y);
-        ctx.lineTo(tip.x, tip.y);
-        ctx.stroke();
+      const samples = sampleHead(screenPts, show * last, SAMPLES_PER_SEG);
+      if (samples.length < 2) {
+        raf = requestAnimationFrame(draw);
+        return;
       }
 
-      ctx.fillStyle = COLORS[Math.min(last, until)];
-      ctx.beginPath();
-      ctx.arc(tip.x, tip.y, radius, 0, Math.PI * 2);
-      ctx.fill();
+      const tip = samples[samples.length - 1];
+      const grad = ctx.createLinearGradient(samples[0].x, samples[0].y, tip.x, tip.y);
+      grad.addColorStop(0, colorAt(0));
+      grad.addColorStop(1, colorAt(show));
+
+      ctx.filter = "blur(0.45px)";
+      ctx.fillStyle = grad;
+      fillRibbon(ctx, samples, radius);
+      ctx.filter = "none";
 
       raf = requestAnimationFrame(draw);
     };

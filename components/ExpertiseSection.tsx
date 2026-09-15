@@ -72,7 +72,6 @@ function damp(current: number, target: number, lambda: number, dt: number) {
 }
 
 const CARD_RATIO = 1.62;
-const CARD_MAX_W = 400;
 const CARD_MIN_W = 200;
 
 export function ExpertiseSection() {
@@ -147,6 +146,21 @@ export function ExpertiseSection() {
       const staggerBudget = 0.28;
       const t = lastTimeRef.current;
 
+      const stageBox = stageEl.getBoundingClientRect();
+      const padX = Math.max(40, window.innerWidth * 0.045);
+      const availW = Math.max(280, stageBox.width - padX * 2);
+      const availH = Math.max(220, stageBox.height - 28);
+      const minGutter = 20;
+      const widthFromRow = (availW - minGutter * (n + 1)) / n;
+      const widthFromHeight = availH / CARD_RATIO;
+      /* Live stage box only — no flat px max. Height fills the stage; the
+         row formula keeps three cards side-by-side. */
+      const cardW = Math.max(
+        CARD_MIN_W,
+        Math.min(widthFromRow, widthFromHeight)
+      );
+      const cardH = cardW * CARD_RATIO;
+
       cards.forEach((card, i) => {
         if (!card) return;
 
@@ -169,18 +183,6 @@ export function ExpertiseSection() {
 
         if (!mobile.matches) {
           const offset = i - center;
-          const stageBox = stageEl.getBoundingClientRect();
-          const padX = Math.max(40, window.innerWidth * 0.045);
-          const availW = Math.max(280, stageBox.width - padX * 2);
-          const availH = Math.max(220, stageBox.height - 28);
-          const minGutter = 20;
-          const widthFromRow = (availW - minGutter * (n + 1)) / n;
-          const widthFromHeight = availH / CARD_RATIO;
-          const cardW = Math.max(
-            CARD_MIN_W,
-            Math.min(CARD_MAX_W, widthFromRow, widthFromHeight)
-          );
-          const cardH = cardW * CARD_RATIO;
           const free = Math.max(0, availW - cardW * n);
           const slot = free / (n + 1);
           const origin = -availW / 2 + slot + cardW / 2;
@@ -255,10 +257,19 @@ export function ExpertiseSection() {
     const stageObserver = new ResizeObserver(() => arrange());
     stageObserver.observe(stageEl);
     visibleRef.current = true;
-    arrange(1 / 60);
-    rafRef.current = requestAnimationFrame(frame);
+    /* Two frames so flex has assigned the stage its real height before the
+       first measure. ResizeObserver still re-arranges on later size changes. */
+    let bootRaf2 = 0;
+    const bootRaf1 = requestAnimationFrame(() => {
+      bootRaf2 = requestAnimationFrame(() => {
+        arrange(1 / 60);
+        rafRef.current = requestAnimationFrame(frame);
+      });
+    });
 
     return () => {
+      cancelAnimationFrame(bootRaf1);
+      cancelAnimationFrame(bootRaf2);
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
       stageObserver.disconnect();
@@ -289,10 +300,12 @@ export function ExpertiseSection() {
           <div className="deck-intro">
             <span className="deck-label">How we build</span>
             <div className="deck-intro-body">
-              <h2 className="deck-heading">
-                <span className="deck-heading-a">Area of</span>
-                <span className="deck-heading-b">expertise</span>
-              </h2>
+              <div className="deck-heading-slot">
+                <h2 className="deck-heading">
+                  <span className="deck-heading-a">Area of</span>
+                  <span className="deck-heading-b">expertise</span>
+                </h2>
+              </div>
               <div className="deck-intro-meta">
                 <p>
                   Multidisciplinary expertise across

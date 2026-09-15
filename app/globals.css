@@ -293,6 +293,42 @@ body {
   letter-spacing: -0.03em;
 }
 
+.process-step {
+  --process-bg: #0a0e27;
+  --process-ink: #ffffff;
+  --process-ink-muted: rgba(255, 255, 255, 0.62);
+  --process-body: rgba(255, 255, 255, 0.78);
+  --process-numeral: rgba(255, 255, 255, 0.16);
+  --process-tag-bg: rgba(255, 255, 255, 0.12);
+  --process-tag-ink: #ffffff;
+  --process-tag-border: rgba(255, 255, 255, 0.22);
+  background-color: var(--process-bg);
+  color: var(--process-ink);
+  will-change: background-color, color;
+}
+
+.process-step-heading {
+  color: var(--process-ink);
+}
+
+.process-step-caption {
+  color: var(--process-ink-muted);
+}
+
+.process-step-body {
+  color: var(--process-body);
+}
+
+.process-step-numeral {
+  color: var(--process-numeral);
+}
+
+.process-step .process-tag {
+  background: var(--process-tag-bg);
+  color: var(--process-tag-ink);
+  border-color: var(--process-tag-border);
+}
+
 .capability-pill {
   --pill-base: var(--color-tint);
   --pill-edge: var(--color-border);
@@ -623,7 +659,24 @@ a:focus-visible .cta-wipe-band {
 
 .clock-heading-long {
   max-width: 18ch;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.clock-deploy {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1.5rem;
+  font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.clock-cta {
+  margin: 0;
 }
 
 .clock-body {
@@ -835,6 +888,7 @@ a:focus-visible .cta-wipe-band {
 .pcta {
   display: block;
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   background: var(--color-carbon-black);
   border-radius: 28px;
@@ -846,6 +900,21 @@ a:focus-visible .cta-wipe-band {
     0 8px 32px rgba(0, 0, 0, 0.12);
   transition: box-shadow 0.4s ease;
   will-change: transform;
+}
+
+.pcta-fluid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.pcta-fluid.is-ready {
+  opacity: 1;
 }
 
 .pcta:hover {
@@ -934,6 +1003,7 @@ a:focus-visible .cta-wipe-band {
   line-height: 0.9;
   font-size: clamp(32px, 7vw, 80px);
   color: #ffffff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
 }
 
 .pcta-sub {
@@ -958,6 +1028,7 @@ a:focus-visible .cta-wipe-band {
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 1;
   height: 3px;
   background: linear-gradient(
     90deg,
@@ -1051,7 +1122,8 @@ a:focus-visible .cta-wipe-band {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: clamp(56px, 6vw, 72px) var(--deck-pad-x) 0;
+  padding: clamp(44px, 6vw, 56px) var(--deck-pad-x) 0;
+  margin-bottom: clamp(12px, 1.6vw, 20px);
   flex-shrink: 0;
 }
 
@@ -1066,43 +1138,62 @@ a:focus-visible .cta-wipe-band {
   color: var(--deck-ink-muted);
 }
 
+.deck-heading-slot {
+  container-type: inline-size;
+  container-name: deck-title;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
 .deck-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 0.28em;
   margin: 0;
+  min-width: 0;
   font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
-  font-size: clamp(36px, 5.2vw, 84px);
+  font-size: clamp(28px, 6cqw, 84px);
   line-height: 0.92;
   letter-spacing: -0.03em;
   word-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--deck-ink);
+  overflow-wrap: normal;
 }
 
 .deck-heading-a,
 .deck-heading-b {
-  display: block;
-  position: relative;
+  position: static;
+  left: auto;
   white-space: nowrap;
-}
-
-.deck-heading-b {
-  left: 0.58em;
-  width: fit-content;
+  overflow-wrap: normal;
 }
 
 @media (min-aspect-ratio: 21/9) {
   .deck-heading {
-    font-size: 5vw;
+    font-size: clamp(28px, 5.5cqw, 84px);
   }
 }
 
 @media (max-height: 820px) and (min-width: 801px) {
   .deck-heading {
-    font-size: clamp(32px, 4.6vw, 64px);
+    font-size: clamp(26px, 5.4cqw, 64px);
   }
 
   .deck-intro {
-    padding-top: 68px;
+    padding-top: 54px;
+    margin-bottom: 12px;
+  }
+}
+
+@container deck-title (max-width: 900px) {
+  .deck-heading {
+    letter-spacing: -0.045em;
+    word-spacing: 0.1em;
+    font-size: clamp(24px, 7cqw, 56px);
   }
 }
 
@@ -1112,10 +1203,6 @@ a:focus-visible .cta-wipe-band {
   grid-template-columns: minmax(0, 1fr) 16.5em;
   column-gap: clamp(20px, 3vw, 48px);
   align-items: start;
-}
-
-.deck-heading {
-  min-width: 0;
 }
 
 .deck-intro-meta {
@@ -1194,7 +1281,7 @@ a:focus-visible .cta-wipe-band {
   align-items: stretch;
   justify-content: flex-start;
   flex-direction: column;
-  padding: 0 0 20px;
+  padding: 0 0 8px;
 }
 
 .deck-stage {
@@ -1213,8 +1300,10 @@ a:focus-visible .cta-wipe-band {
 
 .deck-card {
   position: absolute;
-  width: 320px;
-  height: 518px;
+  /* JS overwrites from the measured stage; this is a fluid first-paint fallback. */
+  width: min(30%, 24vw);
+  aspect-ratio: 1 / 1.62;
+  height: auto;
   left: 50%;
   top: 50%;
   font-size: 16px;
@@ -1537,16 +1626,8 @@ a:focus-visible .cta-wipe-band {
   }
 
   .deck-intro {
-    padding-top: 80px;
+    padding-top: 64px;
     padding-bottom: 8px;
-  }
-
-  .deck-heading {
-    font-size: clamp(40px, 12vw, 64px);
-  }
-
-  .deck-heading-b {
-    left: 0;
   }
 
   .deck-intro-body {
@@ -3181,11 +3262,16 @@ a:focus-visible .cta-wipe-band {
   --nav-h: var(--nav-height, 4.75rem);
   --principles-gap: 1.25rem;
   --principles-bottom: 1.5rem;
-  --sticky-max: calc(100svh - var(--nav-h) - var(--principles-gap) - var(--principles-bottom));
+  /* Extra pad so vh/px rounding at browser zoom cannot shove the card
+     into the nav or past the viewport. */
+  --principles-zoom-pad: 2.75rem;
+  --sticky-max: calc(
+    100svh - var(--nav-h) - var(--principles-gap) - var(--principles-bottom) -
+      var(--principles-zoom-pad)
+  );
   --principles-card-pad: clamp(1.5rem, 4vh, 2.5rem);
   --principles-intro-budget: clamp(4.25rem, 11vh, 6.25rem);
   --card-max-height: calc(var(--sticky-max) - var(--principles-intro-budget));
-  --principles-tile: min(100%, 18rem);
   position: sticky;
   top: calc(var(--nav-h) + var(--principles-gap));
   z-index: 0;
@@ -3202,7 +3288,7 @@ a:focus-visible .cta-wipe-band {
 .principles-sticky-inner {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   width: 100%;
   min-height: 0;
   max-height: var(--sticky-max);
@@ -3215,10 +3301,10 @@ a:focus-visible .cta-wipe-band {
 
 .principles-card {
   --principles-rail-gap: 1.25rem;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--principles-rail-gap);
   padding: var(--principles-card-pad);
   min-height: 0;
@@ -3226,10 +3312,18 @@ a:focus-visible .cta-wipe-band {
   overflow: hidden;
 }
 
+.principles-rail {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
 .principles-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: center;
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: clamp(1.5rem, 4vw, 2.5rem);
   min-height: 0;
   flex: 1 1 auto;
@@ -3241,6 +3335,7 @@ a:focus-visible .cta-wipe-band {
   min-width: 0;
   min-height: 0;
   align-items: stretch;
+  flex: 1 1 auto;
 }
 
 .principles-sizer,
@@ -3323,15 +3418,24 @@ a:focus-visible .cta-wipe-band {
   margin-top: 0.25rem;
 }
 
+.principles-media {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 0;
+  flex: 0 1 auto;
+}
+
 .principles-figure {
   position: relative;
-  width: min(100%, var(--principles-tile));
+  width: min(100%, 18rem);
+  height: auto;
+  max-height: min(38svh, 16rem);
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 24px;
   background: #ebecfe;
-  justify-self: start;
-  align-self: center;
 }
 
 .principles-figure-video {
@@ -3374,11 +3478,16 @@ a:focus-visible .cta-wipe-band {
   }
 
   .principles-layout {
-    --principles-tile: min(25rem, 36%, calc((var(--card-max-height) - 5rem) * 4 / 3));
-    grid-template-columns: minmax(18rem, 1fr) minmax(12rem, var(--principles-tile));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(25rem, 42%);
+    grid-template-rows: minmax(0, auto);
+    align-items: stretch;
     gap: clamp(2rem, 5vw, 4rem);
-    row-gap: 0;
-    align-items: center;
+  }
+
+  .principles-copy-col {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .principles-copy-block {
@@ -3399,12 +3508,32 @@ a:focus-visible .cta-wipe-band {
     margin-top: 0.375rem;
   }
 
-  .principles-figure {
+  .principles-media {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    align-items: center;
+    align-self: stretch;
     width: 100%;
-    max-width: none;
+    min-width: 0;
+    /* Copy column owns the row height. This cell fills that row
+       without contributing intrinsic height, then the figure fits
+       4/3 inside the resulting box. */
+    height: 0;
+    min-height: 100%;
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .principles-figure {
+    box-sizing: border-box;
+    width: min(100cqw, calc(100cqh * 4 / 3));
+    height: min(100cqh, calc(100cqw * 3 / 4));
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 0;
+    min-height: 0;
     aspect-ratio: 4 / 3;
-    justify-self: stretch;
-    align-self: center;
   }
 }
 
@@ -3416,7 +3545,68 @@ a:focus-visible .cta-wipe-band {
 
 @media (max-height: 800px) {
   .principles-copy-block {
+    --principles-title-size: 1.75rem;
     row-gap: 0.65rem;
+  }
+
+  .principles-copy {
+    gap: 0.85rem;
+  }
+}
+
+@media (max-height: 760px) {
+  .principles-sticky {
+    --principles-zoom-pad: 1.75rem;
+    --principles-card-pad: 1.25rem;
+    --principles-intro-budget: clamp(3.25rem, 8vh, 4.5rem);
+    --principles-gap: 0.85rem;
+  }
+
+  .principles-intro {
+    margin-bottom: 0.6rem;
+  }
+
+  .principles-card {
+    --principles-rail-gap: 0.65rem;
+  }
+
+  .principles-copy-block {
+    --principles-title-size: 1.5rem;
+    row-gap: 0.45rem;
+  }
+
+  .principles-copy {
+    gap: 0.65rem;
+  }
+
+  .principles-copy-p {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .principles-rail [role="tab"] {
+    height: 2rem;
+  }
+}
+
+@media (max-height: 640px) {
+  .principles-sticky {
+    --principles-card-pad: 1rem;
+    --principles-intro-budget: 3rem;
+  }
+
+  .principles-copy-block {
+    --principles-title-size: 1.35rem;
+    row-gap: 0.4rem;
+  }
+
+  .principles-copy {
+    gap: 0.5rem;
+  }
+
+  .principles-copy-p {
+    font-size: 14px;
+    line-height: 1.35;
   }
 }
 

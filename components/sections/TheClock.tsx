@@ -36,7 +36,7 @@ const GROUND = [
 type ClockLine = { el: HTMLElement };
 
 function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace("#", "").trim();
+  const h = String(hex ?? "#4fd8ff").replace("#", "").trim();
   const full =
     h.length === 3
       ? h
@@ -59,10 +59,10 @@ function mixHex(a: string, b: string, t: number): string {
 }
 
 function along(palette: string[], t: number): string {
-  const n = palette.length - 1;
-  const x = Math.min(Math.max(t, 0), 1) * n;
-  const i = Math.floor(x);
-  return mixHex(palette[i], palette[Math.min(i + 1, n)], x - i);
+  const n = Math.max(1, palette.length - 1);
+  const x = Math.min(Math.max(t || 0, 0), 1) * n;
+  const i = Math.min(n, Math.max(0, Math.floor(x)));
+  return mixHex(palette[i] ?? palette[0], palette[Math.min(i + 1, n)] ?? palette[i], x - i);
 }
 
 function paintWash(el: HTMLElement, hex: string, a: number) {
@@ -117,7 +117,7 @@ function useLastThursdayLabel() {
       month: "long",
       day: "numeric",
     });
-    setLabel(`Thursday ${dateStr}`);
+    setLabel(`Thursday, ${dateStr}`);
   }, []);
 
   return label;
@@ -143,13 +143,15 @@ function PulseDot({ className }: { className?: string }) {
   }, []);
 
   return (
-    <span
-      ref={dotRef}
-      className={
-        className ??
-        "w-2 h-2 rounded-full bg-accent shrink-0 shadow-[0_0_6px_2px_rgba(79,216,255,0.65)]"
-      }
-    />
+    <span className="inline-flex w-1.5 h-1.5 items-center justify-center shrink-0">
+      <span
+        ref={dotRef}
+        className={
+          className ??
+          "block w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_6px_2px_rgba(79,216,255,0.65)]"
+        }
+      />
+    </span>
   );
 }
 
@@ -157,9 +159,9 @@ function DeployStamp({ moduleRef }: { moduleRef: RefObject<HTMLDivElement | null
   const deployLabel = useLastThursdayLabel();
 
   return (
-    <div ref={moduleRef} className="flex items-center gap-3">
+    <div ref={moduleRef} className="clock-deploy">
       <PulseDot />
-      <span className="type-caption text-text-inverse/70">Last deploy: {deployLabel}</span>
+      <span>Last deploy: {deployLabel}</span>
     </div>
   );
 }
@@ -257,7 +259,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       allLines.forEach((line) => {
         line.el.style.color = "";
       });
-      if (washEl) paintWash(washEl, INK[3], 0.1);
+      if (washEl) paintWash(washEl, INK[INK.length - 1], 0.1);
       section.style.backgroundColor = GROUND[0];
     });
 
@@ -283,7 +285,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
         .to(beat2Ref.current, { autoAlpha: 0, y: -20, duration: 0.6 })
         .addLabel("beat3")
         .to(beat3Ref.current, { autoAlpha: 1, y: 0, duration: 0.55 }, "beat3")
-        .to(moduleRef.current, { autoAlpha: 1, duration: 0.4 }, "beat3+=0.15")
+        .to(moduleRef.current, { autoAlpha: 1, y: 0, duration: 0.4 }, "beat3+=0.15")
         .to(
           ctaRef.current,
           { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
@@ -427,7 +429,7 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
                 <span className="clock-line">You&apos;ll be using it.</span>
               </h2>
               <DeployStamp moduleRef={moduleRef} />
-              <div ref={ctaRef} className="mt-7">
+              <div ref={ctaRef} className="clock-cta">
                 <MagneticButton href="#contact" variant="inverted" strength={0}>
                   Book a build review →
                 </MagneticButton>

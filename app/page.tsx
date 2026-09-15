@@ -55,7 +55,9 @@ export default function Home() {
           <SectionBoundary>
             <ScrollSquiggle>
               <Process />
-              <ProcessCTA />
+              <SectionBoundary>
+                <ProcessCTA />
+              </SectionBoundary>
             </ScrollSquiggle>
             <FAQ />
           </SectionBoundary>
