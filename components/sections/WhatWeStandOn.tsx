@@ -276,6 +276,28 @@ export function WhatWeStandOn() {
 
   useEffect(() => {
     const track = trackRef.current;
+    const inner = track?.querySelector<HTMLElement>(".principles-sticky-inner");
+    const sticky = track?.querySelector<HTMLElement>(".principles-sticky");
+    if (!inner || !sticky) return;
+    const measure = () => {
+      const navHeight = parseFloat(getComputedStyle(sticky).getPropertyValue("--nav-h")) || 76;
+      // Tall panels scroll up until their bottom is visible, then remain sticky.
+      const top = Math.min(navHeight + 20, window.innerHeight - inner.scrollHeight - 24);
+      sticky.style.setProperty("--principles-sticky-top", `${top}px`);
+      ScrollTrigger.refresh();
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(inner);
+    window.addEventListener("resize", measure);
+    measure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
     if (!track || reducedMotion) {
       paint(0);
       return;
