@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clsx } from "clsx";
 import { BrandLogo } from "@/components/ui/BrandLogo";
@@ -30,6 +30,25 @@ function ArrowIcon() {
 export function Nav() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const apply = () => {
+      const h = `${Math.ceil(header.getBoundingClientRect().height)}px`;
+      document.documentElement.style.setProperty("--nav-height", h);
+      document.documentElement.style.setProperty("--nav-h", h);
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(header);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", apply);
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const sections = NAV_LINKS.map((l) => l.href.replace("#", ""));
@@ -74,7 +93,10 @@ export function Nav() {
   }, [mobileOpen]);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none">
+    <header
+      ref={headerRef}
+      className="fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none"
+    >
       {mobileOpen && (
         <button
           type="button"

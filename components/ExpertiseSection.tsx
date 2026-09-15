@@ -13,38 +13,25 @@ type Capability = {
 
 const capabilities: Capability[] = [
   {
-    id: "product",
+    id: "mvp",
     number: "01",
-    title: "PRODUCT",
-    initial: "P",
-    headline: "From idea to interface",
+    title: "MVP",
+    initial: "M",
+    headline: "0 to 1, production-grade",
     items: [
-      "Product strategy",
-      "Scope definition",
-      "Technical architecture",
-      "Design systems",
-      "UI and UX design",
-      "Prototyping",
-    ],
-  },
-  {
-    id: "engineering",
-    number: "02",
-    title: "ENGINEERING",
-    initial: "E",
-    headline: "Code that ships on Thursday",
-    items: [
-      "0→1 products and MVPs",
-      "Multi-tenant SaaS platforms",
+      "0 to 1 products",
+      "Bespoke development",
+      "Scalable multi-tenant platforms",
       "Mobile apps, iOS and Android",
+      "Product design, UI and UX",
+      "Design systems",
       "API design and integration",
       "Data modeling and migrations",
-      "Infrastructure as code",
     ],
   },
   {
     id: "applied-ai",
-    number: "03",
+    number: "02",
     title: "APPLIED AI",
     initial: "AI",
     headline: "Models wired into real products",
@@ -57,31 +44,18 @@ const capabilities: Capability[] = [
     ],
   },
   {
-    id: "platform",
-    number: "04",
-    title: "PLATFORM",
-    initial: "Pl",
-    headline: "Built to survive Series B",
+    id: "methodology",
+    number: "03",
+    title: "METHODOLOGY",
+    initial: "Md",
+    headline: "How the work actually ships",
     items: [
+      "Scope definition and technical architecture",
       "Compliance architecture, HIPAA-grade",
-      "Security and access control",
-      "Observability and monitoring",
+      "Security, observability, and infrastructure as code",
       "Platform rescues and codebase audits",
-      "App store submission",
-    ],
-  },
-  {
-    id: "partnership",
-    number: "05",
-    title: "PARTNERSHIP",
-    initial: "Pa",
-    headline: "Your team, extended",
-    items: [
-      "Embedded product teams",
-      "Ongoing engineering retainers",
-      "Team augmentation",
-      "Roadmap planning",
-      "Strategic advisory",
+      "App store submission and handover",
+      "Embedded teams and engineering retainers",
     ],
   },
 ];
@@ -98,7 +72,8 @@ function damp(current: number, target: number, lambda: number, dt: number) {
 }
 
 const CARD_RATIO = 1.62;
-const CARD_MAX_W = 248;
+const CARD_MAX_W = 400;
+const CARD_MIN_W = 200;
 
 export function ExpertiseSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -121,6 +96,10 @@ export function ExpertiseSection() {
     if (!node || !stage) return;
     const scrollEl: HTMLDivElement = node;
     const stageEl: HTMLDivElement = stage;
+
+    cardRefs.current.length = capabilities.length;
+    rotorRefs.current.length = capabilities.length;
+    contentRefs.current.length = capabilities.length;
 
     const cards = cardRefs.current;
     const rotors = rotorRefs.current;
@@ -163,7 +142,7 @@ export function ExpertiseSection() {
             );
 
       progressRef.current = damp(progressRef.current, target, 4.2, dt);
-      const n = cards.length;
+      const n = capabilities.length;
       const center = (n - 1) / 2;
       const staggerBudget = 0.28;
       const t = lastTimeRef.current;
@@ -191,25 +170,28 @@ export function ExpertiseSection() {
         if (!mobile.matches) {
           const offset = i - center;
           const stageBox = stageEl.getBoundingClientRect();
-          const padX = Math.max(24, window.innerWidth * 0.024);
-          const gutter = Math.max(16, Math.min(28, window.innerWidth * 0.014));
+          const padX = Math.max(40, window.innerWidth * 0.045);
           const availW = Math.max(280, stageBox.width - padX * 2);
-          const availH = Math.max(200, stageBox.height - 32);
-          const widthFromRow = (availW - gutter * (n - 1)) / n;
+          const availH = Math.max(220, stageBox.height - 28);
+          const minGutter = 20;
+          const widthFromRow = (availW - minGutter * (n + 1)) / n;
           const widthFromHeight = availH / CARD_RATIO;
           const cardW = Math.max(
-            140,
+            CARD_MIN_W,
             Math.min(CARD_MAX_W, widthFromRow, widthFromHeight)
           );
           const cardH = cardW * CARD_RATIO;
-          const step = cardW + gutter;
+          const free = Math.max(0, availW - cardW * n);
+          const slot = free / (n + 1);
+          const origin = -availW / 2 + slot + cardW / 2;
+          const step = cardW + slot;
           const stackX = offset * 4;
           const stackY = -offset * 3;
           const stackAngle = offset * 1.15;
-          const fanX = offset * Math.min(64, cardW * 0.28);
+          const fanX = offset * Math.min(72, cardW * 0.22);
           const fanY = Math.abs(offset) * 10;
-          const fanAngle = offset * 7;
-          const rowX = offset * step;
+          const fanAngle = offset * 6;
+          const rowX = origin + i * step;
           const floatY = paused
             ? 0
             : Math.sin(t * 0.00155 + i * 1.12) * (2 + 4 * (1 - spread));
@@ -301,7 +283,7 @@ export function ExpertiseSection() {
   };
 
   return (
-    <section id="capabilities" aria-label="Area of expertise" className="deck-section relative z-[4]">
+    <section id="capabilities" aria-label="Area of expertise" className="deck-section relative z-[2]">
       <div ref={scrollRef} className="deck-scroll">
         <div className="deck-sticky">
           <div className="deck-intro">
@@ -314,8 +296,7 @@ export function ExpertiseSection() {
               <div className="deck-intro-meta">
                 <p>
                   Multidisciplinary expertise across
-                  product, engineering, applied AI,
-                  platform, and partnership.
+                  MVP, applied AI, and methodology.
                 </p>
                 <div className="deck-intro-actions">
                   {capabilities.map((cap, i) => (
@@ -355,119 +336,30 @@ export function ExpertiseSection() {
                   >
                     {/* ───── BACK ───── */}
                     <div className="deck-card__face deck-card__back" aria-hidden="true">
-                      <svg className="deck-back-art" viewBox="0 0 252 470" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        {/* ── Double card border ── */}
-                        <rect x="7" y="7" width="238" height="456" rx="20" stroke="currentColor" strokeWidth="1.5"/>
-                        <rect x="13" y="13" width="226" height="444" rx="16" stroke="currentColor" strokeWidth="0.75" opacity="0.55"/>
-
-                        {/* ── Border dots ── */}
-                        <circle cx="72"  cy="15"  r="2.5" fill="currentColor"/>
-                        <circle cx="126" cy="15"  r="2.5" fill="currentColor"/>
-                        <circle cx="180" cy="15"  r="2.5" fill="currentColor"/>
-                        <circle cx="72"  cy="455" r="2.5" fill="currentColor"/>
-                        <circle cx="126" cy="455" r="2.5" fill="currentColor"/>
-                        <circle cx="180" cy="455" r="2.5" fill="currentColor"/>
-                        <circle cx="15"  cy="155" r="2.5" fill="currentColor"/>
-                        <circle cx="15"  cy="235" r="2.5" fill="currentColor"/>
-                        <circle cx="15"  cy="315" r="2.5" fill="currentColor"/>
-                        <circle cx="237" cy="155" r="2.5" fill="currentColor"/>
-                        <circle cx="237" cy="235" r="2.5" fill="currentColor"/>
-                        <circle cx="237" cy="315" r="2.5" fill="currentColor"/>
-
-                        {/* ── Corner ornaments: ring dot + directional triangle ── */}
-                        {/* TL */}
-                        <circle cx="33" cy="38" r="8" stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="33" cy="38" r="3.5" fill="currentColor"/>
-                        <path d="M24 52L33 70L42 52Z" fill="currentColor"/>
-                        {/* TR */}
-                        <circle cx="219" cy="38" r="8" stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="219" cy="38" r="3.5" fill="currentColor"/>
-                        <path d="M210 52L219 70L228 52Z" fill="currentColor"/>
-                        {/* BL */}
-                        <path d="M24 418L33 400L42 418Z" fill="currentColor"/>
-                        <circle cx="33" cy="432" r="8" stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="33" cy="432" r="3.5" fill="currentColor"/>
-                        {/* BR */}
-                        <path d="M210 418L219 400L228 418Z" fill="currentColor"/>
-                        <circle cx="219" cy="432" r="8" stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="219" cy="432" r="3.5" fill="currentColor"/>
-
-                        {/* ── Outer diamond ── */}
-                        <path d="M126 52L215 235L126 418L37 235Z" stroke="currentColor" strokeWidth="1.5"/>
-                        {/* ── Inner diamond ── */}
-                        <path d="M126 86L188 235L126 384L64 235Z" stroke="currentColor" strokeWidth="1" opacity="0.8"/>
-
-                        {/* ── Inward-pointing filled triangles at inner diamond tips ── */}
-                        <path d="M112 86L126 115L140 86Z"   fill="currentColor"/>
-                        <path d="M112 384L126 355L140 384Z" fill="currentColor"/>
-                        <path d="M64 221L93 235L64 249Z"    fill="currentColor"/>
-                        <path d="M188 221L159 235L188 249Z" fill="currentColor"/>
-
-                        {/* ── Left quadrant: vertical pill + three dashes ── */}
-                        <rect x="44" y="204" width="11" height="62" rx="5.5" stroke="currentColor" strokeWidth="1"/>
-                        <line x1="37" y1="218" x2="62" y2="218" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-                        <line x1="37" y1="235" x2="62" y2="235" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-                        <line x1="37" y1="252" x2="62" y2="252" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-
-                        {/* ── Right quadrant: mirror ── */}
-                        <rect x="197" y="204" width="11" height="62" rx="5.5" stroke="currentColor" strokeWidth="1"/>
-                        <line x1="190" y1="218" x2="215" y2="218" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-                        <line x1="190" y1="235" x2="215" y2="235" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-                        <line x1="190" y1="252" x2="215" y2="252" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
-
-                        {/* ── Top quadrant: radiating lines + stacked circles ── */}
-                        <line x1="94"  y1="68"  x2="116" y2="150" stroke="currentColor" strokeWidth="0.8" opacity="0.45"/>
-                        <line x1="126" y1="52"  x2="126" y2="150" stroke="currentColor" strokeWidth="0.8" opacity="0.35"/>
-                        <line x1="158" y1="68"  x2="136" y2="150" stroke="currentColor" strokeWidth="0.8" opacity="0.45"/>
-                        <circle cx="126" cy="103" r="10"  stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="126" cy="103" r="3.5" fill="currentColor"/>
-                        <circle cx="106" cy="120" r="5.5" stroke="currentColor" strokeWidth="0.95"/>
-                        <circle cx="146" cy="120" r="5.5" stroke="currentColor" strokeWidth="0.95"/>
-
-                        {/* ── Bottom quadrant: mirror of top ── */}
-                        <line x1="94"  y1="402" x2="116" y2="320" stroke="currentColor" strokeWidth="0.8" opacity="0.45"/>
-                        <line x1="126" y1="418" x2="126" y2="320" stroke="currentColor" strokeWidth="0.8" opacity="0.35"/>
-                        <line x1="158" y1="402" x2="136" y2="320" stroke="currentColor" strokeWidth="0.8" opacity="0.45"/>
-                        <circle cx="126" cy="367" r="10"  stroke="currentColor" strokeWidth="1.1"/>
-                        <circle cx="126" cy="367" r="3.5" fill="currentColor"/>
-                        <circle cx="106" cy="350" r="5.5" stroke="currentColor" strokeWidth="0.95"/>
-                        <circle cx="146" cy="350" r="5.5" stroke="currentColor" strokeWidth="0.95"/>
-
-                        {/* ── Central scalloped badge (8-point soft star, blue fill hides diamond lines) ── */}
-                        <path
-                          d="M126 189L142 197L159 202L164 219L172 235L164 251L159 268L142 273L126 281L110 273L93 268L88 251L80 235L88 219L93 202L110 197Z"
-                          stroke="currentColor" strokeWidth="1.4"
-                          style={{ fill: "var(--deck-blue)" }}
-                        />
-                        {/* Inner ring for letter */}
-                        <circle cx="126" cy="235" r="30" stroke="currentColor" strokeWidth="1.1" opacity="0.75"/>
-                        {/* Accent dot at bottom of badge */}
-                        <circle cx="126" cy="269" r="3.5" fill="currentColor" opacity="0.85"/>
-                      </svg>
-
-                      {/* Centre letter */}
-                      <div className="deck-back-badge">
-                        <span className="deck-badge-letter">{cap.initial}</span>
+                      <div className="deck-back">
+                        <header className="deck-back__top">
+                          <span className="deck-back__kicker">Capability</span>
+                        </header>
+                        <div className="deck-back__body">
+                          <span className="deck-back__num">{cap.number}</span>
+                          <strong className="deck-back__title">{cap.title}</strong>
+                          <p className="deck-back__lede">{cap.headline}</p>
+                        </div>
+                        <footer className="deck-back__foot">
+                          <span>Open</span>
+                        </footer>
                       </div>
-
-                      {/* Corner pips */}
-                      <span className="deck-card__corner">
-                        <span>{cap.number}</span>
-                        <small>{cap.initial}</small>
-                      </span>
-                      <span className="deck-card__corner deck-card__corner--rev">
-                        <span>{cap.number}</span>
-                        <small>{cap.initial}</small>
-                      </span>
                     </div>
 
-                    {/* ───── FRONT ───── */}
                     <div
                       className="deck-card__face deck-card__front"
                       id={`deck-panel-${cap.id}`}
                     >
                       <div className="deck-card__head">
-                        <strong>{cap.title}</strong>
+                        <strong>
+                          <span className="deck-card__num">{cap.number}</span>
+                          {cap.title}
+                        </strong>
                         <span className="deck-card__mark" aria-hidden="true">
                           {cap.initial}
                         </span>
@@ -486,7 +378,10 @@ export function ExpertiseSection() {
                       </div>
 
                       <div className="deck-card__foot" aria-hidden="true">
-                        <strong>{cap.title}</strong>
+                        <strong>
+                          <span className="deck-card__num">{cap.number}</span>
+                          {cap.title}
+                        </strong>
                         <span className="deck-card__mark">{cap.initial}</span>
                       </div>
                     </div>

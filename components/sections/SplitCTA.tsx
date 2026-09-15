@@ -16,7 +16,7 @@ function ArrowIcon() {
 
 const PANELS = [
   {
-    href: "#contact",
+    href: "mailto:arpit@avishkarai.com,shivang@avishkarai.com?subject=Build%20review",
     lines: ["Book a", "build review"],
     body: "In 30 minutes we'll tell you what we'd build, how long it would take, and what we'd cut.",
     wipe: "var(--color-primary)",
@@ -31,7 +31,7 @@ const PANELS = [
 
 export function SplitCTA() {
   return (
-    <section aria-label="Next steps">
+    <section id="contact" aria-label="Next steps">
       <div className="grid md:grid-cols-2 bg-paper-white">
         {PANELS.map((panel) => (
           <a

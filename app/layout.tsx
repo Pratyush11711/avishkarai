@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SplashCursorLayer } from "@/components/fx/SplashCursorLayer";
-import { aeonik, ibmPlexMono, lusionMono } from "@/lib/fonts";
+import { aeonik, ibmPlexMono } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${aeonik.variable} ${ibmPlexMono.variable} ${lusionMono.variable} min-h-full`}
+      className={`${aeonik.variable} ${ibmPlexMono.variable} min-h-full`}
       suppressHydrationWarning
     >
       <body

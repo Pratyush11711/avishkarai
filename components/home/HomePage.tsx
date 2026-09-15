@@ -47,9 +47,6 @@ const WhatWeStandOn = load(
 const ExpertiseSection = load(() => import("@/components/ExpertiseSection"), [
   "ExpertiseSection",
 ]);
-const WhatWeDontDo = load(() => import("@/components/sections/WhatWeDontDo"), [
-  "WhatWeDontDo",
-]);
 const ProcessRibbon = load(() => import("@/components/fx/ProcessRibbon"), [
   "ProcessRibbon",
 ]);
@@ -61,7 +58,6 @@ const FAQ = load(() => import("@/components/sections/FAQ"), ["FAQ"]);
 const Newsletter = load(() => import("@/components/sections/Newsletter"), [
   "Newsletter",
 ]);
-const FinalCTA = load(() => import("@/components/sections/FinalCTA"), ["FinalCTA"]);
 const LetsWorkTogether = load(
   () => import("@/components/sections/LetsWorkTogether"),
   ["LetsWorkTogether"],
@@ -107,7 +103,6 @@ export function HomePage() {
 
         <div className="curtain z-[4] bg-bg">
           <SectionBoundary>
-            <WhatWeDontDo />
             <div className="relative pb-[clamp(90px,9vw,160px)]">
               <ProcessRibbon />
               <div className="relative z-[1]">
@@ -122,12 +117,6 @@ export function HomePage() {
         <div className="curtain-sticky z-[5] bg-bg">
           <SectionBoundary>
             <Newsletter />
-          </SectionBoundary>
-        </div>
-
-        <div className="curtain z-[6] bg-deep-navy">
-          <SectionBoundary>
-            <FinalCTA />
           </SectionBoundary>
         </div>
 

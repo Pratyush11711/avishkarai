@@ -7,14 +7,12 @@ import { SectorMarquee } from "@/components/sections/SectorMarquee";
 import { TheClock } from "@/components/sections/TheClock.lazy";
 import { WhatWeStandOn } from "@/components/sections/WhatWeStandOn.lazy";
 import { ExpertiseSection } from "@/components/ExpertiseSection";
-import { WhatWeDontDo } from "@/components/sections/WhatWeDontDo";
 import { Process } from "@/components/sections/Process";
 import { ProcessCTA } from "@/components/sections/ProcessCTA";
 import { FAQ } from "@/components/sections/FAQ";
 import { Newsletter } from "@/components/sections/Newsletter";
 import { LetsWorkTogether } from "@/components/sections/LetsWorkTogether.lazy";
 import { SplitCTA } from "@/components/sections/SplitCTA";
-import { FinalCTA } from "@/components/sections/FinalCTA";
 import { Footer } from "@/components/footer/Footer";
 import { ScrollSquiggle } from "@/components/fx/ScrollSquiggle";
 
@@ -43,7 +41,7 @@ export default function Home() {
           <TheClock />
         </SectionBoundary>
 
-        <div className="curtain z-[4] bg-bg">
+        <div className="principles-runway">
           <SectionBoundary>
             <WhatWeStandOn />
           </SectionBoundary>
@@ -56,7 +54,6 @@ export default function Home() {
         <div className="curtain z-[4] bg-bg">
           <SectionBoundary>
             <ScrollSquiggle>
-              <WhatWeDontDo />
               <Process />
               <ProcessCTA />
             </ScrollSquiggle>
@@ -67,12 +64,6 @@ export default function Home() {
         <div className="curtain-sticky z-[5] bg-bg">
           <SectionBoundary>
             <Newsletter />
-          </SectionBoundary>
-        </div>
-
-        <div className="curtain z-[6] bg-deep-navy">
-          <SectionBoundary>
-            <FinalCTA />
           </SectionBoundary>
         </div>
 

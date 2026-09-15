@@ -20,15 +20,7 @@ import {
 const DIM = "rgba(255, 255, 255, 0.14)";
 
 /** Bright ink the active band paints with as you scroll. */
-const INK = [
-  "#4fd8ff",
-  "#5c8dff",
-  "#ebecfe",
-  "#3040ff",
-  "#1b2bff",
-  "#ffffff",
-  "#4fd8ff",
-];
+const INK = ["#4fd8ff", "#ffffff", "#4fd8ff"];
 
 /** Solid section grounds — dark cousins of the ink, like the reference. */
 const GROUND = [
@@ -370,7 +362,6 @@ export const TheClock = forwardRef<HTMLElement>(function TheClock(_, forwardedRe
       <div className="clock-scene-scrim" aria-hidden />
       <div ref={washRef} className="clock-wash" aria-hidden />
       <div className="relative z-[2] h-full min-h-0 flex flex-col justify-start page-wrap pt-[max(5.5rem,env(safe-area-inset-top))] pb-8 md:pt-28 md:pb-10">
-        <p className="type-caption text-text-inverse/60 mb-4 shrink-0">04 · The Clock</p>
         <div className="grid w-full min-w-0 md:grid-cols-[minmax(0,1fr)_minmax(280px,46%)] gap-8 lg:gap-16 items-stretch">
           <div className="clock-copy-col relative w-full min-w-0 min-h-0 grid md:items-center">
             <div

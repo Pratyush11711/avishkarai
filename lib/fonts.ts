@@ -45,16 +45,3 @@ export const ibmPlexMono = localFont({
   variable: "--font-ibm-plex-mono",
   display: "swap",
 });
-
-/** Lusion decorative mono — LusionMono */
-export const lusionMono = localFont({
-  src: [
-    {
-      path: "../public/fonts/LusionMono.woff2",
-      weight: "400",
-      style: "normal",
-    },
-  ],
-  variable: "--font-lusion-mono",
-  display: "swap",
-});
