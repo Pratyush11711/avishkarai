@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { clsx } from "clsx";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { ChipGlyph, NAV_CHIPS } from "@/components/nav/NavChips";
 import { GradualBlur } from "@/components/react-bits/GradualBlur";
 
-const NAV_LINKS = [
+export const NAV_LINKS = [
   { label: "Work", href: "#work" },
   { label: "Studio", href: "#studio" },
   { label: "Capabilities", href: "#capabilities" },
@@ -30,11 +31,18 @@ function ArrowIcon() {
 export function Nav() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [overHero, setOverHero] = useState(true);
+  const [hudNav, setHudNav] = useState(false);
+  const [navReady, setNavReady] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    setHudNav(Boolean(document.querySelector(".lh-hud")));
+  }, []);
+
+  useEffect(() => {
     const header = headerRef.current;
-    if (!header) return;
+    if (!header || hudNav) return;
     const apply = () => {
       const h = `${Math.ceil(header.getBoundingClientRect().height)}px`;
       document.documentElement.style.setProperty("--nav-height", h);
@@ -48,7 +56,7 @@ export function Nav() {
       ro.disconnect();
       window.removeEventListener("resize", apply);
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, hudNav]);
 
   useEffect(() => {
     const sections = NAV_LINKS.map((l) => l.href.replace("#", ""));
@@ -72,6 +80,30 @@ export function Nav() {
   }, []);
 
   useEffect(() => {
+    const hero = document.getElementById("hero");
+    if (!hero) {
+      setOverHero(false);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setOverHero(entry.isIntersecting && entry.intersectionRatio >= 0.42);
+      },
+      { threshold: [0, 0.25, 0.42, 0.6, 1] }
+    );
+    io.observe(hero);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    setNavReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (overHero || hudNav) setMobileOpen(false);
+  }, [overHero, hudNav]);
+
+  useEffect(() => {
     if (!mobileOpen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -92,10 +124,17 @@ export function Nav() {
     };
   }, [mobileOpen]);
 
+  const hideBar = hudNav || overHero;
+
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none"
+      className={clsx(
+        "site-nav-bar fixed top-0 inset-x-0 z-[100] pt-[max(12px,env(safe-area-inset-top))] pointer-events-none",
+        hideBar && "site-nav-bar--hidden"
+      )}
+      aria-hidden={navReady && hideBar ? true : undefined}
+      inert={navReady && hideBar ? true : undefined}
     >
       {mobileOpen && (
         <button
@@ -158,26 +197,14 @@ export function Nav() {
 
             <button
               type="button"
-              className="lg:hidden w-11 h-11 rounded-full inline-flex items-center justify-center text-carbon-black bg-mist-gray border border-ash"
+              className="lg:hidden inline-flex items-center justify-center min-h-11 px-4 rounded-full text-[14px] font-medium tracking-[-0.03em] text-carbon-black bg-paper-white border border-ash shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
             >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                {mobileOpen ? (
-                  <>
-                    <line x1="4" y1="4" x2="16" y2="16" stroke="currentColor" strokeWidth="1.5" />
-                    <line x1="16" y1="4" x2="4" y2="16" stroke="currentColor" strokeWidth="1.5" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="6" x2="17" y2="6" stroke="currentColor" strokeWidth="1.5" />
-                    <line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" strokeWidth="1.5" />
-                    <line x1="3" y1="14" x2="17" y2="14" stroke="currentColor" strokeWidth="1.5" />
-                  </>
-                )}
-              </svg>
+              {mobileOpen ? "Close" : "Menu"}
+              <span aria-hidden="true"> ×</span>
             </button>
           </div>
         </div>
@@ -193,34 +220,36 @@ export function Nav() {
               transition={{ duration: 0.22 }}
               className="lg:hidden overflow-hidden mt-2 relative z-[2]"
             >
-              <nav className="site-nav-mobile rounded-[28px] px-3 py-3 flex flex-col gap-1 max-h-[min(70dvh,calc(100dvh-5.5rem))] overflow-y-auto">
-                {NAV_LINKS.map((link) => {
+              <nav className="site-nav-mobile rounded-[28px] p-3 flex flex-col gap-2.5 max-h-[min(78dvh,calc(100dvh-5.5rem))] overflow-y-auto">
+                {NAV_CHIPS.map((link) => {
                   const isActive = activeSection === link.href.replace("#", "");
                   return (
                     <a
                       key={link.href}
                       href={link.href}
-                      className={clsx(
-                        "flex items-center min-h-12 px-4 rounded-2xl text-[16px] font-medium tracking-[-0.03em] text-carbon-black",
-                        isActive ? "bg-mist-gray" : "bg-transparent"
-                      )}
+                      className="flex flex-1 items-center justify-center gap-2.5 min-h-[3.25rem] px-4 rounded-full text-[16px] font-medium tracking-[-0.03em]"
+                      style={{
+                        "--chip": link.color,
+                        background: isActive
+                          ? `color-mix(in srgb, ${link.color} 32%, white)`
+                          : `color-mix(in srgb, ${link.color} 20%, white)`,
+                        border: `1.5px solid color-mix(in srgb, ${link.color} 58%, white)`,
+                        color: `color-mix(in srgb, ${link.color} 28%, #16161c)`,
+                      } as React.CSSProperties}
                       onClick={() => setMobileOpen(false)}
                     >
+                      <ChipGlyph icon={link.icon} color={link.color} />
                       {link.label}
                     </a>
                   );
                 })}
                 <a
                   href="#contact"
-                  className="nav-cta mt-2 inline-flex items-center justify-between gap-3 min-h-12 pl-5 pr-1.5 py-1.5 rounded-full bg-primary text-text-inverse text-[16px] font-medium tracking-[-0.03em]"
+                  className="mt-1 inline-flex items-center justify-center gap-2 min-h-14 rounded-full bg-[#111114] text-paper-white text-[16px] font-medium tracking-[-0.03em]"
                   onClick={() => setMobileOpen(false)}
                 >
                   Book a build
-                  <span className="w-10 h-10 rounded-full bg-paper-white text-carbon-black inline-flex items-center justify-center">
-                    <span className="nav-cta-arrow inline-flex">
-                      <ArrowIcon />
-                    </span>
-                  </span>
+                  <span aria-hidden="true">→</span>
                 </a>
               </nav>
             </motion.div>

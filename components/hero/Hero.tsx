@@ -1,24 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import dynamic from "next/dynamic";
 import { HeadingReveal, LineReveal } from "@/components/ui/TypeReveal";
-import { HeroPlus } from "./HeroPlus";
+import { HeroWordImageCycle } from "./HeroWordImageCycle";
 import { HeroErrorBoundary } from "./HeroErrorBoundary";
-import { usePrefersReducedMotion } from "./HeroVideo";
-
-const HeroCrossField = dynamic(
-  () =>
-    import("./HeroCrossField")
-      .then((m) => ({
-        default: m.HeroCrossField ?? m.default ?? (() => null),
-      }))
-      .catch((error) => {
-        console.error("HeroCrossField failed to load", error);
-        return { default: () => null };
-      }),
-  { ssr: false }
-);
 
 const HeroRibbon = dynamic(
   () =>
@@ -31,58 +17,23 @@ const HeroRibbon = dynamic(
 );
 
 export function Hero() {
-  const introRef = useRef<HTMLElement>(null);
   const statementRef = useRef<HTMLElement>(null);
-  const [crossPlaying, setCrossPlaying] = useState(true);
-  const prefersReduced = usePrefersReducedMotion();
-
-  useEffect(() => {
-    const node = introRef.current;
-    if (!node) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setCrossPlaying(entry.isIntersecting && !prefersReduced),
-      { rootMargin: "160px 0px" }
-    );
-    io.observe(node);
-    return () => io.disconnect();
-  }, [prefersReduced]);
 
   return (
     <>
-      <div className="lh">
+      <div className="lh" suppressHydrationWarning>
         <section
-          ref={introRef}
           id="hero"
           className="lh-intro"
           aria-label="Hero"
         >
-          <div className="lh-intro-copy">
+          <HeroWordImageCycle>
             <h1 className="lh-intro-title">
-              We build production-grade software{" "}
+              We ship products that look like art.{" "}
               <br className="lh-intro-br" />
-              and interactive product experiences{" "}
-              <br className="lh-intro-br" />
-              that help teams ship in eight weeks.
+              In Hours, not Months.
             </h1>
-          </div>
-
-          <div className="lh-visual" aria-hidden={!crossPlaying}>
-            {prefersReduced ? (
-              <div className="lh-visual-fallback" />
-            ) : (
-              <HeroErrorBoundary fallback={<div className="lh-visual-fallback" />}>
-                <HeroCrossField playing={crossPlaying} />
-              </HeroErrorBoundary>
-            )}
-          </div>
-
-          <div className="lh-explore" aria-hidden="true">
-            <HeroPlus />
-            <HeroPlus />
-            <span className="lh-explore-text">Scroll to explore</span>
-            <HeroPlus />
-            <HeroPlus />
-          </div>
+          </HeroWordImageCycle>
         </section>
 
         <section
@@ -97,13 +48,10 @@ export function Hero() {
           <div className="lh-statement-grid">
             <h2 className="lh-statement-title">
               <span className="lh-statement-line">
-                <HeadingReveal text="Live in eight weeks," />
+                <HeadingReveal text="We ship products that look like art." />
               </span>
               <span className="lh-statement-line">
-                <HeadingReveal text="Enterprise-grade" />
-              </span>
-              <span className="lh-statement-line">
-                <HeadingReveal text="from day one." />
+                <HeadingReveal text="In Hours, not Months." />
               </span>
             </h2>
 

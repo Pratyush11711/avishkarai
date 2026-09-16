@@ -24,8 +24,7 @@ const FOOTER_LINKS = {
   ],
   Social: [
     { label: "LinkedIn", href: "#" },
-    { label: "X", href: "#" },
-    { label: "GitHub", href: "#" },
+    { label: "Instagram", href: "#" },
   ],
 };
 
@@ -82,7 +81,10 @@ export function Footer() {
         </div>
 
         <div className="pt-6 flex items-center justify-between gap-4 flex-wrap">
-          <p className="type-caption text-text-inverse/55">© 2026 Avishkar AI</p>
+          <p className="type-caption text-text-inverse/55">
+            © {new Date().getFullYear()} Anjaneyaai Technologies Private Limited. All rights
+            reserved.
+          </p>
           <button
             type="button"
             onClick={scrollToTop}

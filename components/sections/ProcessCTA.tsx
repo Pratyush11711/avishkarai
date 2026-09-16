@@ -1,58 +1,58 @@
 "use client";
 
-import { Component, useRef, useState, type ReactNode } from "react";
-import dynamic from "next/dynamic";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-
-const FluidCanvas = dynamic(
-  () => import("./process-cta-fluid/FluidCanvas"),
-  { ssr: false }
-);
+import { useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-class FluidBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  render() {
-    if (this.state.failed) return null;
-    return this.props.children;
-  }
-}
-
 export function ProcessCTA() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const linkRef = useRef<HTMLAnchorElement>(null);
-  const inView = useInView(wrapRef, { once: true, amount: 0.2 });
-  const reducedMotion = useReducedMotion();
+  const inView = useInView(wrapRef, { once: true, amount: 0.3 });
+  const [spot, setSpot] = useState({ x: 50, y: 50 });
   const [hovered, setHovered] = useState(false);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    setSpot({
+      x: ((e.clientX - r.left) / r.width) * 100,
+      y: ((e.clientY - r.top) / r.height) * 100,
+    });
+  }
 
   return (
     <div ref={wrapRef} className="pcta-wrap">
       <motion.a
-        ref={linkRef}
         href="#contact"
         className="pcta"
+        onMouseMove={handleMouseMove}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        style={
+          {
+            "--sx": `${spot.x}%`,
+            "--sy": `${spot.y}%`,
+          } as React.CSSProperties
+        }
         initial={{ opacity: 0, y: 32, scale: 0.98 }}
-        animate={inView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
-        whileHover={reducedMotion ? undefined : { y: -6, scale: 1.008 }}
+        animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+        whileHover={{ y: -6, scale: 1.008 }}
         transition={{ duration: 0.7, ease }}
       >
-        {reducedMotion !== true && (
-          <FluidBoundary>
-            <FluidCanvas hostRef={linkRef} playing={inView} />
-          </FluidBoundary>
-        )}
+        {/* Spotlight that follows cursor */}
+        <span className="pcta-spotlight" aria-hidden />
 
+        {/* Continuous diagonal shimmer */}
+        <span className="pcta-shimmer" aria-hidden />
+
+        {/* Mesh gradient noise layer */}
+        <span className="pcta-mesh" aria-hidden />
+
+        {/* Main content */}
         <span className="pcta-inner">
           <span className="pcta-left">
             <motion.span
               className="pcta-label"
-              animate={hovered && reducedMotion !== true ? { x: 4 } : { x: 0 }}
+              animate={hovered ? { x: 4 } : { x: 0 }}
               transition={{ duration: 0.35, ease }}
             >
               Book your Build Review
@@ -63,21 +63,18 @@ export function ProcessCTA() {
           <motion.span
             className="pcta-arrow"
             aria-hidden
-            animate={
-              hovered && reducedMotion !== true
-                ? { x: 10, rotate: -45 }
-                : { x: 0, rotate: 0 }
-            }
+            animate={hovered ? { x: 10, rotate: -45 } : { x: 0, rotate: 0 }}
             transition={{ duration: 0.35, ease }}
           >
             →
           </motion.span>
         </span>
 
+        {/* Rainbow gradient line — sweeps in from left */}
         <motion.span
           className="pcta-line"
           initial={{ scaleX: 0 }}
-          animate={inView ? { scaleX: 1 } : { scaleX: 1 }}
+          animate={inView ? { scaleX: 1 } : {}}
           transition={{ duration: 1, delay: 0.45, ease }}
           aria-hidden
         />
