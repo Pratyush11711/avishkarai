@@ -48,7 +48,10 @@ export function Hero() {
           <div className="lh-statement-grid">
             <h2 className="lh-statement-title">
               <span className="lh-statement-line">
-                <HeadingReveal text="We ship products that look like art." />
+                <HeadingReveal text="We ship products that" />
+              </span>
+              <span className="lh-statement-line">
+                <HeadingReveal text="look like art." />
               </span>
               <span className="lh-statement-line">
                 <HeadingReveal text="In Hours, not Months." />
