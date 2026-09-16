@@ -6,9 +6,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePrefersReducedMotion } from "./HeroVideo";
 
 const ITEMS = [
-  { word: "Fast.", image: "/hero-mask-1.png" },
-  { word: "Crafted.", image: "/hero-mask-2.png" },
-  { word: "Dependable.", image: "/hero-mask-3.png" },
+  { word: "Fast", image: "/hero-mask-1.png" },
+  { word: "Crafted", image: "/hero-mask-2.png" },
+  { word: "Dependable", image: "/hero-mask-3.png" },
 ] as const;
 const HOLD_MS = 2600;
 const TRANSITION_S = 0.7;
