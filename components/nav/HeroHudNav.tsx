@@ -21,7 +21,7 @@ export function HeroHudNav() {
     const sync = () => {
       const next = mq.matches;
       setDesktop(next);
-      setMenuOpen(next);
+      if (next) setMenuOpen(false);
     };
     sync();
     mq.addEventListener("change", sync);
@@ -137,71 +137,47 @@ export function HeroHudNav() {
           </a>
 
           <nav className="lh-hud-nav" aria-label="Hero">
-            <div className="lh-hud-nav-start">
+            {!desktop ? (
               <button
                 type="button"
                 className="lh-hud-menu"
                 aria-expanded={menuOpen}
-                aria-controls={desktop ? "hero-hud-links" : "hero-hud-menu"}
+                aria-controls="hero-hud-menu"
                 onClick={() => setMenuOpen((v) => !v)}
               >
                 Menu
                 <span aria-hidden="true">{menuOpen ? " ×" : " +"}</span>
               </button>
+            ) : null}
 
-              <AnimatePresence initial={false}>
-                {desktop && menuOpen ? (
-                  <motion.div
-                    key="hud-links"
-                    id="hero-hud-links"
-                    className="lh-hud-links"
-                    initial={reduceMotion ? false : { width: 0, opacity: 0 }}
-                    animate={{ width: "auto", opacity: 1 }}
-                    exit={
-                      reduceMotion
-                        ? undefined
-                        : { width: 0, opacity: 0, transition: { duration: 0.42, ease } }
-                    }
-                    transition={{ duration: 0.42, ease }}
-                  >
-                    {NAV_CHIPS.map((link, i) => {
-                      const isActive = activeSection === link.href.replace("#", "");
-                      const closeDelay = i * 0.035;
-                      const openDelay = (NAV_CHIPS.length - 1 - i) * 0.04;
-                      return (
-                        <motion.a
-                          key={link.href}
-                          href={link.href}
-                          className="lh-hud-chip"
-                          style={{ "--chip": link.color } as React.CSSProperties}
-                          aria-current={isActive ? "true" : undefined}
-                          initial={reduceMotion ? false : { opacity: 0, x: 28 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{
-                            opacity: 0,
-                            x: 36,
-                            transition: { duration: 0.28, delay: closeDelay, ease },
-                          }}
-                          transition={{
-                            duration: 0.36,
-                            delay: reduceMotion ? 0 : openDelay,
-                            ease,
-                          }}
-                        >
-                          <ChipGlyph icon={link.icon} color={link.color} />
-                          {link.label}
-                        </motion.a>
-                      );
-                    })}
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+            <div className="lh-hud-links" id="hero-hud-links">
+              {NAV_CHIPS.map((link, i) => {
+                const isActive = activeSection === link.href.replace("#", "");
+                return (
+                  <span key={link.href} className="lh-hud-item">
+                    {i > 0 ? (
+                      <span className="lh-hud-sep" aria-hidden="true">
+                        ·
+                      </span>
+                    ) : null}
+                    <a
+                      href={link.href}
+                      className="lh-hud-link"
+                      aria-current={isActive ? "true" : undefined}
+                    >
+                      {link.label}
+                    </a>
+                  </span>
+                );
+              })}
+              <span className="lh-hud-sep" aria-hidden="true">
+                ·
+              </span>
+              <a href="#contact" className="lh-hud-cta">
+                Book a build
+                <span aria-hidden="true"> →</span>
+              </a>
             </div>
-
-            <a href="#contact" className="lh-hud-cta">
-              Book a build
-              <span aria-hidden="true"> →</span>
-            </a>
           </nav>
         </div>
       </div>
@@ -249,7 +225,6 @@ export function HeroHudNav() {
                     key={link.href}
                     href={link.href}
                     className="lh-hud-overlay-chip"
-                    style={{ "--chip": link.color } as React.CSSProperties}
                     onClick={closeMenu}
                     initial={reduceMotion ? false : { opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}

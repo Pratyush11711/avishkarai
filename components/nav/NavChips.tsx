@@ -36,10 +36,7 @@ export function ChipGlyph({
   color: string;
   size?: number;
 }) {
-  const shade =
-    color === "currentColor"
-      ? "currentColor"
-      : `color-mix(in srgb, ${color} 62%, #0b1220)`;
+  const shade = `color-mix(in srgb, ${color} 62%, #0b1220)`;
   return (
     <span className="lh-hud-glyph" style={{ width: size, height: size }}>
       {icon === "folder" ? (
