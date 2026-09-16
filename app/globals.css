@@ -1726,12 +1726,14 @@ a:focus-visible .cta-wipe-band {
   position: absolute;
   inset: 0;
   z-index: 0;
+  isolation: isolate;
 }
 
 .hero-word-cycle__image::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 3;
   pointer-events: none;
   background:
     linear-gradient(to top, rgb(0 0 0 / 0.38) 0%, transparent 42%),
