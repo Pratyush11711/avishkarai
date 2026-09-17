@@ -3,12 +3,57 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { workStudies } from "@/lib/work-studies";
 import { HeadingReveal, LineReveal, TitleReveal } from "@/components/ui/TypeReveal";
 
 const RippleDistortion = dynamic(() => import("@/components/ui/RippleDistortion"), {
   ssr: false,
 });
+
+interface WorkItem {
+  index: number;
+  title: string;
+  sector: string;
+  image: string;
+  href: string;
+}
+
+const CASE_STUDIES: WorkItem[] = [
+  {
+    index: 1,
+    title: "Frontier Biomed",
+    sector: "Telehealth",
+    image: "/work/work-frontier-biomed.png",
+    href: "#",
+  },
+  {
+    index: 2,
+    title: "Frontier Wellness",
+    sector: "Mental Health",
+    image: "/work/work-frontier-wellness.png",
+    href: "#",
+  },
+  {
+    index: 3,
+    title: "Guiding Hands",
+    sector: "Care Navigation",
+    image: "/work/work-guiding-hands.png",
+    href: "#",
+  },
+  {
+    index: 4,
+    title: "Medivance",
+    sector: "Clinical Ops",
+    image: "/work/work-medivance.png",
+    href: "#",
+  },
+  {
+    index: 5,
+    title: "House of Life Sciences",
+    sector: "Research",
+    image: "/work/work-house-of-life-sciences.png",
+    href: "#",
+  },
+];
 
 function WorkCardMedia({
   image,
@@ -19,7 +64,7 @@ function WorkCardMedia({
   title: string;
   ripple: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
@@ -35,7 +80,7 @@ function WorkCardMedia({
   }, [ripple]);
 
   return (
-    <div ref={ref} className="work-card-media">
+    <span ref={ref} className="work-card-media" style={{ position: "relative" }}>
       <Image
         src={image}
         alt={`${title} preview`}
@@ -53,7 +98,7 @@ function WorkCardMedia({
           antialias
         />
       )}
-    </div>
+    </span>
   );
 }
 
@@ -95,13 +140,13 @@ export function SelectedWork() {
               <HeadingReveal text="than tell you." />
             </span>
           </h2>
-          <LineReveal text={`${workStudies.length} projects`} className="work-note" />
+          <LineReveal text={`${CASE_STUDIES.length} projects`} className="work-note" />
         </div>
       </div>
 
       <div className="work-grid">
-        {workStudies.map((item) => (
-          <a key={item.slug} href={`/work/${item.slug}`} className="work-card">
+        {CASE_STUDIES.map((item) => (
+          <a key={item.index} href={item.href} className="work-card">
             <WorkCardMedia
               image={item.image}
               title={item.title}

@@ -1,0 +1,37 @@
+[
+  {
+    "hash": "DDE559399DB958CC2BE434027C00DF655148E7B9598B5FF4B1CF95BC5C662B00",
+    "backup": "page.tsx",
+    "path": "app/projects/[slug]/page.tsx"
+  },
+  {
+    "hash": "C2422BD6FB5BD66B271E644F6A603F244A60FAB4B8524FBBB975C12B4F87AC62",
+    "backup": "SelectedWork.tsx",
+    "path": "components/sections/SelectedWork.tsx"
+  },
+  {
+    "hash": "007A0FBD98ED5492F6122FE508517264AD4116008F3DB3D227E7F71B92B4E15E",
+    "backup": null,
+    "path": "components/projects/project-mode.ts"
+  },
+  {
+    "hash": "03488E1F4E9AA1F7B10DF0F393A86CC7D65CAE7F753ABB8F5D36F1CDB31EEBE9",
+    "backup": null,
+    "path": "components/projects/ProjectPreviewControls.tsx"
+  },
+  {
+    "hash": "31DF0B9C99DC24730AF7DCF479C5D1D52E15CFE414BF0ED1E1E6504E3B07E120",
+    "backup": null,
+    "path": "components/projects/ProjectExperience.tsx"
+  },
+  {
+    "hash": "51871173486C3FAA79798F95196B3AC6FA7BCAB7C529DB5AAFD452F4EB28A8C9",
+    "backup": null,
+    "path": "components/projects/ProjectGalleryWebGL.tsx"
+  },
+  {
+    "hash": "58220B51BE5B73AD8660EF9C41DF274A55E1E9F6D3DA5B27CF47B02F029F3B8D",
+    "backup": null,
+    "path": "components/projects/project-experience.module.css"
+  }
+]

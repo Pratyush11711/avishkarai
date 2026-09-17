@@ -293,6 +293,48 @@ body {
   letter-spacing: -0.03em;
 }
 
+.process-step {
+  --process-bg: #0a0e27;
+  --process-ink: #ffffff;
+  --process-ink-muted: rgba(255, 255, 255, 0.62);
+  --process-body: rgba(255, 255, 255, 0.78);
+  --process-numeral: rgba(255, 255, 255, 0.16);
+  --process-tag-bg: rgba(255, 255, 255, 0.12);
+  --process-tag-ink: #ffffff;
+  --process-tag-border: rgba(255, 255, 255, 0.22);
+  background-color: var(--process-bg);
+  color: var(--process-ink);
+  will-change: background-color;
+}
+
+.process-step-heading {
+  color: var(--process-ink);
+}
+
+.process-step-caption {
+  color: var(--process-ink-muted);
+}
+
+.process-step-body {
+  color: var(--process-body);
+}
+
+.process-step-numeral {
+  color: var(--process-numeral);
+}
+
+.process-tag {
+  background: var(--process-tag-bg);
+  color: var(--process-tag-ink);
+  border-color: var(--process-tag-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .process-step {
+    will-change: auto;
+  }
+}
+
 .capability-pill {
   --pill-base: var(--color-tint);
   --pill-edge: var(--color-border);
@@ -2713,6 +2755,9 @@ html:has(.lh-hud) .site-nav-bar {
 }
 
 .work-card-img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 

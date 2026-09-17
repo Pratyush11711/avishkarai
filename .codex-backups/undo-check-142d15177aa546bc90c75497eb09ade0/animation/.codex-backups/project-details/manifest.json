@@ -1,0 +1,18 @@
+[
+  {
+    "path": "components/sections/SelectedWork.tsx",
+    "hash": "A9787A471D04B3B0C203EB6B0B8449297171C83CD0AB5CE73C4B0F761A75972A"
+  },
+  {
+    "path": "lib/project-details.ts",
+    "hash": "89F89D64C5C346B5C541480FE4CF76FB577EC58133403A29661896A562563428"
+  },
+  {
+    "path": "app/projects/[slug]/page.tsx",
+    "hash": "C278D62B09B78CBC0040F95CC93182CD9BE22956770EBF33AA02FB47AF526826"
+  },
+  {
+    "path": "app/projects/[slug]/project.module.css",
+    "hash": "356C73AB2C45C0EACDF48F9DC4C361C04121D593436CC3F06CA75DD13C573CC1"
+  }
+]
