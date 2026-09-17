@@ -5,7 +5,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import type { WorkStudy } from "@/lib/work-studies";
+import type { StudyShot, WorkStudy } from "@/lib/work-studies";
 import styles from "./case-study.module.css";
 
 function themeStyle(study: WorkStudy): CSSProperties {
@@ -26,15 +26,124 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
   return <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .12 }} transition={{ duration: .8, ease: [.22, 1, .36, 1] }}>{children}</motion.div>;
 }
 
-function MediaSlot({ study, variant, number }: { study: WorkStudy; variant: "film" | "poster" | "mobile" | "desktop" | "detail"; number: string }) {
-  return <figure className={`${styles.slot} ${styles[variant]}`}>
-    {variant === "film" ? <div className={styles.filmArt} aria-hidden><div /><div /><div /></div>
-      : variant === "poster" ? <div className={styles.posterArt}><span>AVISHKAR AI / {study.sector}</span><strong>{study.statement}</strong><span>Thoughtfully designed.<br />Built to move you forward.</span></div>
-      : variant === "mobile" ? <div className={styles.phone}><div className={styles.speaker} /><p>{study.title}</p><Image src={study.image} alt={`${study.title} concept on a mobile display`} width={800} height={533} sizes="30vw" /><strong>A clearer<br />way forward.</strong><span>Explore the experience ↗</span></div>
-      : <div className={variant === "desktop" ? styles.browserFrame : styles.detailFrame}><div className={styles.browserBar} aria-hidden><i /><i /><i /><span>{study.title}</span></div><Image src={study.image} alt={`${study.title} — illustrative ${variant === "desktop" ? "desktop layout" : "interface detail"}`} width={1600} height={1067} sizes="(max-width: 700px) 90vw, 80vw" /></div>}
-    <figcaption><span>{number} / {variant === "film" ? "Motion study" : variant === "poster" ? "Visual direction" : variant === "mobile" ? "Mobile experience" : variant === "desktop" ? "Digital experience" : "The details"}</span><span>{study.sector}</span></figcaption>
-    {variant === "film" && <div className={styles.filmLabel}><span aria-hidden>▷</span><p>Space for the story in motion.</p><small>Project film coming here</small></div>}
-  </figure>;
+function shotFor(study: WorkStudy, role: StudyShot["role"]) {
+  const gallery = "gallery" in study ? study.gallery : undefined;
+  return gallery?.find((item) => item.role === role);
+}
+
+function MediaSlot({
+  study,
+  variant,
+  number,
+}: {
+  study: WorkStudy;
+  variant: StudyShot["role"];
+  number: string;
+}) {
+  const shot = shotFor(study, variant);
+  const caption =
+    shot?.caption ??
+    (variant === "film"
+      ? "Motion study"
+      : variant === "poster"
+        ? "Visual direction"
+        : variant === "mobile"
+          ? "Mobile experience"
+          : variant === "desktop"
+            ? "Digital experience"
+            : variant === "still"
+              ? "Still"
+              : "The details");
+
+  if (shot) {
+    return (
+      <figure className={`${styles.slot} ${styles[variant]} ${styles.photo}`}>
+        <Image
+          src={shot.src}
+          alt={shot.alt}
+          fill
+          sizes="(max-width: 700px) 92vw, 80vw"
+          quality={95}
+          className={styles.photoImg}
+        />
+        <figcaption>
+          <span>
+            {number} / {caption}
+          </span>
+          <span>{study.sector}</span>
+        </figcaption>
+      </figure>
+    );
+  }
+
+  return (
+    <figure className={`${styles.slot} ${styles[variant]}`}>
+      {variant === "film" ? (
+        <div className={styles.filmArt} aria-hidden>
+          <div />
+          <div />
+          <div />
+        </div>
+      ) : variant === "poster" ? (
+        <div className={styles.posterArt}>
+          <span>AVISHKAR AI / {study.sector}</span>
+          <strong>{study.statement}</strong>
+          <span>
+            Thoughtfully designed.
+            <br />
+            Built to move you forward.
+          </span>
+        </div>
+      ) : variant === "mobile" ? (
+        <div className={styles.phone}>
+          <div className={styles.speaker} />
+          <p>{study.title}</p>
+          <Image
+            src={study.image}
+            alt={`${study.title} concept on a mobile display`}
+            width={800}
+            height={533}
+            sizes="30vw"
+          />
+          <strong>
+            A clearer
+            <br />
+            way forward.
+          </strong>
+          <span>Explore the experience ↗</span>
+        </div>
+      ) : (
+        <div className={variant === "desktop" ? styles.browserFrame : styles.detailFrame}>
+          <div className={styles.browserBar} aria-hidden>
+            <i />
+            <i />
+            <i />
+            <span>{study.title}</span>
+          </div>
+          <Image
+            src={study.image}
+            alt={`${study.title} — illustrative ${variant === "desktop" ? "desktop layout" : "interface detail"}`}
+            width={1600}
+            height={1067}
+            sizes="(max-width: 700px) 90vw, 80vw"
+          />
+        </div>
+      )}
+      <figcaption>
+        <span>
+          {number} / {caption}
+        </span>
+        <span>{study.sector}</span>
+      </figcaption>
+      {variant === "film" && (
+        <div className={styles.filmLabel}>
+          <span aria-hidden>▷</span>
+          <p>Space for the story in motion.</p>
+          <small>Project film coming here</small>
+        </div>
+      )}
+    </figure>
+  );
 }
 
 export function CaseStudy({ study, related }: { study: WorkStudy; related: WorkStudy[] }) {
@@ -62,22 +171,29 @@ export function CaseStudy({ study, related }: { study: WorkStudy; related: WorkS
           {study.lines.map((line, index) => <span className={styles.titleLine} key={line}><motion.span aria-hidden initial={reduce ? false : { y: "110%", rotate: 3 }} animate={{ y: 0, rotate: 0 }} transition={{ duration: 1.05, delay: .12 + index * .12, ease: [.22, 1, .36, 1] }}>{line}</motion.span></span>)}
         </h1>
         <div ref={hero} className={styles.hero}>
-          <motion.div className={styles.heroImage} style={{ y: reduce ? 0 : imageY }}><Image src={study.image} alt={`${study.title} concept preview — temporary project imagery`} fill sizes="100vw" priority /></motion.div>
-          <div className={styles.heroCaption}><span>{study.title} / Digital experience</span><span>Concept imagery</span></div>
+          <motion.div className={styles.heroImage} style={{ y: reduce ? 0 : imageY }}><Image src={study.image} alt={`${study.title} — product photography`} fill sizes="100vw" quality={95} priority /></motion.div>
+          <div className={styles.heroCaption}><span>{study.title} / {study.sector}</span><span>Product photography</span></div>
         </div>
       </section>
       <section className={styles.narrative} aria-label="About the project">
         <Reveal><h2 className={styles.lead}>{study.lead}</h2></Reveal>
         <div className={styles.storyGrid}>
-          <p className={styles.storyLabel}>A closer look <span aria-hidden>↘</span><small>Illustrative case study</small></p>
+          <p className={styles.storyLabel}>A closer look <span aria-hidden>↘</span><small>{shotFor(study, "film") ? "Selected photography" : "Illustrative case study"}</small></p>
           <Reveal className={styles.story}>{study.description.map(paragraph => <p key={paragraph}>{paragraph}</p>)}<Link href="/#contact" className={styles.textLink}>Build something like this <span aria-hidden>↗</span></Link></Reveal>
         </div>
       </section>
-      <section className={styles.gallery} aria-label="Project gallery with placeholder media">
+      <section className={styles.gallery} aria-label="Project gallery">
         <Reveal><MediaSlot study={study} variant="film" number="01" /></Reveal>
         <div className={styles.pair}><Reveal><MediaSlot study={study} variant="poster" number="02" /></Reveal><Reveal><MediaSlot study={study} variant="mobile" number="03" /></Reveal></div>
         <Reveal><MediaSlot study={study} variant="desktop" number="04" /></Reveal>
-        <div className={styles.pair}><Reveal><MediaSlot study={study} variant="detail" number="05" /></Reveal><Reveal className={styles.quote}><p>Every detail.<br />One experience.</p><span>{study.services.join(" / ")}</span></Reveal></div>
+        <div className={styles.pair}>
+          <Reveal><MediaSlot study={study} variant="detail" number="05" /></Reveal>
+          {shotFor(study, "still") ? (
+            <Reveal><MediaSlot study={study} variant="still" number="06" /></Reveal>
+          ) : (
+            <Reveal className={styles.quote}><p>Every detail.<br />One experience.</p><span>{study.services.join(" / ")}</span></Reveal>
+          )}
+        </div>
       </section>
       <section className={styles.more} aria-labelledby="more-title"><div className={styles.moreHead}><h2 id="more-title">More work</h2><Link href="/#work">All projects ↗</Link></div><div className={styles.pair}>{related.map(project => <Link className={styles.related} key={project.slug} href={`/work/${project.slug}`} style={themeStyle(project)}><div><Image src={project.image} alt={`${project.title} preview`} width={1600} height={1067} sizes="(max-width: 700px) 90vw, 45vw" /></div><h3>{project.title} <span aria-hidden>↗</span></h3><p>{project.sector}</p></Link>)}</div></section>
     </main>

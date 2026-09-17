@@ -11,6 +11,13 @@ export type StudyTheme = {
   glow: string;
 };
 
+export type StudyShot = {
+  role: "film" | "poster" | "mobile" | "desktop" | "detail" | "still";
+  src: string;
+  alt: string;
+  caption: string;
+};
+
 // Palettes pulled from each project's mockup — one accent, dark ground, quiet wash.
 const THEMES: Record<StudyMood, StudyTheme> = {
   biomed: {
@@ -65,23 +72,60 @@ const THEMES: Record<StudyMood, StudyTheme> = {
   },
 };
 
-// Illustrative copy for layout review. Replace with approved case-study content.
 export const workStudies = [
   {
     slug: "frontier-biomed",
     title: "Frontier Biomed",
     lines: ["Frontier", "Biomed"],
-    sector: "Telehealth",
-    image: "/work/work-frontier-biomed.png",
-    lead: "A more human connection to care. A digital experience designed around the people who need it.",
+    sector: "Clinic platform",
+    image: "/frontier-biomed/Laptop_displaying_medical.png",
+    lead: "One platform for everything a clinic prescribes. Source, prescribe, and dispense without the vendor maze.",
     description: [
-      "Frontier Biomed explores a simpler way to connect people with everyday healthcare. This concept brings discovery, appointments, and ongoing support together in one clear, considered digital experience.",
-      "The direction begins with reassurance: a calm interface, useful information at the right moment, and fewer steps between a question and its answer. Every screen is imagined as part of the same patient journey.",
-      "From the first interaction to a follow-up, the proposed product balances a welcoming identity with practical tools for care teams. The media below illustrates the direction while final project assets are prepared.",
+      "Frontier Biomed is a practice platform for modern wellness clinics: pharmaceuticals, peptides, and the operations around them, in one considered product.",
+      "We designed the waitlist, catalog, and affiliate tools as the same system. Clinics can browse inventory, place orders, and track referrals without jumping between vendors or spreadsheets.",
+      "The identity stays calm and clinical. Product photography, tablet workflows, and the desktop dashboard all share one teal language so the brand feels as precise as the supply chain behind it.",
     ],
     services: ["Product strategy", "UX & UI design", "Design system", "Web development"],
     statement: "Care, without the complexity.",
     theme: THEMES.biomed,
+    gallery: [
+      {
+        role: "film",
+        src: "/frontier-biomed/Peptide_vials_on_catalog_page_.jpg",
+        alt: "Frontier BioMed peptide vials, Tesamorelin, BPC-157, and DSIP",
+        caption: "Product line",
+      },
+      {
+        role: "poster",
+        src: "/frontier-biomed/Mobile_landing_page_design_mockup.png",
+        alt: "Frontier Biomed mobile landing page with waitlist",
+        caption: "Mobile landing",
+      },
+      {
+        role: "mobile",
+        src: "/frontier-biomed/Hand-Holding-Phone.jpg",
+        alt: "Frontier Biomed mobile site held in hand",
+        caption: "In hand",
+      },
+      {
+        role: "desktop",
+        src: "/frontier-biomed/Affiliate_dashboard_product_show.png",
+        alt: "Frontier Biomed affiliate dashboard on a desktop display",
+        caption: "Affiliate dashboard",
+      },
+      {
+        role: "detail",
+        src: "/frontier-biomed/Peptide_catalog_displayed_on_tablet.jpg",
+        alt: "Frontier Biomed peptide catalog on a tablet in a lab",
+        caption: "Catalog",
+      },
+      {
+        role: "still",
+        src: "/frontier-biomed/tablet-affiliate-dashboard.jpg",
+        alt: "Frontier Biomed affiliate dashboard on a tablet",
+        caption: "On the desk",
+      },
+    ],
   },
   {
     slug: "frontier-wellness",

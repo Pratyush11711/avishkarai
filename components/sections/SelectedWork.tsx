@@ -39,9 +39,9 @@ function WorkCardMedia({
       <Image
         src={image}
         alt={`${title} preview`}
-        width={1600}
-        height={1067}
+        fill
         sizes="(max-width: 900px) 100vw, 50vw"
+        quality={95}
         className="work-card-img"
       />
       {ripple && inView && (
@@ -51,6 +51,7 @@ function WorkCardMedia({
           amplitude={0.032}
           speed={2.6}
           antialias
+          className="work-card-ripple"
         />
       )}
     </div>
