@@ -12,10 +12,12 @@ export type StudyTheme = {
 };
 
 export type StudyShot = {
-  role: "film" | "poster" | "mobile" | "desktop" | "detail" | "still";
+  role: "film" | "product" | "poster" | "mobile" | "desktop" | "wide" | "detail" | "still";
   src: string;
   alt: string;
   caption: string;
+  fit?: "cover" | "contain";
+  beside?: "film";
 };
 
 // Palettes pulled from each project's mockup — one accent, dark ground, quiet wash.
@@ -62,13 +64,13 @@ const THEMES: Record<StudyMood, StudyTheme> = {
   },
   research: {
     mood: "research",
-    canvas: "#f1f3f6",
-    ink: "#1b2140",
-    muted: "#667088",
-    accent: "#4f8f82",
-    deep: "#1b2140",
-    wash: "#dce8e4",
-    glow: "#9aa4d6",
+    canvas: "#eef2ea",
+    ink: "#101820",
+    muted: "#5c6a74",
+    accent: "#c5d43a",
+    deep: "#070c22",
+    wash: "#e4ebc6",
+    glow: "#7ea3dc",
   },
 };
 
@@ -180,7 +182,7 @@ export const workStudies = [
     title: "House of Life Sciences",
     lines: ["House of", "Life Sciences"],
     sector: "Research",
-    image: "/work/work-house-of-life-sciences.png",
+    image: "/house-of-life-sciences/laptop.png",
     lead: "A home for ideas that move science forward. Connecting people, research, and possibility.",
     description: [
       "House of Life Sciences imagines a digital meeting place for a research community. Discoveries, expertise, and opportunities share a thoughtful editorial platform.",
@@ -190,6 +192,46 @@ export const workStudies = [
     services: ["Creative direction", "Content strategy", "Web design", "Development"],
     statement: "Ideas deserve room to grow.",
     theme: THEMES.research,
+    gallery: [
+      {
+        role: "film",
+        src: "/house-of-life-sciences/home.png",
+        alt: "House of Life Sciences homepage",
+        caption: "Homepage",
+        fit: "contain",
+      },
+      {
+        role: "product",
+        src: "/house-of-life-sciences/product-landing.png",
+        alt: "House of Life Sciences NAD+ product landing page",
+        caption: "Product",
+      },
+      {
+        role: "mobile",
+        src: "/house-of-life-sciences/phone.png",
+        alt: "House of Life Sciences mobile site held in hand",
+        caption: "In hand",
+      },
+      {
+        role: "desktop",
+        src: "/house-of-life-sciences/affiliate-desktop.png",
+        alt: "House of Life Sciences affiliate dashboard on a desktop display",
+        caption: "Affiliate dashboard",
+      },
+      {
+        role: "still",
+        src: "/house-of-life-sciences/tablet-plans.png",
+        alt: "House of Life Sciences membership plans on a tablet",
+        caption: "Plans",
+        beside: "film",
+      },
+      {
+        role: "detail",
+        src: "/house-of-life-sciences/tablet.png",
+        alt: "House of Life Sciences course catalog on a tablet",
+        caption: "Catalog",
+      },
+    ],
   },
 ] as const;
 

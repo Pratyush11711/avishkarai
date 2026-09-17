@@ -93,6 +93,8 @@
   padding: 0;
 }
 .desktop.photo,
+.product.photo,
+.wide.photo,
 .detail.photo,
 .still.photo {
   aspect-ratio: 16 / 9;
@@ -104,17 +106,39 @@
 .poster.photo,
 .mobile.photo {
   aspect-ratio: 9 / 16;
-  background: #082c30;
+  background: var(--study-deep);
+}
+.pair:has(.poster:not(.photo)) .mobile.photo {
+  aspect-ratio: 3 / 4;
 }
 .photoImg {
   object-fit: cover;
+  object-position: center;
+}
+.film.contain {
+  aspect-ratio: 2 / 1;
+  background: var(--study-deep);
+}
+.pair .film.photo,
+.pair .film.contain {
+  aspect-ratio: 16 / 9;
+}
+.product.contain {
+  background: var(--study-deep);
+}
+.wide.contain {
+  background: var(--study-wash);
+}
+.contain .photoImg {
+  object-fit: contain;
   object-position: center;
 }
 .photo figcaption {
   color: #fff;
   text-shadow: 0 1px 12px rgb(0 0 0 / 0.55);
 }
-.quote { background: var(--study-wash); display: flex; flex-direction: column; justify-content: center; padding: 12%; }
+.quote { background: var(--study-wash); display: flex; flex-direction: column; justify-content: center; padding: 12%; min-height: 100%; border-radius: 3px; }
+.pair .quote { aspect-ratio: 16 / 9; }
 .quote p { font-size: clamp(32px, 4vw, 72px); line-height: 1.1; letter-spacing: -.04em; margin: 0 0 40px; }
 .quote p::first-line { color: var(--study-accent); }
 .quote > span { font-size: 12px; line-height: 1.5; max-width: 28ch; color: var(--study-muted); }
@@ -178,7 +202,11 @@
 .page[data-mood="ops"] .phone { transform: none; border-radius: 10px; border-width: 4px; }
 
 .page[data-mood="research"] .hero,
-.page[data-mood="research"] .slot { border-radius: 16px; }
+.page[data-mood="research"] .slot,
+.page[data-mood="research"] .quote { border-radius: 16px; }
+.page[data-mood="research"] .poster {
+  color: var(--study-deep);
+}
 .page[data-mood="research"] .filmArt div {
   border-radius: 50%;
   width: 28%;

@@ -49,15 +49,19 @@ function MediaSlot({
         ? "Visual direction"
         : variant === "mobile"
           ? "Mobile experience"
-          : variant === "desktop"
-            ? "Digital experience"
-            : variant === "still"
-              ? "Still"
-              : "The details");
+          : variant === "product"
+            ? "Product"
+            : variant === "desktop"
+              ? "Digital experience"
+              : variant === "wide"
+                ? "Product interface"
+                : variant === "still"
+                  ? "Still"
+                  : "The details");
 
   if (shot) {
     return (
-      <figure className={`${styles.slot} ${styles[variant]} ${styles.photo}`}>
+      <figure className={`${styles.slot} ${styles[variant]} ${styles.photo} ${shot.fit === "contain" ? styles.contain : ""}`}>
         <Image
           src={shot.src}
           alt={shot.alt}
@@ -153,6 +157,15 @@ export function CaseStudy({ study, related }: { study: WorkStudy; related: WorkS
   const { scrollYProgress } = useScroll({ target: hero, offset: ["start end", "end start"] });
   const imageY = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
   const titleSize = study.title.length > 19 ? styles.longTitle : "";
+  const filmBesideStill = shotFor(study, "still")?.beside === "film";
+  let shotNo = 0;
+  const num = () => String(++shotNo).padStart(2, "0");
+  const quote = (
+    <Reveal className={styles.quote}>
+      <p>Every detail.<br />One experience.</p>
+      <span>{study.services.join(" / ")}</span>
+    </Reveal>
+  );
 
   return <div className={styles.page} data-mood={study.theme.mood} style={themeStyle(study)}>
     <header className={styles.header}>
@@ -183,15 +196,31 @@ export function CaseStudy({ study, related }: { study: WorkStudy; related: WorkS
         </div>
       </section>
       <section className={styles.gallery} aria-label="Project gallery">
-        <Reveal><MediaSlot study={study} variant="film" number="01" /></Reveal>
-        <div className={styles.pair}><Reveal><MediaSlot study={study} variant="poster" number="02" /></Reveal><Reveal><MediaSlot study={study} variant="mobile" number="03" /></Reveal></div>
-        <Reveal><MediaSlot study={study} variant="desktop" number="04" /></Reveal>
+        {filmBesideStill ? (
+          <div className={styles.pair}>
+            <Reveal><MediaSlot study={study} variant="film" number={num()} /></Reveal>
+            <Reveal><MediaSlot study={study} variant="still" number={num()} /></Reveal>
+          </div>
+        ) : (
+          <Reveal><MediaSlot study={study} variant="film" number={num()} /></Reveal>
+        )}
+        {shotFor(study, "product") && (
+          <Reveal><MediaSlot study={study} variant="product" number={num()} /></Reveal>
+        )}
         <div className={styles.pair}>
-          <Reveal><MediaSlot study={study} variant="detail" number="05" /></Reveal>
-          {shotFor(study, "still") ? (
-            <Reveal><MediaSlot study={study} variant="still" number="06" /></Reveal>
+          <Reveal><MediaSlot study={study} variant="poster" number={num()} /></Reveal>
+          <Reveal><MediaSlot study={study} variant="mobile" number={num()} /></Reveal>
+        </div>
+        <Reveal><MediaSlot study={study} variant="desktop" number={num()} /></Reveal>
+        {shotFor(study, "wide") && (
+          <Reveal><MediaSlot study={study} variant="wide" number={num()} /></Reveal>
+        )}
+        <div className={styles.pair}>
+          <Reveal><MediaSlot study={study} variant="detail" number={num()} /></Reveal>
+          {shotFor(study, "still") && !filmBesideStill ? (
+            <Reveal><MediaSlot study={study} variant="still" number={num()} /></Reveal>
           ) : (
-            <Reveal className={styles.quote}><p>Every detail.<br />One experience.</p><span>{study.services.join(" / ")}</span></Reveal>
+            quote
           )}
         </div>
       </section>
