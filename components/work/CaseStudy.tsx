@@ -26,9 +26,9 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
   return <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .12 }} transition={{ duration: .8, ease: [.22, 1, .36, 1] }}>{children}</motion.div>;
 }
 
-function shotFor(study: WorkStudy, role: StudyShot["role"]) {
-  const gallery = "gallery" in study ? study.gallery : undefined;
-  return gallery?.find((item) => item.role === role);
+function shotFor(study: WorkStudy, role: StudyShot["role"]): StudyShot | undefined {
+  if (!("gallery" in study)) return undefined;
+  return study.gallery.find((item) => item.role === role);
 }
 
 function MediaSlot({
