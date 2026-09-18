@@ -21,7 +21,6 @@ const OPERATORS: Operator[] = [
   { name: "Frontier Biomed", hover: "var(--color-tint)" },
   { name: "HOLS", sub: "House of Life Sciences", hover: "var(--color-tint)" },
   { name: "Medivance", hover: "var(--color-tint)" },
-  { name: "Frontier Wellness", hover: "var(--color-tint)" },
   { name: "Guiding Hands", hover: "var(--color-tint)" },
   { name: "Pratap", sub: "Carving Lives", hover: "var(--color-tint)" },
 ];

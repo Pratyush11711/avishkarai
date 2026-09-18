@@ -54,13 +54,13 @@ const THEMES: Record<StudyMood, StudyTheme> = {
   },
   ops: {
     mood: "ops",
-    canvas: "#eef1f6",
-    ink: "#12182a",
-    muted: "#5c6578",
-    accent: "#2f5fbf",
-    deep: "#12182a",
-    wash: "#dce4f2",
-    glow: "#4fd0c8",
+    canvas: "#f3f4f6",
+    ink: "#12141a",
+    muted: "#5e6773",
+    accent: "#3d5f7a",
+    deep: "#101018",
+    wash: "#e6eef2",
+    glow: "#8aa8b8",
   },
   research: {
     mood: "research",
@@ -144,6 +144,7 @@ export const workStudies = [
     services: ["Experience strategy", "Art direction", "UI design", "Web development"],
     statement: "A little space. A new beginning.",
     theme: THEMES.wellness,
+    listed: false,
   },
   {
     slug: "guiding-hands",
@@ -166,7 +167,7 @@ export const workStudies = [
     title: "Medivance",
     lines: ["Medivance"],
     sector: "Clinical Operations",
-    image: "/work/work-medivance.png",
+    image: "/medivance/laptop.png",
     lead: "Less friction behind the scenes. More space for teams to focus on the work that matters.",
     description: [
       "Medivance explores how a shared digital workspace could simplify the everyday rhythm of a clinical team. Tasks, information, and handoffs come together in a focused interface.",
@@ -176,6 +177,44 @@ export const workStudies = [
     services: ["Workflow strategy", "Dashboard design", "Design system", "Engineering"],
     statement: "Clarity is a competitive advantage.",
     theme: THEMES.ops,
+    gallery: [
+      {
+        role: "film",
+        src: "/medivance/homepage.png",
+        alt: "Medivance homepage, Purity you can see on Paper",
+        caption: "Homepage",
+      },
+      {
+        role: "product",
+        src: "/medivance/process.png",
+        alt: "Medivance standard process, source, document, verify, confirm",
+        caption: "Process",
+      },
+      {
+        role: "mobile",
+        src: "/medivance/phone.png",
+        alt: "Medivance mobile site held in a lab",
+        caption: "In hand",
+      },
+      {
+        role: "desktop",
+        src: "/medivance/desktop-overview.png",
+        alt: "Medivance operations overview on a desktop display",
+        caption: "Overview",
+      },
+      {
+        role: "detail",
+        src: "/medivance/tablet-catalog.png",
+        alt: "Medivance product catalog on a tablet",
+        caption: "Catalog",
+      },
+      {
+        role: "still",
+        src: "/medivance/tablet-certificate.png",
+        alt: "Medivance certificate of analysis on a tablet",
+        caption: "Certificate",
+      },
+    ],
   },
   {
     slug: "house-of-life-sciences",
@@ -234,5 +273,9 @@ export const workStudies = [
     ],
   },
 ] as const;
+
+export const listedWorkStudies = workStudies.filter(
+  (study) => !("listed" in study && study.listed === false),
+);
 
 export type WorkStudy = (typeof workStudies)[number];

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { workStudies } from "@/lib/work-studies";
+import { listedWorkStudies } from "@/lib/work-studies";
 import { HeadingReveal, LineReveal, TitleReveal } from "@/components/ui/TypeReveal";
 
 const RippleDistortion = dynamic(() => import("@/components/ui/RippleDistortion"), {
@@ -96,12 +96,12 @@ export function SelectedWork() {
               <HeadingReveal text="than tell you." />
             </span>
           </h2>
-          <LineReveal text={`${workStudies.length} projects`} className="work-note" />
+          <LineReveal text={`${listedWorkStudies.length} projects`} className="work-note" />
         </div>
       </div>
 
       <div className="work-grid">
-        {workStudies.map((item) => (
+        {listedWorkStudies.map((item) => (
           <a key={item.slug} href={`/work/${item.slug}`} className="work-card">
             <WorkCardMedia
               image={item.image}
