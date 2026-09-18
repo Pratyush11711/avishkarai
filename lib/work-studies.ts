@@ -44,13 +44,13 @@ const THEMES: Record<StudyMood, StudyTheme> = {
   },
   guiding: {
     mood: "guiding",
-    canvas: "#f6f1ea",
-    ink: "#1c2438",
-    muted: "#6b645c",
-    accent: "#c45a28",
-    deep: "#1c2438",
-    wash: "#f1e2d2",
-    glow: "#e8a15a",
+    canvas: "#f6f4f0",
+    ink: "#0b2144",
+    muted: "#5c6570",
+    accent: "#3a6ea8",
+    deep: "#0b2144",
+    wash: "#e8eef4",
+    glow: "#d4a090",
   },
   ops: {
     mood: "ops",
@@ -151,7 +151,7 @@ export const workStudies = [
     title: "Guiding Hands",
     lines: ["Guiding", "Hands"],
     sector: "Care Navigation",
-    image: "/work/work-guiding-hands.png",
+    image: "/guiding-hands/laptop.png",
     lead: "A clear next step, every step of the way. Helping families find their way through care.",
     description: [
       "Guiding Hands is a concept for making complex care journeys easier to navigate. It brings useful resources, conversations, and next steps into one supportive digital environment.",
@@ -161,6 +161,38 @@ export const workStudies = [
     services: ["Discovery", "Journey mapping", "Product design", "Platform development"],
     statement: "No one should navigate alone.",
     theme: THEMES.guiding,
+    gallery: [
+      {
+        role: "film",
+        src: "/guiding-hands/homepage.png",
+        alt: "Guiding Hands homepage, The Care Your Loved One Needs May Already Be Covered",
+        caption: "Homepage",
+      },
+      {
+        role: "product",
+        src: "/guiding-hands/tablet-journey.png",
+        alt: "Guiding Hands care journey on a tablet, You shouldn't have to figure this out alone",
+        caption: "Journey",
+      },
+      {
+        role: "mobile",
+        src: "/guiding-hands/phone.png",
+        alt: "Guiding Hands mobile site held in hand",
+        caption: "In hand",
+      },
+      {
+        role: "desktop",
+        src: "/guiding-hands/desktop.png",
+        alt: "Guiding Hands guidance page on a desktop display",
+        caption: "Guidance",
+      },
+      {
+        role: "detail",
+        src: "/guiding-hands/tablet-how-it-works.png",
+        alt: "Guiding Hands How It Works on a tablet",
+        caption: "How it works",
+      },
+    ],
   },
   {
     slug: "medivance",
