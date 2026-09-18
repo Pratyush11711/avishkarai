@@ -7,7 +7,7 @@ function ClockSlot() {
     <div
       id="clock"
       aria-hidden
-      className="relative min-h-[100svh] w-full bg-deep-navy"
+      className="relative min-h-[100svh] w-full bg-bg"
     />
   );
 }
