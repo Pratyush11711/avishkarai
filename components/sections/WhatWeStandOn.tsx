@@ -230,7 +230,11 @@ export function WhatWeStandOn() {
   const [overallProgress, setOverallProgress] = useState(0);
   const [rawProgress, setRawProgress] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [compact, setCompact] = useState(false);
+  const [compact, setCompact] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches
+  );
   const [fitsViewport, setFitsViewport] = useState(true);
   const [debug, setDebug] = useState(false);
 
@@ -294,9 +298,16 @@ export function WhatWeStandOn() {
     };
   }, []);
 
+  const scrubEnabled = !reducedMotion && (compact || fitsViewport);
+
+  useEffect(() => {
+    if (!scrubEnabled) return;
+    ScrollTrigger.refresh();
+  }, [scrubEnabled, compact, fitsViewport]);
+
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || reducedMotion || compact || !fitsViewport) {
+    if (!track || !scrubEnabled) {
       paint(0);
       return;
     }
@@ -306,7 +317,7 @@ export function WhatWeStandOn() {
       trigger: track,
       start: "top top",
       end: "bottom bottom",
-      scrub: 1.8,
+      scrub: compact ? 1.1 : 1.8,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         targetRef.current = self.progress;
@@ -332,7 +343,7 @@ export function WhatWeStandOn() {
       st.kill();
       stRef.current = null;
     };
-  }, [paint, reducedMotion, compact, fitsViewport]);
+  }, [paint, scrubEnabled, compact]);
 
   const goTo = useCallback(
     (next: number) => {
@@ -370,7 +381,8 @@ export function WhatWeStandOn() {
       ref={trackRef}
       id="studio"
       className="principles-track relative z-[1]"
-      data-static={compact || !fitsViewport || reducedMotion}
+      data-static={reducedMotion || (!compact && !fitsViewport)}
+      data-mobile-scrub={compact && scrubEnabled ? "true" : undefined}
       aria-label="What we stand on"
       style={
         {
@@ -397,8 +409,8 @@ export function WhatWeStandOn() {
             <PrincipleRail
               count={COUNT}
               activeIndex={index}
-              segmentFill={reducedMotion || compact || !fitsViewport ? 1 : segmentFill}
-              overallProgress={reducedMotion || compact || !fitsViewport ? (index + 1) / COUNT : overallProgress}
+              segmentFill={scrubEnabled ? segmentFill : 1}
+              overallProgress={scrubEnabled ? overallProgress : (index + 1) / COUNT}
               onSelect={goTo}
               compact={false}
             />

@@ -3673,8 +3673,21 @@ html:has(.lh-hud) .site-nav-bar {
 .principles-track[data-static="true"] .principles-sticky { position: relative; top: auto; }
 @media (max-width: 767px) {
   .principles-runway { padding-bottom: 48px; }
-  .principles-track { height: auto; }
-  .principles-sticky { position: relative; top: auto; }
+  /* Shorter runway than desktop — enough scroll distance to scrub the rail. */
+  .principles-track[data-mobile-scrub="true"] {
+    height: calc((var(--principles-runway, 3) * 140svh) + 55svh);
+  }
+  .principles-track[data-mobile-scrub="true"] .principles-sticky {
+    position: sticky;
+    top: calc(var(--nav-h) + 12px);
+  }
+  .principles-track[data-static="true"] {
+    height: auto;
+  }
+  .principles-track[data-static="true"] .principles-sticky {
+    position: relative;
+    top: auto;
+  }
   .principles-intro .type-heading { font-size: clamp(28px, 7vw, 36px); max-width: 18ch; }
   .principles-card { padding: 20px; gap: 16px; border-radius: 24px; }
   .principles-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }

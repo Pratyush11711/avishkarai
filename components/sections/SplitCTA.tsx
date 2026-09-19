@@ -23,8 +23,8 @@ const PANELS = [
   },
   {
     href: "#clock",
-    lines: ["See how", "we ship"],
-    body: "AI For Critical Infrastructure",
+    lines: ["AI For", "Critical", "Infrastructure"],
+    body: "Scope locks in week one. From week two, a working build is in your hands every Thursday.",
     wipe: "var(--color-tint)",
   },
 ] as const;
@@ -32,12 +32,12 @@ const PANELS = [
 export function SplitCTA() {
   return (
     <section id="contact" aria-label="Next steps">
-      <div className="grid md:grid-cols-2 bg-paper-white">
+      <div className="grid grid-cols-2 bg-paper-white border-t border-ash">
         {PANELS.map((panel) => (
           <a
             key={panel.href}
             href={panel.href}
-            className={`group relative isolate flex min-h-[380px] md:min-h-[520px] flex-col justify-between overflow-hidden px-8 py-10 md:px-12 md:py-14 text-carbon-black border-t md:border-t-0 border-ash md:[&:not(:first-child)]:border-l first:border-t-0 transition-colors duration-300 ${
+            className={`group relative isolate flex min-h-[240px] sm:min-h-[300px] md:min-h-[520px] flex-col justify-between overflow-hidden px-4 py-5 sm:px-6 sm:py-8 md:px-12 md:py-14 text-carbon-black border-ash [&:not(:first-child)]:border-l transition-colors duration-300 ${
               panel.wipe === "var(--color-primary)" ? "hover:text-text-inverse" : ""
             }`}
             style={{ ["--wipe-color" as string]: panel.wipe }}
@@ -46,8 +46,8 @@ export function SplitCTA() {
               <span className="cta-wipe-band" />
             </span>
 
-            <div className="relative z-10 flex items-start justify-between gap-6">
-              <h2 className="font-display text-[clamp(36px,5vw,72px)]">
+            <div className="relative z-10 flex items-start justify-between gap-2 md:gap-6">
+              <h2 className="font-display text-[clamp(18px,4.4vw,28px)] md:text-[clamp(36px,5vw,72px)]">
                 {panel.lines.map((line) => (
                   <span key={line} className="block">
                     <TextRoll>{line}</TextRoll>
@@ -55,14 +55,14 @@ export function SplitCTA() {
                 ))}
               </h2>
 
-              <span className="shrink-0 w-11 h-11 rounded-lg border-[1.5px] border-text inline-flex items-center justify-center transition-colors duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-text-inverse">
+              <span className="shrink-0 w-8 h-8 md:w-11 md:h-11 rounded-lg border-[1.5px] border-text inline-flex items-center justify-center transition-colors duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-text-inverse">
                 <span className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                   <ArrowIcon />
                 </span>
               </span>
             </div>
 
-            <p className="relative z-10 type-body max-w-[36ch] mt-16">
+            <p className="relative z-10 max-w-[36ch] mt-6 text-[12px] leading-snug font-medium md:mt-16 md:text-base md:leading-[1.25]">
               {panel.body}
             </p>
           </a>
