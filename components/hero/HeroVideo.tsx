@@ -21,7 +21,7 @@ export function HeroVideo({ playing }: { playing: boolean }) {
       <video
         ref={videoRef}
         className="hero-video-el"
-        src="/hero.mp4"
+        src="/hero-sec-video.mp4"
         autoPlay
         muted
         loop
