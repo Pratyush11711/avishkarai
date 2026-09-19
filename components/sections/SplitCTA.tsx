@@ -24,7 +24,7 @@ const PANELS = [
   {
     href: "#clock",
     lines: ["See how", "we ship"],
-    body: "Scope locks in week one. From week two, a working build is in your hands every Thursday.",
+    body: "AI For Critical Infrastructure",
     wipe: "var(--color-tint)",
   },
 ] as const;

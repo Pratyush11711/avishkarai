@@ -18,11 +18,8 @@
 .row[data-active="true"] .sub { opacity: 1; }
 .mediaColumn { min-width: 0; }
 .media { position: sticky; top: calc(var(--nav-height, 4.75rem) + 32px); width: 100%; max-width: min(520px, calc(100svh - var(--nav-height, 4.75rem) - 64px)); margin-left: auto; aspect-ratio: 1; border-radius: 28px; overflow: hidden; background: var(--color-tint); }
-.mediaLayer, .placeholder { position: absolute; inset: 0; }
-.placeholder { display: flex; flex-direction: column; justify-content: space-between; padding: 7%; background-image: repeating-linear-gradient(135deg, transparent 0 8px, rgb(18 19 26 / .035) 8px 9px); }
-.mediaLabel { font: 11px var(--font-suisseintlmono), monospace; opacity: .6; text-transform: uppercase; }
-.mediaNumber { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -56%); font-size: clamp(100px, 15vw, 240px); line-height: 1; letter-spacing: -.08em; opacity: .08; }
-.filename { position: absolute; left: 7%; right: 7%; top: 50%; transform: translateY(-50%); text-align: center; overflow-wrap: anywhere; font: clamp(10px, .85vw, 13px)/1.6 var(--font-suisseintlmono), monospace; opacity: .55; }
+.mediaLayer { position: absolute; inset: 0; }
+.mediaAsset { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-top: 48px; padding-top: 30px; border-top: 1px solid color-mix(in srgb, var(--clock-ink) 18%, transparent); font-size: 16px; }
 .footer a { display: flex; align-items: center; gap: 35px; border-bottom: 1px solid currentColor; padding: 8px 0; }
 @media (max-width: 1050px) { .layout { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 28px; } .title { font-size: clamp(2rem, 4vw, 3rem); } }

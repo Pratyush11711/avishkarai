@@ -1824,11 +1824,11 @@ a:focus-visible .cta-wipe-band {
 
 .hero-word-cycle__text {
   display: block;
-  font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
-  font-size: clamp(36px, 5vw, 72px);
-  line-height: 0.82;
-  letter-spacing: -0.055em;
+  font-family: var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(43px, 6vw, 86px);
+  line-height: 0.8;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #fff;
 }
@@ -1841,8 +1841,8 @@ a:focus-visible .cta-wipe-band {
 
 @media (max-width: 700px) {
   .hero-word-cycle__text {
-    font-size: clamp(28px, 9vw, 48px);
-    letter-spacing: -0.045em;
+    font-size: clamp(34px, 10.8vw, 58px);
+    letter-spacing: 0.015em;
   }
 }
 
@@ -3580,6 +3580,13 @@ html:has(.lh-hud) .site-nav-bar {
 .principles-track .type-heading,
 .principles-track .principles-title {
   font-family: var(--font-aeonik), ui-sans-serif, system-ui, sans-serif;
+  word-spacing: 0.16em;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.principles-media {
+  min-width: 0;
 }
 
 .principles-sticky {
@@ -3722,6 +3729,9 @@ html:has(.lh-hud) .site-nav-bar {
   font-weight: 400;
   line-height: 1.5;
   color: var(--color-slate);
+  overflow-wrap: break-word;
+  word-break: normal;
+  word-spacing: 0.03em;
 }
 
 .principles-copy-closer {
@@ -3771,6 +3781,74 @@ html:has(.lh-hud) .site-nav-bar {
   font-size: 11px;
   font-family: ui-monospace, monospace;
   pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .principles-sticky {
+    --principles-gap: 0.7rem;
+    --principles-bottom: max(0.85rem, env(safe-area-inset-bottom));
+    --principles-card-pad: 1.1rem;
+    --principles-tile: min(7.5rem, 38vw);
+  }
+
+  .principles-intro {
+    margin-bottom: 0.7rem;
+  }
+
+  .principles-intro .type-heading {
+    font-size: clamp(1.55rem, 7.2vw, 2rem);
+    line-height: 1.14;
+    max-width: 12ch;
+  }
+
+  .principles-card {
+    justify-content: flex-start;
+    gap: 0.85rem;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .principles-card::-webkit-scrollbar {
+    display: none;
+  }
+
+  .principles-layout {
+    align-items: start;
+    gap: 0.85rem;
+  }
+
+  .principles-copy-block {
+    --principles-title-size: 1.35rem;
+    --principles-title-lh: 1.22;
+    grid-template-rows: auto auto auto;
+    row-gap: 0.5rem;
+  }
+
+  .principles-title {
+    height: auto;
+    max-width: 16ch;
+    overflow: visible;
+  }
+
+  .principles-copy {
+    gap: 0.7rem;
+  }
+
+  .principles-copy-p {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    max-width: none;
+  }
+
+  .principles-figure {
+    width: var(--principles-tile);
+    border-radius: 20px;
+    justify-self: start;
+  }
 }
 
 @media (min-width: 768px) {

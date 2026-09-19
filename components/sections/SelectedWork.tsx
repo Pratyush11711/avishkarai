@@ -102,9 +102,9 @@ export function SelectedWork() {
 
       <div className="work-grid">
         {listedWorkStudies.map((item) => (
-          <a key={item.slug} href={`/work/${item.slug}`} className="work-card">
+          <a key={item.slug} href={`/work/${item.slug}`} className="work-card" data-slug={item.slug}>
             <WorkCardMedia
-              image={item.image}
+              image={"cardImage" in item && item.cardImage ? item.cardImage : item.image}
               title={item.title}
               ripple={ripple}
             />

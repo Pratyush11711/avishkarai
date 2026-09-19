@@ -1,4 +1,12 @@
+import { Barlow_Condensed } from "next/font/google";
 import localFont from "next/font/local";
+
+export const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-barlow-condensed",
+  display: "swap",
+});
 
 /** Lusion primary sans — Aeonik (from lusion/hero-standalone/about.CNa9RfUh.css) */
 export const aeonik = localFont({

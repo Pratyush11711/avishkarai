@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { SplashCursorLayer } from "@/components/fx/SplashCursorLayer";
-import { aeonik } from "@/lib/fonts";
+import { aeonik, barlowCondensed } from "@/lib/fonts";
 import "./globals.css";
 
 const STRIP_EXTENSION_ATTRS = `(function(){var a="bis_skin_checked";function s(e){if(e&&e.removeAttribute&&e.hasAttribute&&e.hasAttribute(a))e.removeAttribute(a)}function w(r){s(r);if(!r||!r.querySelectorAll)return;var n=r.querySelectorAll("["+a+"]");for(var i=0;i<n.length;i++)s(n[i])}w(document.documentElement);try{var mo=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==="attributes")s(m.target);var ns=m.addedNodes;for(var j=0;j<ns.length;j++){if(ns[j].nodeType===1)w(ns[j])}}});mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:[a]});window.addEventListener("load",function(){w(document.documentElement);setTimeout(function(){mo.disconnect()},4000)})}catch(e){}})();`;
@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${aeonik.variable} min-h-full`}
+      className={`${aeonik.variable} ${barlowCondensed.variable} min-h-full`}
       suppressHydrationWarning
     >
       <body

@@ -152,6 +152,7 @@ export const workStudies = [
     lines: ["Guiding", "Hands"],
     sector: "Care Navigation",
     image: "/guiding-hands/laptop.png",
+    cardImage: "/guiding-hands/desktop.png",
     lead: "A clear next step, every step of the way. Helping families find their way through care.",
     description: [
       "Guiding Hands is a concept for making complex care journeys easier to navigate. It brings useful resources, conversations, and next steps into one supportive digital environment.",
@@ -200,6 +201,7 @@ export const workStudies = [
     lines: ["Medivance"],
     sector: "Clinical Operations",
     image: "/medivance/laptop.png",
+    cardImage: "/medivance/tablet-certificate.png",
     lead: "Less friction behind the scenes. More space for teams to focus on the work that matters.",
     description: [
       "Medivance explores how a shared digital workspace could simplify the everyday rhythm of a clinical team. Tasks, information, and handoffs come together in a focused interface.",
@@ -254,6 +256,7 @@ export const workStudies = [
     lines: ["House of", "Life Sciences"],
     sector: "Research",
     image: "/house-of-life-sciences/laptop.png",
+    cardImage: "/house-of-life-sciences/tablet-plans.png",
     lead: "A home for ideas that move science forward. Connecting people, research, and possibility.",
     description: [
       "House of Life Sciences imagines a digital meeting place for a research community. Discoveries, expertise, and opportunities share a thoughtful editorial platform.",

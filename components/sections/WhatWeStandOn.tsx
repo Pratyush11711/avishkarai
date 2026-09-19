@@ -280,6 +280,11 @@ export function WhatWeStandOn() {
     const sticky = track?.querySelector<HTMLElement>(".principles-sticky");
     if (!inner || !sticky) return;
     const measure = () => {
+      if (window.matchMedia("(max-width: 767px)").matches) {
+        sticky.style.removeProperty("--principles-sticky-top");
+        ScrollTrigger.refresh();
+        return;
+      }
       const navHeight = parseFloat(getComputedStyle(sticky).getPropertyValue("--nav-h")) || 76;
       // Tall panels scroll up until their bottom is visible, then remain sticky.
       const top = Math.min(navHeight + 20, window.innerHeight - inner.scrollHeight - 24);
@@ -385,7 +390,7 @@ export function WhatWeStandOn() {
         <div className="page-wrap principles-sticky-inner">
           <div className="principles-intro">
             <span className="type-caption text-smoke">04 · What we stand on</span>
-            <h2 className="type-heading mt-2 max-w-[16ch] text-carbon-black md:mt-3">
+            <h2 className="type-heading mt-2 max-w-[12ch] text-carbon-black md:mt-3 md:max-w-[16ch]">
               The principles behind every build.
             </h2>
           </div>

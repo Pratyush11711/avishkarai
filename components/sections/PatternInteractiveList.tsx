@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import styles from "./PatternInteractiveList.module.css";
@@ -17,22 +18,41 @@ const rowPalette: Record<string, { background: string; media: string; ink: strin
   "08": { background: "#ffffff", media: "#ebecfe", ink: "#12131a" },
 };
 const clockRows: ClockRow[] = [
-  { id: "01", title: "Six-week discovery", sub: "A six-week discovery phase. A kickoff deck.", meta: "The Old Way", group: "old", image: "/images/clock/01.jpg" },
-  { id: "02", title: "“Still setting up”", sub: "Status calls where the honest answer is “we’re still setting up the environment.”", meta: "The Old Way", group: "old", image: "/images/clock/02.jpg" },
-  { id: "03", title: "Month-four surprise", sub: "A demo in month four that looks nothing like what you described.", meta: "The Old Way", group: "old", image: "/images/clock/03.jpg" },
-  { id: "04", title: "Scope locked week one", sub: "Scope is locked in week one. We put the plan in writing during your Build Review, before there is a contract to sign.", meta: "Our Clock", group: "new", image: "/images/clock/04.jpg" },
-  { id: "05", title: "A build every Thursday", sub: "From week two, a working build in your hands every Thursday — deployed, clickable, on a real URL.", meta: "Our Clock", group: "new", image: "/images/clock/05.jpg" },
-  { id: "06", title: "Live in eight weeks", sub: "A focused MVP is live in eight weeks. Multi-tenant platforms with integrations and a compliance layer run 10 to 14.", meta: "Our Clock", group: "new", image: "/images/clock/06.jpg" },
-  { id: "07", title: "No range to forget", sub: "The eight weeks on our homepage is a commitment, not a range we hope you forget.", meta: "Our Clock", group: "new", image: "/images/clock/07.jpg" },
-  { id: "08", title: "You’ll be using it", sub: "You will never have to ask what we’re working on. You’ll be using it.", meta: "Ready", group: "close", image: "/images/clock/08.jpg" },
+  { id: "01", title: "Six-week discovery", sub: "A six-week discovery phase. A kickoff deck.", meta: "The Old Way", group: "old", image: "/different-clock/cosmos_874806332.jpeg" },
+  { id: "02", title: "“Still setting up”", sub: "Status calls where the honest answer is “we’re still setting up the environment.”", meta: "The Old Way", group: "old", image: "/different-clock/cosmos_1628760389.jpeg" },
+  { id: "03", title: "Month-four surprise", sub: "A demo in month four that looks nothing like what you described.", meta: "The Old Way", group: "old", image: "/different-clock/cosmos_1417341526.mp4" },
+  { id: "04", title: "Scope locked week one", sub: "Scope is locked in week one. We put the plan in writing during your Build Review, before there is a contract to sign.", meta: "Our Clock", group: "new", image: "/different-clock/cosmos_266495524.jpeg" },
+  { id: "05", title: "A build every Thursday", sub: "From week two, a working build in your hands every Thursday — deployed, clickable, on a real URL.", meta: "Our Clock", group: "new", image: "/different-clock/cosmos_991516363.gif" },
+  { id: "06", title: "Live in eight weeks", sub: "A focused MVP is live in eight weeks. Multi-tenant platforms with integrations and a compliance layer run 10 to 14.", meta: "Our Clock", group: "new", image: "/different-clock/cosmos_1952560373.jpeg" },
+  { id: "07", title: "No range to forget", sub: "The eight weeks on our homepage is a commitment, not a range we hope you forget.", meta: "Our Clock", group: "new", image: "/different-clock/cosmos_991516363.gif" },
+  { id: "08", title: "You’ll be using it", sub: "You will never have to ask what we’re working on. You’ll be using it.", meta: "Ready", group: "close", image: "/different-clock/cosmos_266495524.jpeg" },
 ];
 
-function PlaceholderMedia({ row }: { row: ClockRow }) {
-  return <div className={styles.placeholder} style={{ backgroundColor: rowPalette[row.id].media, color: rowPalette[row.id].ink }}>
-    <span className={styles.mediaLabel}>{row.meta} / {row.id}</span>
-    <span className={styles.mediaNumber} aria-hidden="true">{row.id}</span>
-    <span className={styles.filename}>{row.id} — {row.image}</span>
-  </div>;
+function ClockMedia({ row }: { row: ClockRow }) {
+  const isVideo = row.image.endsWith(".mp4");
+  if (isVideo) {
+    return (
+      <video
+        className={styles.mediaAsset}
+        src={row.image}
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      />
+    );
+  }
+  return (
+    <Image
+      src={row.image}
+      alt=""
+      fill
+      sizes="(max-width: 767px) 0px, min(520px, 40vw)"
+      unoptimized={row.image.endsWith(".gif")}
+      className={styles.mediaAsset}
+    />
+  );
 }
 
 export function PatternInteractiveList() {
@@ -107,9 +127,10 @@ export function PatternInteractiveList() {
         <div className={styles.media}>
           <AnimatePresence initial={false}>
             <motion.div key={current.id} className={styles.mediaLayer}
+              style={{ backgroundColor: rowPalette[current.id].media }}
               initial={{ opacity: reduced ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: reduced ? 0 : 0.4, ease: "easeInOut" }}>
-              <PlaceholderMedia row={current} />
+              <ClockMedia row={current} />
             </motion.div>
           </AnimatePresence>
         </div>
