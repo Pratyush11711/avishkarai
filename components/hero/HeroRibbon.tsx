@@ -29,6 +29,32 @@ function quadInOut(t: number) {
   return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
 }
 
+/** Desktop: fixed viewport travel. Mobile: tied to section height so the
+    ribbon finishes before the shorter statement block scrolls away. */
+function computeShowRatio(
+  rect: DOMRect,
+  vh: number,
+  mobile: boolean,
+  reduced: boolean
+) {
+  if (reduced) return 1;
+
+  let show: number;
+  if (mobile) {
+    const startY = vh * 0.82;
+    const endTop = vh * 0.22 - rect.height;
+    const travel = Math.max(vh * 0.35, startY - endTop);
+    show = saturate((startY - rect.top) / travel);
+    if (rect.bottom <= vh * 0.18) show = 1;
+    if (rect.top >= vh) show = 0;
+  } else {
+    show = saturate(-(rect.top - START * vh) / (DISTANCE * vh));
+    show = quadInOut(show);
+  }
+
+  return show;
+}
+
 function fit(v: number, a: number, b: number, c: number, d: number) {
   return c + saturate((v - a) / (b - a)) * (d - c);
 }
@@ -230,29 +256,28 @@ export function HeroRibbon({
     const draw = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      if (vw <= 900) {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        raf = 0;
-        return;
-      }
       const rect = trigger.getBoundingClientRect();
       const screenY = rect.top;
-      let show = saturate(-(screenY - START * vh) / (DISTANCE * vh));
-      show = reduced ? 1 : quadInOut(show);
+      const mobile = vw <= 900;
+      const show = computeShowRatio(rect, vh, mobile, reduced);
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const dpr = canvas.width / vw;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      if (show <= 0.001 || rect.bottom < -vh || rect.top > vh * 1.35) {
+      const offscreen =
+        rect.bottom < -vh * 0.15 || rect.top > vh * (mobile ? 1.05 : 1.35);
+      if (show <= 0.001 || offscreen) {
         raf = requestAnimationFrame(draw);
         return;
       }
 
       const diag = Math.hypot(vw, vh);
-      const radius = 0.008 * fit(vw, 540, 1920, 2, 1) * diag;
+      const radiusScale = mobile
+        ? fit(vw, 320, 900, 0.9, 1.15)
+        : fit(vw, 540, 1920, 2, 1);
+      const radius = 0.008 * radiusScale * diag;
       for (let i = 0; i < PATH.length; i++) {
         screenPts[i] = toScreen(PATH[i], diag, screenY);
       }

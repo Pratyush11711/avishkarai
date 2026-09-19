@@ -213,12 +213,14 @@ export function ExpertiseSection() {
             angle = fanAngle * (1 - k);
           }
 
+          card.style.fontSize = `${16 * cardW / 320}px`;
           card.style.width = `${cardW}px`;
           card.style.height = `${cardH}px`;
           card.style.transform =
             `translate3d(calc(-50% + ${x}px), calc(-50% + ${y}px), 0) rotate(${angle}deg)`;
           card.style.zIndex = String(showBack ? 10 + i : 80 + i);
         } else {
+          card.style.removeProperty("font-size");
           card.style.removeProperty("width");
           card.style.removeProperty("height");
           card.style.removeProperty("transform");
