@@ -231,6 +231,7 @@ export function WhatWeStandOn() {
   const [rawProgress, setRawProgress] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [compact, setCompact] = useState(false);
+  const [fitsViewport, setFitsViewport] = useState(true);
   const [debug, setDebug] = useState(false);
 
   const targetRef = useRef(0);
@@ -280,16 +281,8 @@ export function WhatWeStandOn() {
     const sticky = track?.querySelector<HTMLElement>(".principles-sticky");
     if (!inner || !sticky) return;
     const measure = () => {
-      if (window.matchMedia("(max-width: 767px)").matches) {
-        sticky.style.removeProperty("--principles-sticky-top");
-        ScrollTrigger.refresh();
-        return;
-      }
       const navHeight = parseFloat(getComputedStyle(sticky).getPropertyValue("--nav-h")) || 76;
-      // Tall panels scroll up until their bottom is visible, then remain sticky.
-      const top = Math.min(navHeight + 20, window.innerHeight - inner.scrollHeight - 24);
-      sticky.style.setProperty("--principles-sticky-top", `${top}px`);
-      ScrollTrigger.refresh();
+      setFitsViewport(inner.getBoundingClientRect().height <= window.innerHeight - navHeight - 44);
     };
     const observer = new ResizeObserver(measure);
     observer.observe(inner);
@@ -303,7 +296,7 @@ export function WhatWeStandOn() {
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || reducedMotion) {
+    if (!track || reducedMotion || compact || !fitsViewport) {
       paint(0);
       return;
     }
@@ -339,7 +332,7 @@ export function WhatWeStandOn() {
       st.kill();
       stRef.current = null;
     };
-  }, [paint, reducedMotion]);
+  }, [paint, reducedMotion, compact, fitsViewport]);
 
   const goTo = useCallback(
     (next: number) => {
@@ -377,6 +370,7 @@ export function WhatWeStandOn() {
       ref={trackRef}
       id="studio"
       className="principles-track relative z-[1]"
+      data-static={compact || !fitsViewport || reducedMotion}
       aria-label="What we stand on"
       style={
         {
@@ -403,10 +397,10 @@ export function WhatWeStandOn() {
             <PrincipleRail
               count={COUNT}
               activeIndex={index}
-              segmentFill={reducedMotion ? 1 : segmentFill}
-              overallProgress={reducedMotion ? (index + 1) / COUNT : overallProgress}
+              segmentFill={reducedMotion || compact || !fitsViewport ? 1 : segmentFill}
+              overallProgress={reducedMotion || compact || !fitsViewport ? (index + 1) / COUNT : overallProgress}
               onSelect={goTo}
-              compact={compact}
+              compact={false}
             />
 
             <div className="principles-layout">
