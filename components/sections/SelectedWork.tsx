@@ -21,6 +21,11 @@ function WorkCardMedia({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
+  const [textureSrc, setTextureSrc] = useState(image);
+
+  useEffect(() => {
+    setTextureSrc(image);
+  }, [image]);
 
   useEffect(() => {
     if (!ripple) return;
@@ -43,10 +48,14 @@ function WorkCardMedia({
         sizes="(max-width: 900px) 100vw, 50vw"
         quality={95}
         className="work-card-img"
+        onLoad={(event) => {
+          const src = event.currentTarget.currentSrc;
+          if (src) setTextureSrc(src);
+        }}
       />
       {ripple && inView && (
         <RippleDistortion
-          imageSrc={image}
+          imageSrc={textureSrc}
           frequency={18}
           amplitude={0.032}
           speed={2.6}

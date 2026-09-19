@@ -65,6 +65,8 @@ export default function RippleDistortion({
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
@@ -91,6 +93,7 @@ export default function RippleDistortion({
       fragmentShader,
       uniforms,
       transparent: true,
+      toneMapped: false,
     });
     scene.add(new THREE.Mesh(geometry, material));
 
@@ -156,7 +159,7 @@ export default function RippleDistortion({
       texture.magFilter = THREE.LinearFilter;
       texture.wrapS = THREE.ClampToEdgeWrapping;
       texture.wrapT = THREE.ClampToEdgeWrapping;
-      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.colorSpace = THREE.NoColorSpace;
       uniforms.uTexture.value = texture;
       resize();
     });
