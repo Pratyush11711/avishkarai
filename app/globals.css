@@ -896,6 +896,33 @@ a:focus-visible .cta-wipe-band {
     0 24px 80px rgba(0, 0, 0, 0.18);
 }
 
+@media (max-width: 767px) {
+  .pcta {
+    padding: 32px 22px;
+    border-radius: 24px;
+  }
+
+  .pcta-inner {
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .pcta-left {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .pcta-label {
+    font-size: clamp(22px, 5.6vw, 30px);
+    line-height: 0.95;
+  }
+
+  .pcta-arrow {
+    font-size: clamp(26px, 4.2vw, 34px);
+  }
+}
+
 @media (min-width: 768px) {
   .pcta { padding: 64px 60px; border-radius: 32px; }
 }
@@ -2713,6 +2740,12 @@ html:has(.lh-hud) .site-nav-bar {
   letter-spacing: -0.03em;
 }
 
+@media (max-width: 767px) {
+  .work-card-title {
+    font-size: clamp(22px, 5.4vw, 28px);
+  }
+}
+
 .work-card-title-arrow {
   position: relative;
   flex: 0 0 0.8em;
@@ -3688,10 +3721,15 @@ html:has(.lh-hud) .site-nav-bar {
     position: relative;
     top: auto;
   }
-  .principles-intro .type-heading { font-size: clamp(28px, 7vw, 36px); max-width: 18ch; }
+  .principles-intro .type-heading {
+    font-size: clamp(22px, 5.8vw, 32px);
+    max-width: 18ch;
+    line-height: 1.05;
+  }
   .principles-card { padding: 20px; gap: 16px; border-radius: 24px; }
+  .principles-rail { overflow: visible; }
   .principles-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .principles-title { font-size: 25px; }
+  .principles-title { font-size: clamp(20px, 5.2vw, 24px); line-height: 1.12; }
   .principles-copy-p { font-size: 15px; line-height: 1.5; }
   .principles-figure { border-radius: 16px; }
 }

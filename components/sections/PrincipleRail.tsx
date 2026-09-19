@@ -18,6 +18,7 @@ export function PrincipleRail({
   compact?: boolean;
 }) {
   const tip = Math.min(1, Math.max(0, overallProgress));
+  const tipLeft = `calc(14px + ${tip} * (100% - 28px))`;
 
   return (
     <div
@@ -28,7 +29,7 @@ export function PrincipleRail({
       <span
         aria-hidden
         className="pointer-events-none absolute top-1/2 z-[1] h-7 w-7 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] opacity-55 blur-md"
-        style={{ left: `${tip * 100}%` }}
+        style={{ left: tipLeft }}
       />
 
       <div className="relative z-[2] flex gap-2">
@@ -64,7 +65,7 @@ export function PrincipleRail({
       <span
         aria-hidden
         className="pointer-events-none absolute top-1/2 z-[3] h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#3040ff] shadow-[0_0_8px_2px_rgba(48,64,255,0.4)]"
-        style={{ left: `${tip * 100}%` }}
+        style={{ left: tipLeft }}
       />
     </div>
   );

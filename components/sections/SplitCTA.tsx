@@ -46,8 +46,8 @@ export function SplitCTA() {
               <span className="cta-wipe-band" />
             </span>
 
-            <div className="relative z-10 flex items-start justify-between gap-2 md:gap-6">
-              <h2 className="font-display text-[clamp(18px,4.4vw,28px)] md:text-[clamp(36px,5vw,72px)]">
+            <div className="relative z-10 flex items-start justify-between gap-2 min-w-0 md:gap-6">
+              <h2 className="min-w-0 flex-1 font-display text-[clamp(14px,3.25vw,28px)] leading-[1.05] md:text-[clamp(36px,5vw,72px)] md:leading-none">
                 {panel.lines.map((line) => (
                   <span key={line} className="block">
                     <TextRoll>{line}</TextRoll>
@@ -55,7 +55,7 @@ export function SplitCTA() {
                 ))}
               </h2>
 
-              <span className="shrink-0 w-8 h-8 md:w-11 md:h-11 rounded-lg border-[1.5px] border-text inline-flex items-center justify-center transition-colors duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-text-inverse">
+              <span className="mt-0.5 shrink-0 w-7 h-7 md:mt-0 md:w-11 md:h-11 rounded-lg border-[1.5px] border-text inline-flex items-center justify-center transition-colors duration-300 group-hover:bg-primary group-hover:border-primary group-hover:text-text-inverse">
                 <span className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                   <ArrowIcon />
                 </span>
