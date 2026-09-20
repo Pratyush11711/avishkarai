@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Counter } from "@/components/react-bits/Counter";
 import { listedWorkStudies } from "@/lib/work-studies";
 
-const MIN_VISIBLE_MS = 1100;
+const MIN_HOLD_AT_100_MS = 320;
 const MAX_WAIT_MS = 45000;
-const QUIET_MS = 1000;
+const QUIET_MS = 500;
 
 const SITE_VIDEOS = [
   "/hero-sec-video.mp4",
@@ -28,31 +29,46 @@ const SITE_IMAGES = [
   ),
 ];
 
-function cacheFile(src: string) {
-  return fetch(src, { cache: "force-cache" })
-    .then((res) => (res.ok ? res.blob() : undefined))
-    .catch(() => undefined);
+const SITE_ASSETS = [...SITE_VIDEOS, ...SITE_IMAGES];
+
+const ESTIMATED_BYTES: Record<string, number> = {
+  "/hero-sec-video.mp4": 19_000_000,
+  "/stand1.mp4": 750_000,
+  "/stand2.mp4": 12_600_000,
+  "/stand3.mp4": 6_200_000,
+  "/different-clock/cosmos_1417341526.mp4": 1_800_000,
+};
+
+function estimateTotal(src: string) {
+  try {
+    const path = new URL(src, "https://local.invalid").pathname;
+    return ESTIMATED_BYTES[path] ?? (path.match(/\.(mp4|webm)$/i) ? 4_000_000 : 350_000);
+  } catch {
+    return 350_000;
+  }
 }
 
-function preloadImage(src: string) {
-  return new Promise<void>((resolve) => {
-    const img = new Image();
-    const done = () => resolve();
-    img.addEventListener("load", done, { once: true });
-    img.addEventListener("error", done, { once: true });
-    img.src = src;
-    if (img.complete) resolve();
-  });
+function toAbs(src: string) {
+  try {
+    return new URL(src, window.location.origin).href;
+  } catch {
+    return src;
+  }
+}
+
+function entrySize(entry: PerformanceResourceTiming) {
+  return entry.transferSize || entry.encodedBodySize || entry.decodedBodySize || 0;
 }
 
 function mediaSource(node: HTMLImageElement | HTMLVideoElement) {
   if (node instanceof HTMLImageElement) {
-    return node.currentSrc || node.getAttribute("src") || node.getAttribute("srcset");
+    return node.currentSrc || node.getAttribute("src") || "";
   }
   return (
     node.currentSrc ||
     node.getAttribute("src") ||
-    node.querySelector("source")?.getAttribute("src")
+    node.querySelector("source")?.getAttribute("src") ||
+    ""
   );
 }
 
@@ -64,6 +80,14 @@ function isImageReady(img: HTMLImageElement) {
 function isVideoReady(video: HTMLVideoElement) {
   if (!mediaSource(video)) return true;
   return video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA;
+}
+
+function videoFraction(video: HTMLVideoElement) {
+  if (isVideoReady(video)) return 1;
+  if (video.buffered.length && video.duration && Number.isFinite(video.duration)) {
+    return Math.min(1, video.buffered.end(video.buffered.length - 1) / video.duration);
+  }
+  return Math.min(1, video.readyState / HTMLMediaElement.HAVE_ENOUGH_DATA);
 }
 
 function waitForImage(img: HTMLImageElement) {
@@ -155,10 +179,7 @@ function waitForDocumentMedia(signal: AbortSignal) {
           track(node);
           scan(node);
         });
-        if (
-          record.type === "attributes" &&
-          record.target instanceof Element
-        ) {
+        if (record.type === "attributes" && record.target instanceof Element) {
           track(record.target);
         }
       }
@@ -174,117 +195,198 @@ function waitForDocumentMedia(signal: AbortSignal) {
     scan();
     bumpQuiet();
 
-    const onAbort = () => finish();
     if (signal.aborted) {
       finish();
       return;
     }
-    signal.addEventListener("abort", onAbort, { once: true });
+    signal.addEventListener("abort", finish, { once: true });
   });
 }
 
-function waitForSiteMedia(signal: AbortSignal) {
-  return Promise.all([
-    ...SITE_VIDEOS.map((src) => cacheFile(src)),
-    ...SITE_IMAGES.map((src) => preloadImage(src)),
-    waitForDocumentMedia(signal),
-  ]);
+async function fetchWithProgress(
+  src: string,
+  onProgress: (loaded: number, total: number) => void
+) {
+  const fallback = estimateTotal(src);
+  try {
+    const response = await fetch(src, { cache: "force-cache" });
+    const headerTotal = Number(response.headers.get("content-length")) || 0;
+    if (!response.ok || !response.body) {
+      onProgress(fallback, fallback);
+      return;
+    }
+
+    const reader = response.body.getReader();
+    let loaded = 0;
+    const total = headerTotal || fallback;
+    onProgress(0, total);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      loaded += value.byteLength;
+      onProgress(Math.min(loaded, total), total);
+    }
+
+    onProgress(total, total);
+  } catch {
+    onProgress(fallback, fallback);
+  }
+}
+
+function clampPercent(n: number) {
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(100, Math.max(0, Math.round(n)));
 }
 
 export function SitePreloader() {
   const [hiding, setHiding] = useState(false);
   const [gone, setGone] = useState(false);
+  const [percent, setPercent] = useState(0);
 
   useEffect(() => {
-    const started = performance.now();
     const controller = new AbortController();
     let finished = false;
-    let minTimer = 0;
     let maxTimer = 0;
+    let holdTimer = 0;
+    let pollTimer = 0;
+    let highest = 0;
+
+    const bytes = new Map<string, { loaded: number; total: number }>();
+
+    const setBytes = (id: string, loaded: number, total: number, announce = true) => {
+      const safeTotal = Math.max(total, 1);
+      const prev = bytes.get(id);
+      const nextTotal = loaded >= safeTotal ? safeTotal : Math.max(safeTotal, prev?.total ?? 0);
+      bytes.set(id, {
+        loaded: Math.min(Math.max(loaded, prev?.loaded ?? 0), nextTotal),
+        total: nextTotal,
+      });
+      if (announce) publish();
+    };
+
+    const collectLiveMedia = () => {
+      document.querySelectorAll<HTMLImageElement | HTMLVideoElement>("img, video").forEach((node) => {
+        const src = mediaSource(node);
+        if (!src) return;
+        const id = toAbs(src);
+        const total = estimateTotal(src);
+        if (node instanceof HTMLVideoElement) {
+          setBytes(id, videoFraction(node) * total, total, false);
+          return;
+        }
+        if (isImageReady(node)) setBytes(id, total, total, false);
+      });
+
+      for (const entry of performance.getEntriesByType("resource") as PerformanceResourceTiming[]) {
+        if (entry.responseEnd <= 0) continue;
+        const size = entrySize(entry) || estimateTotal(entry.name);
+        setBytes(entry.name, size, size, false);
+      }
+      publish();
+    };
+
+    const publish = () => {
+      if (finished) return;
+      let loaded = 0;
+      let total = 0;
+      for (const item of bytes.values()) {
+        loaded += item.loaded;
+        total += item.total;
+      }
+      if (total <= 0) return;
+      const next = Math.min(99, Math.floor((loaded / total) * 100));
+      highest = Math.max(highest, next);
+      setPercent(clampPercent(highest));
+    };
 
     const dismiss = () => {
       if (finished) return;
       finished = true;
-      window.clearTimeout(minTimer);
       window.clearTimeout(maxTimer);
-      controller.abort();
+      window.clearTimeout(holdTimer);
+      window.clearInterval(pollTimer);
+      observer.disconnect();
+      setPercent(100);
       setHiding(true);
     };
 
-    const reveal = () => {
-      const remaining = Math.max(0, MIN_VISIBLE_MS - (performance.now() - started));
-      minTimer = window.setTimeout(dismiss, remaining);
+    const finishAtHundred = () => {
+      highest = 100;
+      setPercent(100);
+      holdTimer = window.setTimeout(dismiss, MIN_HOLD_AT_100_MS);
     };
 
-    waitForSiteMedia(controller.signal).then(reveal).catch(reveal);
+    for (const src of SITE_ASSETS) {
+      setBytes(toAbs(src), 0, estimateTotal(src));
+    }
+    collectLiveMedia();
+
+    const observer = new PerformanceObserver(() => collectLiveMedia());
+    observer.observe({ type: "resource", buffered: true });
+    pollTimer = window.setInterval(collectLiveMedia, 200);
+
+    Promise.all([
+      ...SITE_ASSETS.map((src) =>
+        fetchWithProgress(src, (loaded, total) => setBytes(toAbs(src), loaded, total))
+      ),
+      waitForDocumentMedia(controller.signal),
+      document.fonts?.ready ?? Promise.resolve(),
+    ])
+      .then(() => {
+        collectLiveMedia();
+        finishAtHundred();
+      })
+      .catch(finishAtHundred);
+
     maxTimer = window.setTimeout(dismiss, MAX_WAIT_MS);
 
     return () => {
       finished = true;
-      window.clearTimeout(minTimer);
       window.clearTimeout(maxTimer);
+      window.clearTimeout(holdTimer);
+      window.clearInterval(pollTimer);
+      observer.disconnect();
       controller.abort();
     };
   }, []);
+
+  const shown = clampPercent(percent);
 
   if (gone) return null;
 
   return (
     <div
       className={hiding ? "site-preloader is-hiding" : "site-preloader"}
-      role="status"
-      aria-live="polite"
-      aria-busy={!hiding}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={shown}
+      aria-label="Loading site"
       onTransitionEnd={(event) => {
         if (event.target === event.currentTarget && hiding) setGone(true);
       }}
     >
-      <span className="sr-only">Loading</span>
-      {/* From Uiverse.io by Nawsome */}
-      <svg className="pl" width="240" height="240" viewBox="0 0 240 240" aria-hidden="true">
-        <circle
-          className="pl__ring pl__ring--a"
-          cx="120"
-          cy="120"
-          r="105"
-          fill="none"
-          strokeWidth="20"
-          strokeDasharray="0 660"
-          strokeDashoffset="-330"
-          strokeLinecap="round"
+      <span
+        className="loader"
+        style={{ ["--progress" as string]: `${shown}%` }}
+      />
+      <div className="loader-count" aria-hidden="true">
+        <Counter
+          value={shown}
+          places={[100, 10, 1]}
+          fontSize={132}
+          padding={0}
+          gap={2}
+          borderRadius={0}
+          horizontalPadding={0}
+          textColor="#fff"
+          fontWeight={400}
+          gradientHeight={28}
+          gradientFrom="#000"
+          gradientTo="transparent"
         />
-        <circle
-          className="pl__ring pl__ring--b"
-          cx="120"
-          cy="120"
-          r="35"
-          fill="none"
-          strokeWidth="20"
-          strokeDasharray="0 220"
-          strokeDashoffset="-110"
-          strokeLinecap="round"
-        />
-        <circle
-          className="pl__ring pl__ring--c"
-          cx="85"
-          cy="120"
-          r="70"
-          fill="none"
-          strokeWidth="20"
-          strokeDasharray="0 440"
-          strokeLinecap="round"
-        />
-        <circle
-          className="pl__ring pl__ring--d"
-          cx="155"
-          cy="120"
-          r="70"
-          fill="none"
-          strokeWidth="20"
-          strokeDasharray="0 440"
-          strokeLinecap="round"
-        />
-      </svg>
+      </div>
     </div>
   );
 }

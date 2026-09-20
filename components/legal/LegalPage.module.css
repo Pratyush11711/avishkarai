@@ -1,0 +1,35 @@
+.page { color: var(--color-carbon-black); background: var(--color-bg); }
+.header { max-width: 1200px; margin: auto; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--color-ash); }
+.header > a:last-child { font-size: 14px; }
+.main { max-width: 1200px; margin: auto; padding: 64px 32px 100px; }
+.hero { padding-bottom: 40px; border-bottom: 1px solid var(--color-ash); }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--color-primary); }
+.hero h1 { font-size: clamp(38px, 6vw, 76px); line-height: 1.05; letter-spacing: -.045em; font-weight: 500; margin: 20px 0; }
+.hero p { font-size: 14px; line-height: 1.6; color: var(--color-slate); }
+.links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.links a { border: 1px solid var(--color-ash); border-radius: 999px; padding: 10px 18px; font-size: 14px; }
+.links a[aria-current] { background: var(--color-deep-navy); color: var(--color-paper-white); }
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 64px; padding-top: 48px; align-items: start; }
+.contents { position: sticky; top: 24px; max-height: calc(100svh - 48px); overflow: auto; }
+.contents summary { font-size: 14px; font-weight: 500; cursor: pointer; padding-bottom: 16px; }
+.contents nav { display: grid; gap: 12px; }
+.contents a { font-size: 13px; line-height: 1.5; color: var(--color-slate); }
+.contents a:hover { color: var(--color-primary); }
+.article { min-width: 0; max-width: 72ch; overflow-wrap: anywhere; }
+.article h2 { scroll-margin-top: 32px; font-size: clamp(23px, 2.4vw, 30px); line-height: 1.25; font-weight: 500; letter-spacing: -.025em; margin: 48px 0 20px; }
+.article h2:first-child { margin-top: 0; }
+.article h3 { font-size: 19px; font-weight: 500; line-height: 1.4; margin: 28px 0 12px; }
+.article p, .article li { font-size: 16px; line-height: 1.75; color: var(--color-slate); }
+.article p { margin: 0 0 16px; }
+.article ul { list-style: disc; padding-left: 24px; margin: 20px 0; }
+.article li { padding-left: 4px; margin-bottom: 12px; }
+.top { display: inline-block; color: var(--color-primary); margin-top: 32px; }
+.page a:focus-visible, .page summary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+@media (max-width: 800px) {
+  .header { padding: 22px 20px; }
+  .main { padding: 40px 20px 64px; }
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 28px; }
+  .contents { position: static; max-height: none; padding-bottom: 24px; border-bottom: 1px solid var(--color-ash); }
+  .contents nav { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+}
+@media (max-width: 420px) { .contents nav { grid-template-columns: 1fr; } }

@@ -7,10 +7,10 @@ import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 const FOOTER_LINKS = {
   Studio: [
-    { label: "Work", href: "#work" },
-    { label: "Capabilities", href: "#capabilities" },
-    { label: "Process", href: "#process" },
-    { label: "About", href: "#studio" },
+    { label: "Work", href: "/#work" },
+    { label: "Capabilities", href: "/#capabilities" },
+    { label: "Process", href: "/#process" },
+    { label: "About", href: "/#studio" },
     { label: "Careers", href: "#" },
   ],
   Contact: [
@@ -19,9 +19,9 @@ const FOOTER_LINKS = {
     { label: "Book a build review", href: BOOK_A_BUILD_HREF },
   ],
   Legal: [
-    { label: "Privacy", href: "#" },
+    { label: "Privacy", href: "/privacy-policy" },
     { label: "Security", href: "#" },
-    { label: "Terms", href: "#" },
+    { label: "Terms", href: "/terms-of-service" },
   ],
   Social: [
     { label: "LinkedIn", href: "#" },
@@ -36,7 +36,7 @@ export function Footer() {
       <div className="page-wrap py-16">
         <div className="grid md:grid-cols-[1fr_auto] gap-12 md:gap-20 mb-12">
           <div>
-            <a href="#" className="inline-block mb-4">
+            <a href="/" className="inline-block mb-4">
               <BrandLogo on="dark" className="h-8 w-[11rem]" />
             </a>
             <p className="type-body text-text-inverse/70 mb-2 max-w-[40ch]">

@@ -6,11 +6,6 @@ import { Accordion } from "@/components/ui/Accordion";
 const FAQ_ITEMS = [
   // Trust & security
   {
-    question: "Who owns the code?",
-    answer:
-      "You do. From the first commit, in your repository, under your account. Full IP assignment in the contract.",
-  },
-  {
     question: "How do you handle our data?",
     answer:
       "Least-privilege access, signed NDAs across the team, encrypted secrets management, no production data in development environments, and a documented subprocessor list.",
