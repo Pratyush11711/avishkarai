@@ -9,11 +9,18 @@ export function HeroVideo({ playing }: { playing: boolean }) {
     const video = videoRef.current;
     if (!video) return;
 
-    if (playing) {
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-    }
+    const sync = () => {
+      if (playing) video.play().catch(() => {});
+      else video.pause();
+    };
+
+    sync();
+    video.addEventListener("canplay", sync);
+    video.addEventListener("canplaythrough", sync);
+    return () => {
+      video.removeEventListener("canplay", sync);
+      video.removeEventListener("canplaythrough", sync);
+    };
   }, [playing]);
 
   return (

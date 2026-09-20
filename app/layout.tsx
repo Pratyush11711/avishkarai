@@ -24,6 +24,9 @@ export default function RootLayout({
       className={`${aeonik.variable} ${barlowCondensed.variable} min-h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preload" href="/hero-sec-video.mp4" as="video" type="video/mp4" />
+      </head>
       <body
         className={`${aeonik.className} min-h-full flex flex-col antialiased bg-bg text-text`}
         suppressHydrationWarning
