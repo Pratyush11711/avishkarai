@@ -6,6 +6,7 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { NAV_LINKS } from "@/components/nav/Nav";
 import { ChipGlyph, NAV_CHIPS } from "@/components/nav/NavChips";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -173,7 +174,7 @@ export function HeroHudNav() {
               <span className="lh-hud-sep" aria-hidden="true">
                 ·
               </span>
-              <a href="#contact" className="lh-hud-cta">
+              <a href={BOOK_A_BUILD_HREF} className="lh-hud-cta">
                 Book a build
                 <span aria-hidden="true"> →</span>
               </a>
@@ -247,7 +248,7 @@ export function HeroHudNav() {
               </nav>
 
               <motion.a
-                href="#contact"
+                href={BOOK_A_BUILD_HREF}
                 className="lh-hud-overlay-cta"
                 onClick={closeMenu}
                 initial={reduceMotion ? false : { opacity: 0, y: 22 }}

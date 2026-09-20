@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -22,7 +23,7 @@ export function ProcessCTA() {
   return (
     <div ref={wrapRef} className="pcta-wrap">
       <motion.a
-        href="#contact"
+        href={BOOK_A_BUILD_HREF}
         className="pcta"
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setHovered(true)}

@@ -1,3 +1,4 @@
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 import { TextRoll } from "@/components/ui/TextRoll";
 
 function ArrowIcon() {
@@ -16,7 +17,7 @@ function ArrowIcon() {
 
 const PANELS = [
   {
-    href: "mailto:arpit@avishkarai.com,shivang@avishkarai.com?subject=Build%20review",
+    href: BOOK_A_BUILD_HREF,
     lines: ["Book a", "build review"],
     body: "In 30 minutes we'll tell you what we'd build, how long it would take, and what we'd cut.",
     wipe: "var(--color-primary)",

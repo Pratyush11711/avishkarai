@@ -6,6 +6,7 @@ import { clsx } from "clsx";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ChipGlyph, NAV_CHIPS } from "@/components/nav/NavChips";
 import { GradualBlur } from "@/components/react-bits/GradualBlur";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 export const NAV_LINKS = [
   { label: "Work", href: "#work" },
@@ -184,7 +185,7 @@ export function Nav() {
 
           <div className="flex items-center gap-2 shrink-0">
             <a
-              href="#contact"
+              href={BOOK_A_BUILD_HREF}
               className="nav-cta hidden lg:inline-flex items-center justify-between gap-3 min-w-[11rem] pl-6 pr-2 py-2 rounded-full bg-primary text-text-inverse hover:bg-primary-hover text-[16px] font-medium leading-none tracking-[-0.03em]"
             >
               Book a build
@@ -244,7 +245,7 @@ export function Nav() {
                   );
                 })}
                 <a
-                  href="#contact"
+                  href={BOOK_A_BUILD_HREF}
                   className="mt-1 inline-flex items-center justify-center gap-2 min-h-14 rounded-full bg-[#111114] text-paper-white text-[16px] font-medium tracking-[-0.03em]"
                   onClick={() => setMobileOpen(false)}
                 >

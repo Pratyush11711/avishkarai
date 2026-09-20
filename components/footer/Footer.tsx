@@ -3,6 +3,7 @@
 import { scrollToTop } from "@/lib/smooth-scroll";
 import { TextRoll } from "@/components/ui/TextRoll";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 const FOOTER_LINKS = {
   Studio: [
@@ -15,7 +16,7 @@ const FOOTER_LINKS = {
   Contact: [
     { label: "arpit@avishkarai.com", href: "mailto:arpit@avishkarai.com" },
     { label: "shivang@avishkarai.com", href: "mailto:shivang@avishkarai.com" },
-    { label: "Book a build review", href: "#contact" },
+    { label: "Book a build review", href: BOOK_A_BUILD_HREF },
   ],
   Legal: [
     { label: "Privacy", href: "#" },

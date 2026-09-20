@@ -5,6 +5,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 import type { StudyShot, WorkStudy } from "@/lib/work-studies";
 import styles from "./case-study.module.css";
 
@@ -170,7 +171,7 @@ export function CaseStudy({ study, related }: { study: WorkStudy; related: WorkS
   return <div className={styles.page} data-mood={study.theme.mood} style={themeStyle(study)}>
     <header className={styles.header}>
       <Link href="/" aria-label="Avishkar AI home"><BrandLogo on="light" /></Link>
-      <nav className={styles.desktopNav} aria-label="Main navigation"><Link href="/#work">Work</Link><Link href="/#capabilities">Capabilities</Link><Link href="/#studio">Studio</Link><Link href="/#contact">Book a build <span aria-hidden>↗</span></Link></nav>
+      <nav className={styles.desktopNav} aria-label="Main navigation"><Link href="/#work">Work</Link><Link href="/#capabilities">Capabilities</Link><Link href="/#studio">Studio</Link><Link href={BOOK_A_BUILD_HREF}>Book a build <span aria-hidden>↗</span></Link></nav>
       <button className={styles.menuButton} aria-expanded={menuOpen} aria-controls="case-menu" onClick={() => setMenuOpen(!menuOpen)}>Menu {menuOpen ? "−" : "+"}</button>
       {menuOpen && <nav id="case-menu" className={styles.mobileMenu} aria-label="Mobile navigation"><Link href="/#work">Work</Link><Link href="/#capabilities">Capabilities</Link><Link href="/#studio">Studio</Link><Link href="/#contact">Contact ↗</Link></nav>}
     </header>

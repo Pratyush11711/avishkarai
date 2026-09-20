@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 import styles from "./PatternInteractiveList.module.css";
 
 type ClockRow = { id: string; title: string; sub: string; meta: string; group: "old" | "new" | "close"; image: string };
@@ -136,6 +137,6 @@ export function PatternInteractiveList() {
         </div>
       </aside>
     </div>
-    <footer className={styles.footer}><span>From a plan to a product you can use.</span><a href="#contact">Book a build review <span aria-hidden="true">↗</span></a></footer>
+    <footer className={styles.footer}><span>From a plan to a product you can use.</span><a href={BOOK_A_BUILD_HREF}>Book a build review <span aria-hidden="true">↗</span></a></footer>
   </section>;
 }

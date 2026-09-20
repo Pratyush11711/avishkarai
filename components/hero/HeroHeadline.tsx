@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 export function HeroHeadline() {
   const eyebrowRef = useRef<HTMLDivElement>(null);
@@ -129,7 +130,7 @@ export function HeroHeadline() {
           ref={ctaRef}
           className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 opacity-0 shrink-0"
         >
-          <MagneticButton href="#contact" variant="inverted" strength={0}>
+          <MagneticButton href={BOOK_A_BUILD_HREF} variant="inverted" strength={0}>
             Book a 30-minute build review
           </MagneticButton>
           <MagneticButton href="#clock" variant="ghost" strength={0} className="text-paper-white">
