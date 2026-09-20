@@ -93,7 +93,7 @@ export const workStudies = [
     gallery: [
       {
         role: "film",
-        src: "/frontier-biomed/Peptide_vials_on_catalog_page_.jpg",
+        src: "/frontier-biomed/Peptide_vials_on_catalog_page_.png",
         alt: "Frontier BioMed peptide vials, Tesamorelin, BPC-157, and DSIP",
         caption: "Product line",
       },

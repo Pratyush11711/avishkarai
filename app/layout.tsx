@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { SitePreloader } from "@/components/fx/SitePreloader";
 import { SplashCursorLayer } from "@/components/fx/SplashCursorLayer";
 import { aeonik, barlowCondensed } from "@/lib/fonts";
 import "./globals.css";
@@ -30,8 +31,12 @@ export default function RootLayout({
         <Script id="strip-extension-attrs" strategy="beforeInteractive">
           {STRIP_EXTENSION_ATTRS}
         </Script>
+        <noscript>
+          <style>{`.site-preloader{display:none!important}`}</style>
+        </noscript>
         <SplashCursorLayer />
         {children}
+        <SitePreloader />
       </body>
     </html>
   );
