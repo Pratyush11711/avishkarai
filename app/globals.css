@@ -3608,7 +3608,7 @@ html:has(.lh-hud) .site-nav-bar {
   background: var(--color-bg);
   border-radius: 28px 28px 0 0;
   /* Holds How we build off the last principle so the card isn't clipped. */
-  padding-bottom: 12vh;
+  padding-bottom: 32px;
 }
 
 .principles-track {
@@ -3713,6 +3713,16 @@ html:has(.lh-hud) .site-nav-bar {
    flow and manual tabs instead of hiding content or moving behind the nav. */
 .principles-track[data-static="true"] { height: auto; }
 .principles-track[data-static="true"] .principles-sticky { position: relative; top: auto; }
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  /* Balance spare viewport space around the complete heading/card group
+     instead of leaving it all below the card when zoomed out. */
+  .principles-track[data-static="false"] .principles-sticky-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100svh - var(--nav-h) - 48px);
+  }
+}
 @media (max-width: 767px) {
   .principles-runway { padding-bottom: 48px; }
   /* Shorter runway than desktop — enough scroll distance to scrub the rail. */

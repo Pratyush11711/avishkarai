@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: study ? `${study.title} — Avishkar AI` : "Project not found",
     description: study?.lead,
-    robots: { index: false, follow: true },
+    ...(!study ? { robots: { index: false, follow: true } } : {}),
   };
 }
 export default async function WorkPage({ params }: Props) {

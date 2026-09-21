@@ -11,7 +11,6 @@ const FOOTER_LINKS = {
     { label: "Capabilities", href: "/#capabilities" },
     { label: "Process", href: "/#process" },
     { label: "About", href: "/#studio" },
-    { label: "Careers", href: "#" },
   ],
   Contact: [
     { label: "arpit@avishkarai.com", href: "mailto:arpit@avishkarai.com" },
@@ -24,8 +23,8 @@ const FOOTER_LINKS = {
     { label: "Terms", href: "/terms-of-service" },
   ],
   Social: [
-    { label: "LinkedIn", href: "#" },
-    { label: "Instagram", href: "#" },
+    { label: "LinkedIn", href: "https://www.linkedin.com/company/anjaneya-ai/" },
+    { label: "Instagram", href: "https://www.instagram.com/avishkarai_/" },
   ],
 };
 
@@ -57,10 +56,15 @@ export function Footer() {
               <div key={group}>
                 <p className="type-caption text-text-inverse/55 mb-4">{group}</p>
                 <ul className="flex flex-col gap-2.5">
-                  {links.map((link) => (
+                  {links.map((link) => {
+                    const external = link.href.startsWith("http");
+                    return (
                     <li key={link.label}>
                       <a
                         href={link.href}
+                        {...(external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
                         className={
                           link.label.includes("@")
                             ? "type-body-sm voltage-mark px-1"
@@ -74,7 +78,8 @@ export function Footer() {
                         )}
                       </a>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
             ))}

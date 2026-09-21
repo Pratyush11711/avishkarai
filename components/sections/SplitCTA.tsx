@@ -23,7 +23,7 @@ const PANELS = [
     wipe: "var(--color-primary)",
   },
   {
-    href: "#clock",
+    href: "https://avishkarai.com/",
     lines: ["AI For", "Critical", "Infrastructure"],
     body: "Scope locks in week one. From week two, a working build is in your hands every Thursday.",
     wipe: "var(--color-tint)",
@@ -38,6 +38,9 @@ export function SplitCTA() {
           <a
             key={panel.href}
             href={panel.href}
+            {...(panel.href.startsWith("http")
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
             className={`group relative isolate flex min-h-[240px] sm:min-h-[300px] md:min-h-[520px] flex-col justify-between overflow-hidden px-4 py-5 sm:px-6 sm:py-8 md:px-12 md:py-14 text-carbon-black border-ash [&:not(:first-child)]:border-l transition-colors duration-300 ${
               panel.wipe === "var(--color-primary)" ? "hover:text-text-inverse" : ""
             }`}

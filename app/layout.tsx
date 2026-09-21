@@ -3,14 +3,28 @@ import Script from "next/script";
 import { SitePreloader } from "@/components/fx/SitePreloader";
 import { SplashCursorLayer } from "@/components/fx/SplashCursorLayer";
 import { aeonik, barlowCondensed } from "@/lib/fonts";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const STRIP_EXTENSION_ATTRS = `(function(){var a="bis_skin_checked";function s(e){if(e&&e.removeAttribute&&e.hasAttribute&&e.hasAttribute(a))e.removeAttribute(a)}function w(r){s(r);if(!r||!r.querySelectorAll)return;var n=r.querySelectorAll("["+a+"]");for(var i=0;i<n.length;i++)s(n[i])}w(document.documentElement);try{var mo=new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==="attributes")s(m.target);var ns=m.addedNodes;for(var j=0;j<ns.length;j++){if(ns[j].nodeType===1)w(ns[j])}}});mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:[a]});window.addEventListener("load",function(){w(document.documentElement);setTimeout(function(){mo.disconnect()},4000)})}catch(e){}})();`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Avishkar AI — Product & Engineering Studio",
   description:
     "We build production-grade software with the design finesse of a funded product. Live in eight weeks. Enterprise-grade from day one.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon/favicon.png", type: "image/png", sizes: "60x57" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: {
+      url: "/favicon/apple-touch-icon.png",
+      sizes: "766x864",
+      type: "image/png",
+    },
+  },
 };
 
 export default function RootLayout({
