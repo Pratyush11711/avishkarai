@@ -1794,7 +1794,9 @@ a:focus-visible .cta-wipe-band {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100dvh;
+  /* svh = small viewport height (stable, excludes browser chrome) — matches
+     window.innerHeight used by the HUD navbar scroll calculation */
+  min-height: 100svh;
   padding: 9.75rem clamp(18px, 4.2vw, 56px) 0.75rem;
   overflow: hidden;
   color: #fff;
@@ -1971,8 +1973,11 @@ a:focus-visible .cta-wipe-band {
   z-index: 220;
   color: #fff;
   pointer-events: none;
-  transform: translate3d(0, calc(100dvh - 100%), 0);
+  /* Use vh (matches window.innerHeight used in JS) not dvh (changes with mobile browser chrome) */
+  transform: translate3d(0, calc(100vh - 100%), 0);
   will-change: transform;
+  /* Clip any 1px subpixel seam artifact from the dark bar */
+  overflow: hidden;
 }
 
 .lh-hud-bar {
@@ -2242,6 +2247,12 @@ html:has(.lh-hud) .site-nav-bar {
 
   .lh-hud-bar {
     padding: 0 18px;
+    /* Prevent subpixel seam below bar on mobile */
+    border-bottom: none;
+    box-shadow: none;
+    /* Cover any 1px rendering gap at bottom */
+    margin-bottom: -1px;
+    padding-bottom: 1px;
   }
 }
 
