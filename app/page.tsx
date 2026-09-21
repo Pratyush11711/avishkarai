@@ -1,6 +1,4 @@
 import { SmoothScrollProvider } from "@/lib/smooth-scroll";
-import { Nav } from "@/components/nav/Nav";
-import { HeroHudNav } from "@/components/nav/HeroHudNav";
 import { Hero } from "@/components/hero/Hero.lazy";
 import { SectionBoundary } from "@/components/ui/SectionBoundary";
 import { SelectedWork } from "@/components/sections/SelectedWork";
@@ -20,8 +18,6 @@ import { ScrollSquiggle } from "@/components/fx/ScrollSquiggle";
 export default function Home() {
   return (
     <SmoothScrollProvider>
-      <Nav />
-      <HeroHudNav />
       <main className="relative isolate w-full max-w-full">
         <SectionBoundary>
           <Hero />

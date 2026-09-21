@@ -5,7 +5,6 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { NAV_LINKS } from "@/components/nav/Nav";
 import { ChipGlyph, NAV_CHIPS } from "@/components/nav/NavChips";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { BOOK_A_BUILD_HREF } from "@/lib/booking";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -33,50 +32,6 @@ export function HeroHudNav() {
     const hud = hudRef.current;
     if (!hud) return;
 
-    // Use visualViewport.height — stable during iOS browser chrome animation
-    // (unlike window.innerHeight which fluctuates as address bar shows/hides).
-    // This must match the CSS 100svh used for .lh-intro min-height.
-    const getVh = () => window.visualViewport?.height ?? window.innerHeight;
-    let cachedVh = getVh();
-
-    const setProgress = (progress: number) => {
-      const next = Math.min(1, Math.max(0, progress));
-      const travel = Math.max(cachedVh - hud.offsetHeight, 0);
-      hud.style.transform = `translate3d(0, ${(1 - next) * travel}px, 0)`;
-      hud.classList.toggle("is-docked", next >= 0.999);
-    };
-
-    const fromHero = () => {
-      const hero = document.getElementById("hero");
-      if (!hero) return;
-      const rect = hero.getBoundingClientRect();
-      const range = Math.max(rect.height, 1);
-      setProgress(-rect.top / range);
-    };
-
-    // Refresh cached height on actual resize (orientation change, window resize)
-    const onResize = () => {
-      cachedVh = getVh();
-      fromHero();
-    };
-
-    fromHero();
-
-    const trigger = ScrollTrigger.create({
-      trigger: "#hero",
-      start: "top top",
-      end: "bottom top",
-      invalidateOnRefresh: true,
-      onUpdate: (self) => setProgress(self.progress),
-      onLeave: () => setProgress(1),
-      onEnterBack: (self) => setProgress(self.progress),
-      onRefresh: fromHero,
-    });
-
-    gsap.ticker.add(fromHero);
-    window.addEventListener("scroll", fromHero, { passive: true });
-    window.addEventListener("resize", onResize);
-
     const onBarResize = () => {
       const h = `${Math.ceil(hud.offsetHeight)}px`;
       document.documentElement.style.setProperty("--nav-height", h);
@@ -86,17 +41,8 @@ export function HeroHudNav() {
     const ro = new ResizeObserver(onBarResize);
     ro.observe(hud);
 
-    requestAnimationFrame(() => {
-      fromHero();
-      ScrollTrigger.refresh();
-    });
-
     return () => {
-      trigger.kill();
       ro.disconnect();
-      gsap.ticker.remove(fromHero);
-      window.removeEventListener("scroll", fromHero);
-      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -142,7 +88,10 @@ export function HeroHudNav() {
 
   return (
     <>
-      <div ref={hudRef} className={menuOpen ? "lh-hud is-menu-open" : "lh-hud"}>
+      <div
+        ref={hudRef}
+        className={menuOpen ? "lh-hud is-menu-open" : "lh-hud"}
+      >
         <div className="lh-hud-bar">
           <a href="#" className="lh-hud-brand">
             <BrandLogo on="dark" className="lh-hud-logo-mark" />

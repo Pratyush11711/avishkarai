@@ -105,10 +105,10 @@ function colorAt(lineRatio: number) {
   return `rgb(${Math.round(rgb.r * 255)},${Math.round(rgb.g * 255)},${Math.round(rgb.b * 255)})`;
 }
 
-function toScreen(cp: [number, number], diag: number, screenY: number): Pt {
+function toLocal(cp: [number, number], diag: number): Pt {
   return {
     x: (cp[0] + MARGIN_X) * diag,
-    y: screenY + (-MARGIN_Y - cp[1]) * diag,
+    y: (-MARGIN_Y - cp[1]) * diag,
   };
 }
 
@@ -236,40 +236,53 @@ export function HeroRibbon({
     ctx.imageSmoothingQuality = "high";
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let raf = 0;
     const last = PATH.length - 1;
-    const screenPts: Pt[] = new Array(PATH.length);
+    const localPts: Pt[] = new Array(PATH.length);
+    let lastDrawnShow = -1;
+    let isIntersecting = false;
+    let rafId = 0;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = window.innerWidth;
-      const h = window.innerHeight;
+      const vh = document.documentElement.clientHeight || window.innerHeight;
+      const diag = Math.hypot(w, vh);
+
+      const sectionH = trigger.offsetHeight || vh;
+      const canvasH = Math.max(sectionH, Math.ceil(0.88 * diag));
+
       canvas.width = Math.max(1, Math.round(w * dpr));
-      canvas.height = Math.max(1, Math.round(h * dpr));
+      canvas.height = Math.max(1, Math.round(canvasH * dpr));
       canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
+      canvas.style.height = `${canvasH}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
+
+      for (let i = 0; i < PATH.length; i++) {
+        localPts[i] = toLocal(PATH[i], diag);
+      }
     };
 
     const draw = () => {
       const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const vh = document.documentElement.clientHeight || window.innerHeight;
       const rect = trigger.getBoundingClientRect();
-      const screenY = rect.top;
       const mobile = vw <= 900;
       const show = computeShowRatio(rect, vh, mobile, reduced);
+
+      if (Math.abs(show - lastDrawnShow) < 0.001) {
+        return;
+      }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const dpr = canvas.width / vw;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const offscreen =
-        rect.bottom < -vh * 0.15 || rect.top > vh * (mobile ? 1.05 : 1.35);
-      if (show <= 0.001 || offscreen) {
-        raf = requestAnimationFrame(draw);
+      lastDrawnShow = show;
+
+      if (show <= 0.001) {
         return;
       }
 
@@ -278,13 +291,9 @@ export function HeroRibbon({
         ? fit(vw, 320, 900, 0.9, 1.15)
         : fit(vw, 540, 1920, 2, 1);
       const radius = 0.008 * radiusScale * diag;
-      for (let i = 0; i < PATH.length; i++) {
-        screenPts[i] = toScreen(PATH[i], diag, screenY);
-      }
 
-      const samples = sampleHead(screenPts, show * last, SAMPLES_PER_SEG);
+      const samples = sampleHead(localPts, show * last, SAMPLES_PER_SEG);
       if (samples.length < 2) {
-        raf = requestAnimationFrame(draw);
         return;
       }
 
@@ -297,20 +306,55 @@ export function HeroRibbon({
       ctx.fillStyle = grad;
       fillRibbon(ctx, samples, radius);
       ctx.filter = "none";
+    };
 
-      raf = requestAnimationFrame(draw);
+    const tick = () => {
+      if (!isIntersecting) return;
+      draw();
+      rafId = requestAnimationFrame(tick);
     };
 
     const onResize = () => {
+      lastDrawnShow = -1;
       resize();
-      if (!raf) draw();
+      draw();
     };
+
+    const onScroll = () => {
+      if (isIntersecting) draw();
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        isIntersecting = entry.isIntersecting;
+        if (isIntersecting) {
+          draw();
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(tick);
+        } else {
+          cancelAnimationFrame(rafId);
+        }
+      },
+      { rootMargin: "300px 0px" }
+    );
+    io.observe(trigger);
+
+    const ro = new ResizeObserver(() => {
+      onResize();
+    });
+    ro.observe(trigger);
 
     resize();
     draw();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
+
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafId);
+      io.disconnect();
+      ro.disconnect();
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
   }, [triggerRef]);
