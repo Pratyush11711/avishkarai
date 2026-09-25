@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Counter } from "@/components/react-bits/Counter";
 import { listedWorkStudies } from "@/lib/work-studies";
 
-const MIN_HOLD_AT_100_MS = 320;
-const MAX_WAIT_MS = 45000;
-const QUIET_MS = 500;
+const MIN_HOLD_AT_100_MS = 220;
+const MAX_WAIT_MS = 7000;
+const MEDIA_WAIT_MS = 2800;
+const ASSET_TIMEOUT_MS = 4000;
+const QUIET_MS = 120;
 
 const SITE_VIDEOS = [
   "/hero-sec-video.mp4",
@@ -28,8 +30,6 @@ const SITE_IMAGES = [
     "cardImage" in study && study.cardImage ? study.cardImage : study.image
   ),
 ];
-
-const SITE_ASSETS = [...SITE_VIDEOS, ...SITE_IMAGES];
 
 const ESTIMATED_BYTES: Record<string, number> = {
   "/hero-sec-video.mp4": 19_000_000,
@@ -56,10 +56,6 @@ function toAbs(src: string) {
   }
 }
 
-function entrySize(entry: PerformanceResourceTiming) {
-  return entry.transferSize || entry.encodedBodySize || entry.decodedBodySize || 0;
-}
-
 function mediaSource(node: HTMLImageElement | HTMLVideoElement) {
   if (node instanceof HTMLImageElement) {
     return node.currentSrc || node.getAttribute("src") || "";
@@ -79,7 +75,7 @@ function isImageReady(img: HTMLImageElement) {
 
 function isVideoReady(video: HTMLVideoElement) {
   if (!mediaSource(video)) return true;
-  return video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA;
+  return video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA;
 }
 
 function videoFraction(video: HTMLVideoElement) {
@@ -110,8 +106,12 @@ function waitForVideo(video: HTMLVideoElement) {
   }
   if (isVideoReady(video)) return Promise.resolve();
   return new Promise<void>((resolve) => {
-    const done = () => resolve();
-    video.addEventListener("canplaythrough", done, { once: true });
+    const done = () => {
+      window.clearTimeout(timer);
+      resolve();
+    };
+    const timer = window.setTimeout(done, MEDIA_WAIT_MS);
+    video.addEventListener("canplay", done, { once: true });
     video.addEventListener("error", done, { once: true });
   });
 }
@@ -205,11 +205,17 @@ function waitForDocumentMedia(signal: AbortSignal) {
 
 async function fetchWithProgress(
   src: string,
-  onProgress: (loaded: number, total: number) => void
+  onProgress: (loaded: number, total: number) => void,
+  signal: AbortSignal
 ) {
   const fallback = estimateTotal(src);
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), ASSET_TIMEOUT_MS);
+  const abort = () => controller.abort();
+  signal.addEventListener("abort", abort, { once: true });
+
   try {
-    const response = await fetch(src, { cache: "force-cache" });
+    const response = await fetch(src, { cache: "force-cache", signal: controller.signal });
     const headerTotal = Number(response.headers.get("content-length")) || 0;
     if (!response.ok || !response.body) {
       onProgress(fallback, fallback);
@@ -231,6 +237,9 @@ async function fetchWithProgress(
     onProgress(total, total);
   } catch {
     onProgress(fallback, fallback);
+  } finally {
+    window.clearTimeout(timeout);
+    signal.removeEventListener("abort", abort);
   }
 }
 
@@ -243,16 +252,29 @@ export function SitePreloader() {
   const [hiding, setHiding] = useState(false);
   const [gone, setGone] = useState(false);
   const [percent, setPercent] = useState(0);
+  const barRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    let finished = false;
+    let closing = false;
+    let removed = false;
     let maxTimer = 0;
     let holdTimer = 0;
     let pollTimer = 0;
-    let highest = 0;
+    let raf = 0;
+    let target = 0;
+    let shown = 0;
+    let lastInt = 0;
 
     const bytes = new Map<string, { loaded: number; total: number }>();
+
+    const paint = (value: number) => {
+      barRef.current?.style.setProperty("--progress", `${value}%`);
+      const rounded = clampPercent(value);
+      if (rounded === lastInt) return;
+      lastInt = rounded;
+      setPercent(rounded);
+    };
 
     const setBytes = (id: string, loaded: number, total: number, announce = true) => {
       const safeTotal = Math.max(total, 1);
@@ -270,24 +292,21 @@ export function SitePreloader() {
         const src = mediaSource(node);
         if (!src) return;
         const id = toAbs(src);
-        const total = estimateTotal(src);
+        const total =
+          node instanceof HTMLVideoElement
+            ? Math.min(estimateTotal(src), 1_500_000)
+            : estimateTotal(src);
         if (node instanceof HTMLVideoElement) {
           setBytes(id, videoFraction(node) * total, total, false);
           return;
         }
         if (isImageReady(node)) setBytes(id, total, total, false);
       });
-
-      for (const entry of performance.getEntriesByType("resource") as PerformanceResourceTiming[]) {
-        if (entry.responseEnd <= 0) continue;
-        const size = entrySize(entry) || estimateTotal(entry.name);
-        setBytes(entry.name, size, size, false);
-      }
       publish();
     };
 
     const publish = () => {
-      if (finished) return;
+      if (closing) return;
       let loaded = 0;
       let total = 0;
       for (const item of bytes.values()) {
@@ -295,58 +314,80 @@ export function SitePreloader() {
         total += item.total;
       }
       if (total <= 0) return;
-      const next = Math.min(99, Math.floor((loaded / total) * 100));
-      highest = Math.max(highest, next);
-      setPercent(clampPercent(highest));
+      target = Math.max(target, Math.min(100, (loaded / total) * 100));
     };
 
-    const dismiss = () => {
-      if (finished) return;
-      finished = true;
+    const stopWatchers = () => {
       window.clearTimeout(maxTimer);
       window.clearTimeout(holdTimer);
       window.clearInterval(pollTimer);
       observer.disconnect();
-      setPercent(100);
+    };
+
+    const hide = () => {
+      if (removed) return;
+      removed = true;
+      closing = true;
+      stopWatchers();
+      cancelAnimationFrame(raf);
+      paint(100);
       setHiding(true);
     };
 
-    const finishAtHundred = () => {
-      highest = 100;
-      setPercent(100);
-      holdTimer = window.setTimeout(dismiss, MIN_HOLD_AT_100_MS);
+    const requestClose = () => {
+      if (closing) return;
+      closing = true;
+      target = 100;
+      stopWatchers();
     };
 
-    for (const src of SITE_ASSETS) {
-      setBytes(toAbs(src), 0, estimateTotal(src));
+    const tick = () => {
+      const rate = closing ? 0.2 : 0.14;
+      const next = shown + (target - shown) * rate;
+      shown = Math.abs(target - next) < 0.25 ? target : next;
+      paint(shown);
+      if (closing && shown >= 100) {
+        holdTimer = window.setTimeout(hide, MIN_HOLD_AT_100_MS);
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    for (const src of SITE_IMAGES) {
+      setBytes(toAbs(src), 0, estimateTotal(src), false);
     }
-    collectLiveMedia();
+    for (const src of SITE_VIDEOS) {
+      setBytes(toAbs(src), 0, Math.min(estimateTotal(src), 1_500_000), false);
+    }
+    publish();
+    raf = requestAnimationFrame(tick);
 
     const observer = new PerformanceObserver(() => collectLiveMedia());
-    observer.observe({ type: "resource", buffered: true });
-    pollTimer = window.setInterval(collectLiveMedia, 200);
+    try {
+      observer.observe({ type: "resource", buffered: true });
+    } catch {
+      observer.disconnect();
+    }
+    pollTimer = window.setInterval(collectLiveMedia, 160);
 
     Promise.all([
-      ...SITE_ASSETS.map((src) =>
-        fetchWithProgress(src, (loaded, total) => setBytes(toAbs(src), loaded, total))
+      ...SITE_IMAGES.map((src) =>
+        fetchWithProgress(src, (loaded, total) => setBytes(toAbs(src), loaded, total), controller.signal)
       ),
       waitForDocumentMedia(controller.signal),
       document.fonts?.ready ?? Promise.resolve(),
     ])
-      .then(() => {
-        collectLiveMedia();
-        finishAtHundred();
-      })
-      .catch(finishAtHundred);
+      .then(requestClose)
+      .catch(requestClose);
 
-    maxTimer = window.setTimeout(dismiss, MAX_WAIT_MS);
+    maxTimer = window.setTimeout(requestClose, MAX_WAIT_MS);
 
     return () => {
-      finished = true;
-      window.clearTimeout(maxTimer);
+      removed = true;
+      closing = true;
+      stopWatchers();
+      cancelAnimationFrame(raf);
       window.clearTimeout(holdTimer);
-      window.clearInterval(pollTimer);
-      observer.disconnect();
       controller.abort();
     };
   }, []);
@@ -367,10 +408,7 @@ export function SitePreloader() {
         if (event.target === event.currentTarget && hiding) setGone(true);
       }}
     >
-      <span
-        className="loader"
-        style={{ ["--progress" as string]: `${shown}%` }}
-      />
+      <span ref={barRef} className="loader" />
       <div className="loader-count" aria-hidden="true">
         <Counter
           value={shown}
